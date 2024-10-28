@@ -1,0 +1,137 @@
+{
+  "targets": [
+    {
+      "isStage": true,
+      "name": "Stage",
+      "variables": {
+        "`jEk@4|i[#Fk?(8x)AV.-my variable": [
+          "my variable",
+          0
+        ]
+      },
+      "lists": {
+      },
+      "broadcasts": {
+      },
+      "blocks": {
+      },
+      "comments": {
+      },
+      "currentCostume": 0,
+      "costumes": [
+        {
+          "name": "backdrop1",
+          "dataFormat": "svg",
+          "assetId": "cd21514d0531fdffb22204e0ec5ed84a",
+          "md5ext": "cd21514d0531fdffb22204e0ec5ed84a.svg",
+          "rotationCenterX": 240,
+          "rotationCenterY": 180
+        }
+      ],
+      "sounds": [
+      ],
+      "volume": 100,
+      "layerOrder": 0,
+      "tempo": 60,
+      "videoTransparency": 50,
+      "videoState": "on",
+      "textToSpeechLanguage": null
+    },
+    {
+      "isStage": false,
+      "name": "Sprite1",
+      "variables": {
+      },
+      "lists": {
+      },
+      "broadcasts": {
+      },
+      "blocks": {
+        "b": {
+          "opcode": "event_whenflagclicked",
+          "next": "a",
+          "parent": null,
+          "inputs": {
+          },
+          "fields": {
+          },
+          "shadow": false,
+          "topLevel": true,
+          "x": 168,
+          "y": 120
+        },
+        "a": {
+          "opcode": "control_repeat",
+          "next": null,
+          "parent": "b",
+          "inputs": {
+            "TIMES": [
+              1,
+              [
+                6,
+                "10"
+              ]
+            ],
+            "SUBSTACK": [
+              2,
+              "c"
+            ]
+          },
+          "fields": {
+          },
+          "shadow": false,
+          "topLevel": false
+        },
+        "c": {
+          "opcode": "looks_show",
+          "next": null,
+          "parent": "a",
+          "inputs": {
+          },
+          "fields": {
+          },
+          "shadow": false,
+          "topLevel": false
+        }
+      },
+      "comments": {
+      },
+      "currentCostume": 0,
+      "costumes": [
+        {
+          "name": "costume1",
+          "bitmapResolution": 1,
+          "dataFormat": "svg",
+          "assetId": "3339a2953a3bf62bb80e54ff575dbced",
+          "md5ext": "3339a2953a3bf62bb80e54ff575dbced.svg",
+          "rotationCenterX": 0,
+          "rotationCenterY": 0
+        }
+      ],
+      "sounds": [
+      ],
+      "volume": 100,
+      "layerOrder": 1,
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "size": 100,
+      "direction": 90,
+      "draggable": false,
+      "rotationStyle": "all around"
+    }
+  ],
+  "monitors": [
+  ],
+  "extensions": [
+  ],
+  "meta": {
+    "semver": "3.0.0",
+    "vm": "0.2.0",
+    "agent": "",
+    "platform": {
+      "name": "TurboWarp",
+      "url": "https://turbowarp.org/"
+    }
+  }
+}
