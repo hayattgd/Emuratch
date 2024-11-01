@@ -1,11 +1,15 @@
-﻿using Raylib_cs;
+﻿using Emuratch.Core.Project;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace Emuratch.Core.vm;
 
 public class Block
 {
     //https://en.scratch-wiki.info/wiki/List_of_Block_Opcodes
-    public static string[] opcodes = new string[]
+    public readonly static List<string> opcodes = new()
     {
         "motion_movesteps",
         "motion_turnright",
@@ -140,6 +144,44 @@ public class Block
     };
 
     public string opcode = "";
-    public Block next = new();
-    public Block parent = new();
+    public Block? next;
+    public string nextId = "";
+    public Block? parent;
+    public string parentId = "";
+    public List<Block> inputs = new();
+    public List<object> fields = new();
+}
+
+public class BlockConverter : JsonConverter<Dictionary<string, Block>>
+{
+	public override void WriteJson(JsonWriter writer, Dictionary<string, Block>? value, JsonSerializer serializer)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override Dictionary<string, Block>? ReadJson(JsonReader reader, Type objectType, Dictionary<string, Block>? existingValue, bool hasExistingValue, JsonSerializer serializer)
+	{
+        var obj = JObject.Load(reader).Values();
+
+        Dictionary<string, Block> blocks = new() { };
+
+        foreach (var item in obj)
+        {
+            string[] keys = item.Path.Split(',');
+            //^1 = keys.Length - 1
+            //I didn't knew it!
+            string key = keys[^1];
+
+            blocks.Add(key, new()
+            {
+                opcode = item["opcode"]?.ToString() ?? "",
+                next = null,
+                nextId = item["next"]?.ToString() ?? "",
+                parent = null,
+                parentId = item["parent"]?.ToString() ?? "",
+            });
+        }
+
+        return blocks;
+    }
 }

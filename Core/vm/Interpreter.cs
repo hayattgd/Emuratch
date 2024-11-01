@@ -1,10 +1,12 @@
-﻿using Raylib_cs;
+﻿using Emuratch.Core.Project;
+using System.Collections.Generic;
+using System;
 
 namespace Emuratch.Core.vm;
 
-public class Interpreter
+public class Interpreter : Executer
 {
-    public static List<Action<Sprite, List<object>>> Operations = new()
+    public readonly static List<Action<Sprite, List<object>>> Operations = new()
     {
         //motion_movesteps
         (spr, arg) => {
@@ -38,13 +40,25 @@ public class Interpreter
         (spr, arg) => {
             spr.x = (float)arg[0];
             spr.y = (float)arg[1];
-        }
+        },
     };
 
-    public Sprite sprite;
+    public Sprite Sprite {  get; set; }
 
     public Interpreter(Sprite spr)
     {
-        sprite = spr;
+        Sprite = spr;
+    }
+
+    public void Execute(Block block)
+    {
+        int operationIndex = Block.opcodes.IndexOf(block.opcode);
+        if (operationIndex == -1) return;
+
+        Operations[operationIndex](Sprite, block.fields);
+        if (block.next != null)
+        {
+            Execute(block.next);
+        }
     }
 }

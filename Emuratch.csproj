@@ -1,14 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Raylib-cs" Version="6.1.1" />
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties project_4project_1json__JsonSchema="https://json.schemastore.org/minecraft-biome.json" /></VisualStudio></ProjectExtensions>
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="S:\Workspace\Csharp\raylib\Emuratch\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="S:\Workspace\Csharp\raylib\Emuratch\.editorconfig" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,4 @@
-﻿using Raylib_cs;
-
-namespace Emuratch.Core;
+﻿namespace Emuratch.Core.Project;
 
 public class Sound
 {

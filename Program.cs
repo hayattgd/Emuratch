@@ -1,23 +1,29 @@
-﻿using Raylib_cs;
+﻿using Emuratch.Core.Project;
+using System.IO;
+using Raylib_cs;
 
-namespace Emurach;
+namespace Emuratch;
 
 public class Program
 {
-    public static int Main(string[] args)
+    public static int Main()
     {
-        Raylib.InitWindow(800, 600, "Emuratch");
+		bool success = Project.LoadProject(File.ReadAllText(@"S:\Workspace\Csharp\raylib\Emuratch\Project\project.json"), out Project _);
 
-        while (!Raylib.WindowShouldClose())
-        {
-            Raylib.BeginDrawing();
+		Raylib.InitWindow(800, 600, "Emuratch");
 
-            Raylib.ClearBackground(Color.White);
+		while (!Raylib.WindowShouldClose())
+		{
+			Raylib.BeginDrawing();
 
-            Raylib.EndDrawing();
-        }
+			Raylib.ClearBackground(Color.White);
 
-        Raylib.CloseWindow();
-        return 0;
+			Raylib.DrawText(success.ToString(), 16, 16, 8, Color.Black);
+
+			Raylib.EndDrawing();
+		}
+
+		Raylib.CloseWindow();
+		return 0;
     }
 }

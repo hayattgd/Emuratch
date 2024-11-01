@@ -10,41 +10,14 @@
         ]
       },
       "lists": {
+        "gQ75G0U.3J6nt-{:N(k^": [
+          "test listttt",
+          [
+          ]
+        ]
       },
       "broadcasts": {
-      },
-      "blocks": {
-      },
-      "comments": {
-      },
-      "currentCostume": 0,
-      "costumes": [
-        {
-          "name": "backdrop1",
-          "dataFormat": "svg",
-          "assetId": "cd21514d0531fdffb22204e0ec5ed84a",
-          "md5ext": "cd21514d0531fdffb22204e0ec5ed84a.svg",
-          "rotationCenterX": 240,
-          "rotationCenterY": 180
-        }
-      ],
-      "sounds": [
-      ],
-      "volume": 100,
-      "layerOrder": 0,
-      "tempo": 60,
-      "videoTransparency": 50,
-      "videoState": "on",
-      "textToSpeechLanguage": null
-    },
-    {
-      "isStage": false,
-      "name": "Sprite1",
-      "variables": {
-      },
-      "lists": {
-      },
-      "broadcasts": {
+        "!_(+[l4fSlyubTm|#yeI": "message1"
       },
       "blocks": {
         "b": {
@@ -57,8 +30,8 @@
           },
           "shadow": false,
           "topLevel": true,
-          "x": 168,
-          "y": 120
+          "x": -72,
+          "y": 888
         },
         "a": {
           "opcode": "control_repeat",
@@ -83,10 +56,18 @@
           "topLevel": false
         },
         "c": {
-          "opcode": "looks_show",
+          "opcode": "event_broadcast",
           "next": null,
           "parent": "a",
           "inputs": {
+            "BROADCAST_INPUT": [
+              1,
+              [
+                11,
+                "message1",
+                "!_(+[l4fSlyubTm|#yeI"
+              ]
+            ]
           },
           "fields": {
           },
@@ -95,30 +76,35 @@
         }
       },
       "comments": {
+        "d": {
+          "blockId": null,
+          "x": 50,
+          "y": 50,
+          "width": 292,
+          "height": 615,
+          "minimized": false,
+          "text": "Configuration for https://turbowarp.org/\nYou can move, resize, and minimize this comment, but don't edit it by hand. This comment can be deleted to remove the stored settings.\n{\"framerate\":60,\"runtimeOptions\":{\"maxClones\":Infinity,\"fencing\":false},\"interpolation\":true,\"hq\":true,\"width\":640} // _twconfig_"
+        }
       },
       "currentCostume": 0,
       "costumes": [
         {
-          "name": "costume1",
-          "bitmapResolution": 1,
+          "name": "backdrop1",
           "dataFormat": "svg",
-          "assetId": "3339a2953a3bf62bb80e54ff575dbced",
-          "md5ext": "3339a2953a3bf62bb80e54ff575dbced.svg",
-          "rotationCenterX": 0,
-          "rotationCenterY": 0
+          "assetId": "cd21514d0531fdffb22204e0ec5ed84a",
+          "md5ext": "cd21514d0531fdffb22204e0ec5ed84a.svg",
+          "rotationCenterX": 240,
+          "rotationCenterY": 180
         }
       ],
       "sounds": [
       ],
       "volume": 100,
-      "layerOrder": 1,
-      "visible": true,
-      "x": 0,
-      "y": 0,
-      "size": 100,
-      "direction": 90,
-      "draggable": false,
-      "rotationStyle": "all around"
+      "layerOrder": 0,
+      "tempo": 60,
+      "videoTransparency": 50,
+      "videoState": "on",
+      "textToSpeechLanguage": null
     }
   ],
   "monitors": [
