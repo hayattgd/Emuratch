@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System;
 
-namespace Emuratch.Core.Project;
+namespace Emuratch.Core.Scratch;
 
 public class Variable
 {
@@ -35,4 +35,6 @@ public class VariableConverter : JsonConverter<Variable[]>
 
 		return variables.ToArray();
 	}
+
+	public override bool CanWrite => false;
 }

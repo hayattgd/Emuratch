@@ -1,4 +1,4 @@
-﻿using Emuratch.Core.Project;
+﻿using Emuratch.Core.Scratch;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -161,27 +161,26 @@ public class BlockConverter : JsonConverter<Dictionary<string, Block>>
 
 	public override Dictionary<string, Block>? ReadJson(JsonReader reader, Type objectType, Dictionary<string, Block>? existingValue, bool hasExistingValue, JsonSerializer serializer)
 	{
-        var obj = JObject.Load(reader).Values();
+        var obj = JObject.Load(reader);
 
         Dictionary<string, Block> blocks = new() { };
 
-        foreach (var item in obj)
+        foreach (var item in obj.Properties())
         {
-            string[] keys = item.Path.Split(',');
-            //^1 = keys.Length - 1
-            //I didn't knew it!
-            string key = keys[^1];
+			string key = item.Name;
 
             blocks.Add(key, new()
             {
-                opcode = item["opcode"]?.ToString() ?? "",
+                opcode = item.Value["opcode"]?.ToString() ?? "",
                 next = null,
-                nextId = item["next"]?.ToString() ?? "",
+                nextId = item.Value["next"]?.ToString() ?? "",
                 parent = null,
-                parentId = item["parent"]?.ToString() ?? "",
+                parentId = item.Value["parent"]?.ToString() ?? "",
             });
         }
 
         return blocks;
-    }
+	}
+
+	public override bool CanWrite => false;
 }

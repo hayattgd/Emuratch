@@ -2,16 +2,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
-namespace Emuratch.Core.Project;
+namespace Emuratch.Core.Scratch;
 
 public class Project
 {
     public Sprite background = new();
     public Sprite[] sprites = Array.Empty<Sprite>();
+	public Comment[] comments = Array.Empty<Comment>();
     public Meta meta = new();
 
-    public static bool LoadProject(string json, out Project project)
+	public int width = 480;
+	public int height = 360;
+
+	public static bool LoadProject(string json, out Project project)
     {
         project = new();
 
@@ -36,13 +41,13 @@ public class Project
             if (meta == null) return false;
 
             project.meta = meta;
-        }
-        catch (Exception)
-        {
-            throw;
-            //return false;
-        }
 
-        return true;
+			return true;
+		}
+        catch (Exception ex)
+        {
+			MessageBox.Show("Error while loading project : " + ex.ToString(), "Error");
+			return false;
+        }
     }
 }

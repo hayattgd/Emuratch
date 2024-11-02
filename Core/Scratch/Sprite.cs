@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-namespace Emuratch.Core.Project;
+namespace Emuratch.Core.Scratch;
 
 public class Sprite
 {
@@ -19,9 +19,11 @@ public class Sprite
 
     public int currentCostume = 0;
 
+	[JsonConverter(typeof(CostumeConverter))]
     public Costume[] costumes = Array.Empty<Costume>();
 
-    public Sound[] sounds = Array.Empty<Sound>();
+	[JsonConverter(typeof(SoundConverter))]
+	public Sound[] sounds = Array.Empty<Sound>();
 
     public float volume = 100;
     public int layoutOrder = 0;

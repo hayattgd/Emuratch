@@ -1,4 +1,4 @@
-﻿namespace Emuratch.Core.Project;
+﻿namespace Emuratch.Core.Scratch;
 
 public class Meta
 {

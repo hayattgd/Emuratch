@@ -89,15 +89,24 @@
       "currentCostume": 0,
       "costumes": [
         {
-          "name": "backdrop1",
+          "name": "vector",
+          "bitmapResolution": 1,
           "dataFormat": "svg",
-          "assetId": "cd21514d0531fdffb22204e0ec5ed84a",
-          "md5ext": "cd21514d0531fdffb22204e0ec5ed84a.svg",
-          "rotationCenterX": 240,
-          "rotationCenterY": 180
+          "assetId": "3a0229e6c8385208c5dfebd7d29caf57",
+          "md5ext": "3a0229e6c8385208c5dfebd7d29caf57.svg",
+          "rotationCenterX": 46.60558993313674,
+          "rotationCenterY": 56.425134619120755
         }
       ],
       "sounds": [
+        {
+          "name": "Pop",
+          "assetId": "83a9787d4cb6f3b7632b4ddfebf74367",
+          "dataFormat": "wav",
+          "rate": 44100,
+          "sampleCount": 1032,
+          "md5ext": "83a9787d4cb6f3b7632b4ddfebf74367.wav"
+        }
       ],
       "volume": 100,
       "layerOrder": 0,
@@ -105,6 +114,43 @@
       "videoTransparency": 50,
       "videoState": "on",
       "textToSpeechLanguage": null
+    },
+    {
+      "isStage": false,
+      "name": "Sprite1",
+      "variables": {
+      },
+      "lists": {
+      },
+      "broadcasts": {
+      },
+      "blocks": {
+      },
+      "comments": {
+      },
+      "currentCostume": 0,
+      "costumes": [
+        {
+          "name": "costume1",
+          "bitmapResolution": 2,
+          "dataFormat": "png",
+          "assetId": "656a21f158dc7bbf035a8ab80c83129e",
+          "md5ext": "656a21f158dc7bbf035a8ab80c83129e.png",
+          "rotationCenterX": 59,
+          "rotationCenterY": 40
+        }
+      ],
+      "sounds": [
+      ],
+      "volume": 100,
+      "layerOrder": 1,
+      "visible": true,
+      "x": -9,
+      "y": -50,
+      "size": 100,
+      "direction": 90,
+      "draggable": false,
+      "rotationStyle": "all around"
     }
   ],
   "monitors": [
