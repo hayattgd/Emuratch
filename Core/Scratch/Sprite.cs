@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Emuratch.Core.Scratch;
 
@@ -16,6 +17,9 @@ public class Sprite
 
     [JsonConverter(typeof(BlockConverter))]
     public Dictionary<string, Block> blocks = new() { };
+
+	[JsonConverter(typeof(CommentConverter))]
+	public Comment[] comments = Array.Empty<Comment>();
 
     public int currentCostume = 0;
 
@@ -42,4 +46,17 @@ public class Sprite
     public float videoTransparency = 50;
     public string videoState = "on";
     public string textToSpeechLanguage = "";
+
+	public IEnumerator<Unloadable> GetEnumerator()
+	{
+		foreach (var item in costumes)
+		{
+			yield return item;
+		}
+
+		foreach (var item in sounds)
+		{
+			yield return item;
+		}
+	}
 }

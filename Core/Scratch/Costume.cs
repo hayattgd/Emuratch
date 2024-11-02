@@ -8,14 +8,21 @@ using System.IO;
 
 namespace Emuratch.Core.Scratch;
 
-public class Costume
+public class Costume : Unloadable
 {
     public string name = "";
+	public int bitmapResolution = 1;
     public string dataFormat = "";
     public float rotationCenterX = 240;
     public float rotationCenterY = 180;
     public Image image = new();
 	public Texture2D texture = new();
+
+	public void Unload()
+	{
+		Raylib.UnloadImage(image);
+		Raylib.UnloadTexture(texture);
+	}
 }
 
 public class CostumeConverter : JsonConverter<Costume[]>
@@ -36,12 +43,13 @@ public class CostumeConverter : JsonConverter<Costume[]>
 			Costume costume = new()
 			{
 				name = item["name"]?.ToString() ?? "",
+				bitmapResolution = (int)(item["bitmapResolution"] ?? 0),
 				dataFormat = item["dataFormat"]?.ToString() ?? "",
 				rotationCenterX = (int)(item["rotationCenterX"] ?? 0),
 				rotationCenterY = (int)(item["rotationCenterY"] ?? 0)
 			};
 
-			string imagepath = item["md5ext"]?.ToString() ?? "";
+			string imagepath = $"{item["assetId"]?.ToString()}.{costume.dataFormat}" ?? "";
 
 			if (costume.dataFormat != "svg")
 			{
@@ -55,10 +63,8 @@ public class CostumeConverter : JsonConverter<Costume[]>
 				if (!File.Exists(pngpath))
 				{
 					var svg = SvgDocument.Open(imagepath);
-					using (var bitmap = svg.Draw())
-					{
-						bitmap?.Save(pngpath);
-					}
+					using var bitmap = svg.Draw();
+					bitmap?.Save(pngpath);
 				}
 
 				costume.image = Raylib.LoadImage(pngpath);

@@ -7,10 +7,15 @@ using System.IO;
 
 namespace Emuratch.Core.Scratch;
 
-public class Sound
+public class Sound : Unloadable
 {
     public string name = "";
     public Raylib_cs.Sound sound;
+
+	public void Unload()
+	{
+		Raylib.UnloadSound(sound);
+	}
 }
 
 public class SoundConverter : JsonConverter<Sound[]>
@@ -31,7 +36,7 @@ public class SoundConverter : JsonConverter<Sound[]>
 			sounds.Add(new()
 			{
 				name = item["name"]?.ToString() ?? "",
-				sound = Raylib.LoadSound(item["md5ext"]?.ToString() ?? "")
+				sound = Raylib.LoadSound($"{item["assetId"]?.ToString()}.{item["dataFormat"]?.ToString()}" ?? "")
 			});
 		}
 

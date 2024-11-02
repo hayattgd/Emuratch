@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Emuratch.Core.Turbowarp;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,19 +7,36 @@ using System.Windows.Forms;
 
 namespace Emuratch.Core.Scratch;
 
-public class Project
+public class Project : Unloadable
 {
+	public const uint defaultWidth = 480;
+	public const uint defaultHeight = 360;
+
     public Sprite background = new();
     public Sprite[] sprites = Array.Empty<Sprite>();
 	public Comment[] comments = Array.Empty<Comment>();
     public Meta meta = new();
 
-	public int width = 480;
-	public int height = 360;
+	public uint width = defaultWidth;
+	public uint height = defaultHeight;
+
+	public bool isTurbowarp = false;
+
+	public void Unload()
+	{
+		foreach (var sprite in sprites)
+		{
+			foreach (var item in sprite)
+			{
+				item.Unload();
+			}
+		}
+	}
 
 	public static bool LoadProject(string json, out Project project)
     {
         project = new();
+		Configuration.Config = null;
 
         try
         {

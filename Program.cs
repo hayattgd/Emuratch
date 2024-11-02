@@ -18,7 +18,6 @@ public static class Program
 			app.OnUpdate();
 		}
 
-		app.Unload();
-		return 0;
-    }
+		return app.Unload();
+	}
 }

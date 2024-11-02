@@ -1,5 +1,6 @@
 ﻿using Emuratch.Core.Scratch;
 using Raylib_cs;
+using System.Linq;
 using System.Numerics;
 
 namespace Emuratch.Core;
@@ -15,8 +16,13 @@ public class Render
 
 	public void RenderAll()
 	{
+		Raylib.ClearBackground(Color.White);
+
 		RenderSprite(project.background);
-		foreach (var sprite in project.sprites)
+		var list = project.sprites.ToList();
+		list.Sort((a, b) => a.layoutOrder.CompareTo(b.layoutOrder));
+
+		foreach (var sprite in list)
 		{
 			RenderSprite(sprite);
 		}
@@ -24,8 +30,26 @@ public class Render
 
 	public void RenderSprite(Sprite spr)
 	{
-		Vector2 pos = ScratchToRaylib(spr.x, spr.y);
-		Raylib.DrawTexture(spr.costumes[spr.currentCostume].texture, (int)pos.X, (int)pos.Y, Color.White);
+		Costume costume = spr.costumes[spr.currentCostume];
+		Vector2 offset = new(costume.rotationCenterX, costume.rotationCenterY / 2);
+		offset /= costume.bitmapResolution;
+
+		Vector2 pos = ScratchToRaylib(
+			spr.x - offset.X,
+			spr.y - offset.Y
+		);
+		if (spr.isStage) pos = ScratchToRaylib(-costume.rotationCenterX/2, -costume.rotationCenterY/2);
+
+		Raylib.DrawTextureEx(
+			costume.texture,
+			new(
+				(int)pos.X,
+				(int)pos.Y
+			),
+			spr.direction - 90,
+			spr.size / 100 / costume.bitmapResolution,
+			Color.White
+		);
 	}
 
 	public Vector2 ScratchToRaylib(float x, float y)
