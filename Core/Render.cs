@@ -26,6 +26,10 @@ public class Render
 		{
 			RenderSprite(sprite);
 		}
+
+#if DEBUG
+		unsafe { Raylib.DrawText(Raylib.GetFPS().ToString(), 2, 2, 20, Color.Lime); }
+#endif
 	}
 
 	public void RenderSprite(Sprite spr)

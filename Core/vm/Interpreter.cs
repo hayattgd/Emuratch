@@ -6,43 +6,6 @@ namespace Emuratch.Core.vm;
 
 public class Interpreter : Executer
 {
-  //  public readonly static List<Action<Sprite, List<object>>> Operations = new()
-  //  {
-  //      //motion_movesteps
-  //      (spr, arg) => {
-  //          spr.x += (float)arg[0] * MathF.Sin(spr.direction);
-  //          spr.x += (float)arg[0] * MathF.Cos(spr.direction);
-  //      },
-
-  //      //motion_turnright
-  //      (spr, arg) => {
-  //          spr.direction += (float)arg[0];
-  //      },
-
-  //      //motion_turnleft
-  //      (spr, arg) => {
-  //          spr.direction -= (float)arg[0];
-  //      },
-
-  //      //motion_goto
-  //      (spr, arg) => {
-  //          spr.x = ((Sprite)arg[0]).x;
-  //          spr.y = ((Sprite)arg[0]).y;
-  //      },
-
-  //      //motion_gotoxy
-  //      (spr, arg) => {
-  //          spr.x = (float)arg[0];
-  //          spr.y = (float)arg[1];
-  //      },
-
-  //      //motion_glideto
-  //      (spr, arg) => {
-  //          spr.x = (float)arg[0];
-  //          spr.y = (float)arg[1];
-  //      },
-  //  };
-
     public Sprite Sprite { get; set; }
 
     public Interpreter(Sprite spr)
@@ -55,53 +18,63 @@ public class Interpreter : Executer
 		switch (block.opcode)
 		{
 			case Block.opcodes.motion_movesteps:
-				{ 
-					break; 
+				{
+					break;
 				};
 
 			case Block.opcodes.motion_turnright:
-				{ 
-					break; 
+				{
+					break;
 				};
 
 			case Block.opcodes.motion_turnleft:
-				{ 
-					break; 
+				{
+					break;
 				};
 
 			case Block.opcodes.motion_goto:
 				{
-					break; 
+					break;
 				};
 
 			case Block.opcodes.motion_gotoxy:
 				{
-					break; 
+					break;
 				};
 
 			case Block.opcodes.motion_glideto:
 				{
-					break; 
+					break;
+				};
+
+			case Block.opcodes.motion_glideto_menu:
+				{
+					break;
 				};
 
 			case Block.opcodes.motion_glidesecstoxy:
-				{ 
+				{
 					break;
 				};
 
 			case Block.opcodes.motion_pointindirection:
-				{ 
-					break; 
+				{
+					break;
 				};
 
 			case Block.opcodes.motion_pointtowards:
 				{
-					break; 
+					break;
+				};
+
+			case Block.opcodes.motion_pointtowards_menu:
+				{
+					break;
 				};
 
 			case Block.opcodes.motion_changexby:
 				{
-					break; 
+					break;
 				};
 
 			case Block.opcodes.motion_setx:
@@ -149,6 +122,11 @@ public class Interpreter : Executer
 					break;
 				};
 
+			case Block.opcodes.looks_say:
+				{
+					break;
+				};
+
 			case Block.opcodes.looks_thinkforsecs:
 				{
 					break;
@@ -164,6 +142,11 @@ public class Interpreter : Executer
 					break;
 				};
 
+			case Block.opcodes.looks_costume:
+				{
+					break;
+				};
+
 			case Block.opcodes.looks_nextcostume:
 				{
 					break;
@@ -174,7 +157,7 @@ public class Interpreter : Executer
 					break;
 				};
 
-			case Block.opcodes.looks_switchbackdroptoandwait:
+			case Block.opcodes.looks_backdrops:
 				{
 					break;
 				};
@@ -209,6 +192,16 @@ public class Interpreter : Executer
 					break;
 				};
 
+			case Block.opcodes.looks_show:
+				{
+					break;
+				};
+
+			case Block.opcodes.looks_hide:
+				{
+					break;
+				};
+
 			case Block.opcodes.looks_gotofrontback:
 				{
 					break;
@@ -235,6 +228,11 @@ public class Interpreter : Executer
 				};
 
 			case Block.opcodes.sound_playuntildone:
+				{
+					break;
+				};
+
+			case Block.opcodes.sound_sounds_menu:
 				{
 					break;
 				};
@@ -329,6 +327,11 @@ public class Interpreter : Executer
 					break;
 				};
 
+			case Block.opcodes.control_repeat:
+				{
+					break;
+				};
+
 			case Block.opcodes.control_forever:
 				{
 					break;
@@ -354,6 +357,11 @@ public class Interpreter : Executer
 					break;
 				};
 
+			case Block.opcodes.control_while:
+				{
+					break;
+				};
+
 			case Block.opcodes.control_stop:
 				{
 					break;
@@ -369,12 +377,22 @@ public class Interpreter : Executer
 					break;
 				};
 
+			case Block.opcodes.control_create_clone_of_menu:
+				{
+					break;
+				};
+
 			case Block.opcodes.control_delete_this_clone:
 				{
 					break;
 				};
 
 			case Block.opcodes.sensing_touchingobject:
+				{
+					break;
+				};
+
+			case Block.opcodes.sensing_touchingobjectmenu:
 				{
 					break;
 				};
@@ -394,6 +412,11 @@ public class Interpreter : Executer
 					break;
 				};
 
+			case Block.opcodes.sensing_distancetomenu:
+				{
+					break;
+				};
+
 			case Block.opcodes.sensing_askandwait:
 				{
 					break;
@@ -405,6 +428,11 @@ public class Interpreter : Executer
 				};
 
 			case Block.opcodes.sensing_keypressed:
+				{
+					break;
+				};
+
+			case Block.opcodes.sensing_keyoptions:
 				{
 					break;
 				};
@@ -445,6 +473,11 @@ public class Interpreter : Executer
 				};
 
 			case Block.opcodes.sensing_of:
+				{
+					break;
+				};
+
+			case Block.opcodes.sensing_of_object_menu:
 				{
 					break;
 				};

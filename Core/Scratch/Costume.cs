@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System;
 using Svg;
 using System.IO;
+using System.Windows.Forms;
 
 namespace Emuratch.Core.Scratch;
 
@@ -57,17 +58,23 @@ public class CostumeConverter : JsonConverter<Costume[]>
 			}
 			else
 			{
-				//Convert .svg to .png
-				string pngpath = Path.ChangeExtension(imagepath, ".png");
-
-				if (!File.Exists(pngpath))
+				if (File.Exists(Program.app.GetAbsolutePath(imagepath)))
 				{
-					var svg = SvgDocument.Open(imagepath);
-					using var bitmap = svg.Draw();
-					bitmap?.Save(pngpath);
-				}
+					//Convert .svg to .png
+					string pngpath = Path.ChangeExtension(imagepath, ".png");
 
-				costume.image = Raylib.LoadImage(pngpath);
+					if (!File.Exists(Program.app.GetAbsolutePath(pngpath)))
+					{
+						var svg = SvgDocument.Open(Program.app.GetAbsolutePath(imagepath));
+						using var bitmap = svg.Draw();
+						bitmap?.Save(Program.app.GetAbsolutePath(pngpath));
+					}
+					costume.image = Raylib.LoadImage(pngpath);
+				}
+				else
+				{
+					costume.image = Raylib.GenImageColor(32, 32, new Color(255, 0, 255, 255));
+				}
 			}
 
 			costume.texture = Raylib.LoadTextureFromImage(costume.image);

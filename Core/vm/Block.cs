@@ -18,9 +18,11 @@ public class Block
         motion_goto,
         motion_gotoxy,
         motion_glideto,
+        motion_glideto_menu,
         motion_glidesecstoxy,
         motion_pointindirection,
         motion_pointtowards,
+        motion_pointtowards_menu,
         motion_changexby,
         motion_setx,
         motion_changeyby,
@@ -32,18 +34,22 @@ public class Block
         motion_direction,
 
         looks_sayforsecs,
+		looks_say,
         looks_thinkforsecs,
         looks_think,
         looks_switchcostumeto,
+		looks_costume,
         looks_nextcostume,
         looks_switchbackdropto,
-        looks_switchbackdroptoandwait,
+		looks_backdrops,
         looks_nextbackdrop,
         looks_changesizeby,
         looks_setsizeto,
         looks_changeeffectby,
         looks_seteffectto,
         looks_cleargraphiceffects,
+		looks_show,
+		looks_hide,
         looks_gotofrontback,
         looks_goforwardbackwardlayers,
         looks_costumenumbername,
@@ -51,6 +57,7 @@ public class Block
         looks_size,
 
         sound_playuntildone,
+		sound_sounds_menu,
         sound_play,
         sound_stopallsounds,
         sound_changeeffectby,
@@ -71,23 +78,29 @@ public class Block
         event_broadcastandwait,
 
         control_wait,
+		control_repeat,
         control_forever,
         control_if,
         control_if_else,
         control_wait_until,
         control_repeat_until,
+		control_while,
         control_stop,
         control_start_as_clone,
         control_create_clone_of,
+		control_create_clone_of_menu,
         control_delete_this_clone,
 
         sensing_touchingobject,
+        sensing_touchingobjectmenu,
         sensing_touchingcolor,
         sensing_coloristouchingcolor,
         sensing_distanceto,
+        sensing_distancetomenu,
         sensing_askandwait,
         sensing_answer,
         sensing_keypressed,
+        sensing_keyoptions,
         sensing_mousedown,
         sensing_mousex,
         sensing_mousey,
@@ -96,6 +109,7 @@ public class Block
         sensing_timer,
         sensing_resettimer,
         sensing_of,
+        sensing_of_object_menu,
         sensing_current,
         sensing_dayssince2000,
         sensing_username,
@@ -144,11 +158,17 @@ public class Block
         argument_reporter_boolean,
     };
 
+	public struct Input
+	{
+		public bool isReference;
+		public string value;
+	}
+
     public opcodes opcode = opcodes.motion_movesteps;
     public string nextId = "";
     public string parentId = "";
-    public List<Block> inputs = new();
-    public List<object> fields = new();
+    public List<Input> inputs = new();
+    public List<string> fields = new();
 
 	public Block Next(Sprite sprite)
 	{
@@ -170,15 +190,42 @@ public class BlockConverter : JsonConverter<Dictionary<string, Block>>
         Dictionary<string, Block> blocks = new() { };
 
         foreach (var item in obj.Properties())
-        {
+		{
 			string key = item.Name;
 
-			blocks.Add(key, new()
+			Block block = new()
 			{
-				opcode = Block.opcodes.motion_movesteps,//Enum.Parse<Block.opcodes>(item.Value["opcode"]?.ToString() ?? "motion_movesteps"),
+				opcode = Enum.Parse<Block.opcodes>(item.Value["opcode"]?.ToString() ?? "motion_movesteps"),
 				nextId = item.Value["next"]?.ToString() ?? "",
 				parentId = item.Value["parent"]?.ToString() ?? "",
-			}); 
+			};
+
+			foreach (var input in item.Value["inputs"]?.Values())
+			{
+				if (input[1]?.Type == JTokenType.Array)
+				{
+					block.inputs.Add(new()
+					{
+						isReference = false,
+						value = input[1]?[1]?.ToString()
+					});
+				}
+				else if(input[1]?.Type == JTokenType.String)
+				{
+					block.inputs.Add(new()
+					{
+						isReference = true,
+						value = input[1]?.ToString()
+					});
+				}
+			}
+
+			foreach (var field in item.Value["fields"]?.Values())
+			{
+				block.fields.Add(field[0]?.ToString());
+			}
+
+			blocks.Add(key, block);
         }
 
         return blocks;

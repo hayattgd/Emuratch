@@ -135,16 +135,8 @@ public class Application
 		}
 
 		projectpath = Path.GetDirectoryName(jsonpath) ?? "";
-		byte[] bytes = Encoding.ASCII.GetBytes(projectpath);
 
-		unsafe
-		{
-			fixed (byte* p = bytes)
-			{
-				sbyte* sp = (sbyte*)p;
-				Raylib.ChangeDirectory(sp);
-			}
-		}
+		Directory.SetCurrentDirectory(projectpath);
 
 		json = File.ReadAllText(jsonpath);
 
@@ -159,5 +151,10 @@ public class Application
 
 		projectloaded = false;
 		return null;
+	}
+
+	public string GetAbsolutePath(string path)
+	{
+		return Program.app.projectpath + Path.DirectorySeparatorChar + path;
 	}
 }

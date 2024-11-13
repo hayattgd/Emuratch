@@ -10,8 +10,8 @@ public class Meta
             this.url = url;
         }
 
-        public string name = "None";
-        public string url = "";
+        public string name = "Scratch";
+        public string url = "https://scratch.mit.edu";
     }
 
     public string semver = "3.0.0";
