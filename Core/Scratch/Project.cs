@@ -12,10 +12,10 @@ public class Project : Unloadable
 	public const uint defaultWidth = 480;
 	public const uint defaultHeight = 360;
 
-    public Sprite background = new();
-    public Sprite[] sprites = Array.Empty<Sprite>();
+	public Sprite background = new();
+	public Sprite[] sprites = Array.Empty<Sprite>();
 	public Comment[] comments = Array.Empty<Comment>();
-    public Meta meta = new();
+	public Meta meta = new();
 
 	public uint width = defaultWidth;
 	public uint height = defaultHeight;
@@ -34,38 +34,38 @@ public class Project : Unloadable
 	}
 
 	public static bool LoadProject(string json, out Project project)
-    {
-        project = new();
+	{
+		project = new();
 		Configuration.Config = null;
 
-        try
-        {
-            JObject parsed = JObject.Parse(json);
+		try
+		{
+			JObject parsed = JObject.Parse(json);
 
-            //Import sprites
-            Sprite[]? spritesArray = parsed["targets"]?.ToObject<Sprite[]>();
-            if (spritesArray == null) return false;
+			//Import sprites
+			Sprite[]? spritesArray = parsed["targets"]?.ToObject<Sprite[]>();
+			if (spritesArray == null) return false;
 
-            project.background = spritesArray[0];
+			project.background = spritesArray[0];
 
-            List<Sprite> spritesList = spritesArray.ToList();
-            spritesList.RemoveAt(0);
-            spritesArray = spritesList.ToArray();
+			List<Sprite> spritesList = spritesArray.ToList();
+			spritesList.RemoveAt(0);
+			spritesArray = spritesList.ToArray();
 
-            project.sprites = spritesArray;
+			project.sprites = spritesArray;
 
-            //Import meta
-            Meta? meta = parsed["meta"]?.ToObject<Meta>();
-            if (meta == null) return false;
+			//Import meta
+			Meta? meta = parsed["meta"]?.ToObject<Meta>();
+			if (meta == null) return false;
 
-            project.meta = meta;
+			project.meta = meta;
 
 			return true;
 		}
-        catch (Exception ex)
-        {
+		catch (Exception ex)
+		{
 			MessageBox.Show("Error while loading project : " + ex.ToString(), "Error");
 			return false;
-        }
-    }
+		}
+	}
 }

@@ -1,94 +1,254 @@
-﻿using Emuratch.Core.Scratch;
+﻿#nullable disable
+
+using Emuratch.Core.Overlay;
+using Emuratch.Core.Scratch;
+using Raylib_cs;
 using System.Collections.Generic;
 using System;
+using System.Linq;
+using System.Numerics;
 
 namespace Emuratch.Core.vm;
 
-public class Interpreter : Executer
+public class Interpreter : Runner
 {
-    public Sprite Sprite { get; set; }
+	const float DegToRad = MathF.PI / 180;
+	const float MoveMultiplier = 1f;
 
-    public Interpreter(Sprite spr)
-    {
-        Sprite = spr;
-    }
+	public Interpreter(Project project)
+	{
+		this.project = project;
+	}
 
-    public void Execute(Block block)
-    {
+	public Project project { get; set; }
+
+	public bool TAS { get; set; }
+	public bool paused { get; set; }
+
+	public int fpsIdx { get; set; } = 3;
+	public int fps { get => Runner.FPS[fpsIdx]; }
+	public float deltatime { get => 1 / fps; }
+	public Random rng { get; set; }
+
+	public float timer { get; set; }
+
+	public Vector2 mouse { get => Raylib.GetMousePosition() - new Vector2(project.width * 0.5f, project.height * 0.5f); }
+	public Vector2 tasmouse { get; set; }
+	public Vector2 mousepos { get => TAS ? tasmouse : mouse; }
+
+	public List<Thread> PressFlag()
+	{
+		List<Thread> threads = new();
+
+		foreach (var spr in Application.project.sprites)
+		{
+			foreach (var block in spr.blocks)
+			{
+				if (block.Value.opcode == Block.opcodes.event_whenflagclicked)
+				{
+					Thread t = new(spr, block.Value);
+					threads.Add(t);
+					Execute(t);
+				}
+			}
+		}
+
+		return threads;
+	}
+
+	void ClampToStage(Sprite spr)
+	{
+		float width = spr.costume.image.Width / 4 * spr.costume.bitmapResolution;
+		float height = spr.costume.image.Height / 4 * spr.costume.bitmapResolution;
+
+		spr.x = Math.Clamp(spr.x, project.width * -0.5f - width, project.width * 0.5f + width);
+		spr.y = Math.Clamp(spr.y, project.height * -0.5f - height, project.height * 0.5f + height);
+	}
+
+	string Boolstr(bool boolean)
+	{
+		return boolean ? "true" : "false";
+	}
+
+	public string Execute(Thread thread)
+	{
+		return Execute(thread.sprite, thread.block, thread);
+	}
+
+	public string Execute(Sprite spr, Block block)
+	{
+		return Execute(spr, block, new(spr, block));
+	}
+
+	public string Execute(Sprite spr, Block block, Thread thread)
+	{
+		if (!Application.projectloaded) return string.Empty;
+
+		int sprIndex = Application.project.sprites.ToList().IndexOf(spr);
+
+		block.inputs.ForEach(
+			(input) => {
+				input.sprite = spr;
+			});
+
 		switch (block.opcode)
 		{
 			case Block.opcodes.motion_movesteps:
 				{
+					spr.x += MoveMultiplier * float.Parse(block.inputs[0].value) * MathF.Sin(spr.direction * DegToRad);
+					spr.y -= MoveMultiplier * float.Parse(block.inputs[0].value) * MathF.Cos(spr.direction * DegToRad);
+					ClampToStage(spr);
 					break;
 				};
 
 			case Block.opcodes.motion_turnright:
 				{
+					spr.direction += float.Parse(block.inputs[0].value) * 2;
 					break;
 				};
 
 			case Block.opcodes.motion_turnleft:
 				{
+					spr.direction -= float.Parse(block.inputs[0].value) * 2;
 					break;
 				};
 
 			case Block.opcodes.motion_goto:
 				{
+					Vector2 pos = Vector2.Zero;
+
+					if (block.inputs[0].value == "_random_")
+					{
+						pos = new(
+							rng.Next((int)(Application.project.width * -0.5f), (int)(Application.project.width * 0.5f)),
+							rng.Next((int)(Application.project.height * -0.5f), (int)(Application.project.height * 0.5f))
+						);
+					}
+					else if (block.inputs[0].value == "_mouse_")
+					{
+						pos = mousepos;
+					}
+					else
+					{
+						Sprite destination = Application.project.sprites.First((spr) => spr.name == block.inputs[0].value);
+						pos = new(destination.x, destination.y);
+					}
+
+					spr.x = pos.X;
+					spr.y = pos.Y;
+					ClampToStage(spr);
 					break;
+				};
+
+			case Block.opcodes.motion_goto_menu:
+				{
+					return block.fields[0];
 				};
 
 			case Block.opcodes.motion_gotoxy:
 				{
+					spr.x = float.Parse(block.inputs[0].value);
+					spr.y = float.Parse(block.inputs[1].value);
+					ClampToStage(spr);
 					break;
 				};
 
 			case Block.opcodes.motion_glideto:
 				{
-					break;
+					thread.delay = float.Parse(block.inputs[0].value);
+
+					Vector2 pos = Vector2.Zero;
+
+					if (block.inputs[0].value == "_random_")
+					{
+						pos = new(
+							rng.Next((int)(Application.project.width * -0.5f), (int)(Application.project.width * 0.5f)),
+							rng.Next((int)(Application.project.height * -0.5f), (int)(Application.project.height * 0.5f))
+						);
+					}
+					else if (block.inputs[0].value == "_mouse_")
+					{
+						pos = mousepos;
+					}
+					else
+					{
+						Sprite destination = Application.project.sprites.First((spr) => spr.name == block.inputs[0].value);
+						pos = new(destination.x, destination.y);
+					}
+
+					spr.x = pos.X;
+					spr.y = pos.Y;
+					ClampToStage(spr);
+					return "";
 				};
 
 			case Block.opcodes.motion_glideto_menu:
 				{
-					break;
+					return block.fields[0];
 				};
 
 			case Block.opcodes.motion_glidesecstoxy:
 				{
-					break;
+					spr.x += float.Parse(block.inputs[1].value);
+					spr.y += float.Parse(block.inputs[2].value);
+					ClampToStage(spr);
+					return "";
 				};
 
 			case Block.opcodes.motion_pointindirection:
 				{
+					spr.direction = float.Parse(block.inputs[0].value);
 					break;
 				};
 
 			case Block.opcodes.motion_pointtowards:
 				{
+					Vector2 pos = Vector2.Zero;
+
+					if (block.inputs[0].value == "_mouse_")
+					{
+						pos = mousepos;
+					}
+					else
+					{
+						Sprite destination = Application.project.sprites.First((spr) => spr.name == block.inputs[0].value);
+						pos = new(destination.x, destination.y);
+					}
+
+					spr.direction = MathF.Atan((pos.X - spr.x) / (pos.Y - spr.y) + 180 * pos.Y < spr.y ? 1 : 0);
 					break;
 				};
 
 			case Block.opcodes.motion_pointtowards_menu:
 				{
-					break;
+					return block.fields[0];
 				};
 
 			case Block.opcodes.motion_changexby:
 				{
+					spr.x += float.Parse(block.inputs[0].value);
+					ClampToStage(spr);
 					break;
 				};
 
 			case Block.opcodes.motion_setx:
 				{
+					spr.x = float.Parse(block.inputs[0].value);
+					ClampToStage(spr);
 					break;
 				};
 
 			case Block.opcodes.motion_changeyby:
 				{
+					spr.y += float.Parse(block.inputs[0].value);
+					ClampToStage(spr);
 					break;
 				};
 
 			case Block.opcodes.motion_sety:
 				{
+					spr.y = float.Parse(block.inputs[0].value);
+					ClampToStage(spr);
 					break;
 				};
 
@@ -99,56 +259,90 @@ public class Interpreter : Executer
 
 			case Block.opcodes.motion_setrotationstyle:
 				{
+					spr.rotationStyle = block.fields[0];
 					break;
 				};
 
 			case Block.opcodes.motion_xposition:
 				{
-					break;
+					return spr.x.ToString();
 				};
 
 			case Block.opcodes.motion_yposition:
 				{
-					break;
+					return spr.y.ToString();
 				};
 
 			case Block.opcodes.motion_direction:
 				{
-					break;
+					return spr.direction.ToString();
 				};
 
 			case Block.opcodes.looks_sayforsecs:
 				{
-					break;
+					float sec = float.Parse(block.inputs[0].value);
+					if (sec > 0)
+					{
+						thread.delay = sec;
+					}
+					else
+					{
+						thread.nextframe = false;
+					}
+					return "";
 				};
 
 			case Block.opcodes.looks_say:
 				{
+					OverlayRender.RenderDialogue((int)spr.x, (int)spr.y + spr.costumes[spr.currentCostume].image.Height, block.inputs[0].value);
 					break;
 				};
 
 			case Block.opcodes.looks_thinkforsecs:
 				{
-					break;
+					float sec = float.Parse(block.inputs[0].value);
+					if (sec > 0)
+					{
+						thread.delay = sec;
+					}
+					else
+					{
+						thread.nextframe = false;
+					}
+					return "";
 				};
 
 			case Block.opcodes.looks_think:
 				{
+					OverlayRender.RenderDialogue((int)spr.x, (int)spr.y + spr.costumes[spr.currentCostume].image.Height, block.inputs[0].value);
 					break;
 				};
 
 			case Block.opcodes.looks_switchcostumeto:
 				{
+					spr.currentCostume = int.Parse(block.inputs[0].value);
 					break;
 				};
 
 			case Block.opcodes.looks_costume:
 				{
-					break;
+					int index = 0;
+					if (int.TryParse(block.fields[0], out int number))
+					{
+						index = number;
+					}
+					else
+					{
+						index = spr.costumes.ToList().IndexOf(spr.costumes.First((x) => x.name == block.fields[0]));
+					}
+
+					return index.ToString();
 				};
 
 			case Block.opcodes.looks_nextcostume:
 				{
+					spr.currentCostume++;
+					//add codes to repeat costume
 					break;
 				};
 
@@ -169,11 +363,13 @@ public class Interpreter : Executer
 
 			case Block.opcodes.looks_changesizeby:
 				{
+					spr.size += float.Parse(block.inputs[0].value);
 					break;
 				};
 
 			case Block.opcodes.looks_setsizeto:
 				{
+					spr.size = float.Parse(block.inputs[0].value);
 					break;
 				};
 
@@ -194,11 +390,13 @@ public class Interpreter : Executer
 
 			case Block.opcodes.looks_show:
 				{
+					spr.visible = true;
 					break;
 				};
 
 			case Block.opcodes.looks_hide:
 				{
+					spr.visible = false;
 					break;
 				};
 
@@ -214,7 +412,7 @@ public class Interpreter : Executer
 
 			case Block.opcodes.looks_costumenumbername:
 				{
-					break;
+					return block.fields[0] == "number" ? spr.currentCostume.ToString() : spr.costumes[spr.currentCostume].name;
 				};
 
 			case Block.opcodes.looks_backdropnumbername:
@@ -224,21 +422,23 @@ public class Interpreter : Executer
 
 			case Block.opcodes.looks_size:
 				{
-					break;
+					return spr.size.ToString();
 				};
 
 			case Block.opcodes.sound_playuntildone:
 				{
-					break;
+					Raylib.PlaySound(spr.sounds.First((x) => x.name == block.inputs[0].value).sound);
+					return "";
 				};
 
 			case Block.opcodes.sound_sounds_menu:
 				{
-					break;
+					return block.fields[0];
 				};
 
 			case Block.opcodes.sound_play:
 				{
+					Raylib.PlaySound(spr.sounds.First((x) => x.name == block.inputs[0].value).sound);
 					break;
 				};
 
@@ -274,7 +474,7 @@ public class Interpreter : Executer
 
 			case Block.opcodes.sound_volume:
 				{
-					break;
+					return spr.volume.ToString();
 				};
 
 			case Block.opcodes.event_whenflagclicked:
@@ -314,6 +514,13 @@ public class Interpreter : Executer
 
 			case Block.opcodes.event_broadcast:
 				{
+					foreach (var sprite in project.sprites)
+					{
+						foreach (var top in sprite.blocks.Where((x) => x.Value.opcode == Block.opcodes.event_whenbroadcastreceived))
+						{
+							Execute(sprite, top.Value);
+						}
+					}
 					break;
 				};
 
@@ -324,7 +531,17 @@ public class Interpreter : Executer
 
 			case Block.opcodes.control_wait:
 				{
-					break;
+					float sec = float.Parse(block.inputs[0].value);
+					if (sec > 0)
+					{
+						thread.delay = sec;
+					}
+					else
+					{
+						thread.nextframe = false;
+					}
+
+					return "";
 				};
 
 			case Block.opcodes.control_repeat:
@@ -334,6 +551,9 @@ public class Interpreter : Executer
 
 			case Block.opcodes.control_forever:
 				{
+					thread.block = spr.blocks[block.inputs[0].OriginalValue];
+					thread.returnto.Add(thread.block);
+					thread.forever = true;
 					break;
 				};
 
@@ -519,22 +739,23 @@ public class Interpreter : Executer
 
 			case Block.opcodes.operator_random:
 				{
-					break;
+					double number = (rng.NextDouble() + float.Parse(block.inputs[0].value) * (float.Parse(block.inputs[1].value) - float.Parse(block.inputs[0].value)));
+					return number.ToString(); //limit this as int or float depending on inputs
 				};
 
 			case Block.opcodes.operator_gt:
 				{
-					break;
+					return Boolstr(float.Parse(block.inputs[0].value) > float.Parse(block.inputs[1].value));
 				};
 
 			case Block.opcodes.operator_lt:
 				{
-					break;
+					return Boolstr(float.Parse(block.inputs[0].value) < float.Parse(block.inputs[1].value));
 				};
 
 			case Block.opcodes.operator_equals:
 				{
-					break;
+					return Boolstr(block.inputs[0].value == block.inputs[1].value);
 				};
 
 			case Block.opcodes.operator_and:
@@ -554,12 +775,12 @@ public class Interpreter : Executer
 
 			case Block.opcodes.operator_join:
 				{
-					break;
+					return block.inputs[0].value + block.inputs[1].value;
 				};
 
 			case Block.opcodes.operator_letter_of:
 				{
-					break;
+					return block.inputs[0].value[int.Parse(block.inputs[1].value)].ToString();
 				};
 
 			case Block.opcodes.operator_length:
@@ -677,6 +898,11 @@ public class Interpreter : Executer
 					break;
 				};
 
+			case Block.opcodes.procedures_prototype:
+				{
+					break;
+				};
+
 			case Block.opcodes.procedures_call:
 				{
 					break;
@@ -698,9 +924,11 @@ public class Interpreter : Executer
 				};
 		}
 
-		if (block.nextId != null)
-        {
-            Execute(block.Next(Sprite));
-        }
-    }
+		if (block.nextId != "")
+		{
+			return Execute(spr, block.Next(spr), thread);
+		}
+
+		return string.Empty;
+	}
 }

@@ -8,7 +8,7 @@ namespace Emuratch.Core.Scratch;
 
 public class Comment
 {
-    public string text = "";
+	public string text = "";
 }
 
 public class CommentConverter : JsonConverter<Comment[]>

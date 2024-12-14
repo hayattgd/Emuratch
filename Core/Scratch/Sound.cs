@@ -9,8 +9,8 @@ namespace Emuratch.Core.Scratch;
 
 public class Sound : Unloadable
 {
-    public string name = "";
-    public Raylib_cs.Sound sound;
+	public string name = "";
+	public Raylib_cs.Sound sound;
 
 	public void Unload()
 	{

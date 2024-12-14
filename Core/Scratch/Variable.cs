@@ -7,8 +7,8 @@ namespace Emuratch.Core.Scratch;
 
 public class Variable
 {
-    public string name = "my variable";
-    public object value = 0;
+	public string name = "my variable";
+	public object value = 0;
 }
 
 public class VariableConverter : JsonConverter<Variable[]>

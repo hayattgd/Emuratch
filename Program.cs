@@ -9,8 +9,8 @@ public static class Program
 	public static Application app = new();
 
 	[STAThread]
-    public static int Main()
-    {
+	public static int Main()
+	{
 		app.Initialize();
 
 		while (!Raylib.WindowShouldClose())

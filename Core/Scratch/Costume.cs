@@ -11,12 +11,12 @@ namespace Emuratch.Core.Scratch;
 
 public class Costume : Unloadable
 {
-    public string name = "";
+	public string name = "";
 	public int bitmapResolution = 1;
-    public string dataFormat = "";
-    public float rotationCenterX = 240;
-    public float rotationCenterY = 180;
-    public Image image = new();
+	public string dataFormat = "";
+	public float rotationCenterX = 0;
+	public float rotationCenterY = 0;
+	public Image image = new();
 	public Texture2D texture = new();
 
 	public void Unload()

@@ -21,6 +21,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Tests\**" />
+    <EmbeddedResource Remove="Tests\**" />
+    <None Remove="Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Raylib-cs" Version="6.1.1" />
     <PackageReference Include="Svg" Version="3.4.7" />
@@ -34,10 +40,6 @@
 
   <ItemGroup>
     <None Include="S:\Workspace\Csharp\raylib\Emuratch\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Tests\research\" />
   </ItemGroup>
 
 </Project>
