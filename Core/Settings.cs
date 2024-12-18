@@ -14,10 +14,10 @@ public class Settings
 		string[] splits = text.Split("\n");
 		List<string> splitlist = splits.ToList();
 
-		foreach (var item in splitlist.Where((selected) => selected[0] == '#'))
+		foreach (var item in splitlist.Where(selected => selected[0] == '#').ToList())
 		{
 			splitlist.Remove(item);
-		};
+		}
 
 		return new()
 		{

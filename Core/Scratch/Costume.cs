@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System;
 using Svg;
 using System.IO;
-using System.Windows.Forms;
 
 namespace Emuratch.Core.Scratch;
 
@@ -14,10 +13,10 @@ public class Costume : Unloadable
 	public string name = "";
 	public int bitmapResolution = 1;
 	public string dataFormat = "";
-	public float rotationCenterX = 0;
-	public float rotationCenterY = 0;
-	public Image image = new();
-	public Texture2D texture = new();
+	public float rotationCenterX;
+	public float rotationCenterY;
+	public Image image;
+	public Texture2D texture;
 
 	public void Unload()
 	{
@@ -33,11 +32,11 @@ public class CostumeConverter : JsonConverter<Costume[]>
 		throw new NotImplementedException();
 	}
 
-	public override Costume[]? ReadJson(JsonReader reader, Type objectType, Costume[]? existingValue, bool hasExistingValue, JsonSerializer serializer)
+	public override Costume[] ReadJson(JsonReader reader, Type objectType, Costume[]? existingValue, bool hasExistingValue, JsonSerializer serializer)
 	{
 		var obj = JToken.Load(reader);
 
-		List<Costume> costumes = new() { };
+		List<Costume> costumes = new();
 
 		foreach (var item in obj)
 		{
@@ -50,7 +49,7 @@ public class CostumeConverter : JsonConverter<Costume[]>
 				rotationCenterY = (int)(item["rotationCenterY"] ?? 0)
 			};
 
-			string imagepath = $"{item["assetId"]?.ToString()}.{costume.dataFormat}" ?? "";
+			string imagepath = $"{item["assetId"]}.{costume.dataFormat}";
 
 			if (costume.dataFormat != "svg")
 			{

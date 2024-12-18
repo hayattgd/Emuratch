@@ -8,31 +8,12 @@ namespace Emuratch.Core.vm;
 
 public interface Runner
 {
-	public static int[] FPS
-	{
-		get => new int[]
-		{
-			2,
-			5,
-			15,
-			30,
-			45,
-			60,
-			90,
-			120,
-			240,
-			480,
-			960
-		};
-	}
-
 	public Project project { get; protected internal set; }
 
 	public bool TAS { get; set; }
 	public bool paused { get; set; }
 
-	public int fpsIdx { get; set; }
-	public int fps { get => FPS[fpsIdx]; }
+	public int fps { get; set; }
 	public double deltatime { get => 1d / fps; }
 	public Random rng { get; set; }
 

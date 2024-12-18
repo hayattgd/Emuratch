@@ -1,7 +1,6 @@
 ﻿using Emuratch.Core.Scratch;
 using Raylib_cs;
 using System;
-using System.Xml.Serialization;
 
 namespace Emuratch.Core.Overlay;
 
@@ -9,12 +8,11 @@ public static class OverlayRender
 {
 	const int fontsize = 20;
 
-	public static void RenderMessage(Core.Overlay.Message msg, int idx)
+	public static void RenderMessage(Message msg, int idx)
 	{
 		int height = 28;
 		int margin = height - fontsize;
 		int padding = 3;
-		int width = Raylib.MeasureText(msg.message, fontsize);
 
 		RenderDialogue(padding, padding + (padding + height) * idx, padding + margin, height, msg.message);
 	}

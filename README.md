@@ -4,12 +4,12 @@ Scratch emulator made with C# & [raylib](https://www.raylib.com/)
 
 ## Controls
 
-| Key | Behaviour                 |
-|-----|---------------------------|
-| F1  | Load project              |
-| F5  | Press flag                |
-|PAUSE| Pause / resume game       |
-| -   | Frame advance             |
+| Key   | Behaviour           |
+|-------|---------------------|
+| F1    | Load project        |
+| F5    | Press flag          |
+| PAUSE | Pause / resume game |
+| -     | Frame advance       |
 
 ## LICENSE
 

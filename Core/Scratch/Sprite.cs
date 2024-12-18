@@ -22,7 +22,7 @@ public class Sprite
 	public Variable[] variables = Array.Empty<Variable>();
 
 	[JsonConverter(typeof(BlockConverter))]
-	public Dictionary<string, Block> blocks = new() { };
+	public Dictionary<string, Block> blocks = new();
 
 	[JsonConverter(typeof(CommentConverter))]
 	public Comment[] comments = Array.Empty<Comment>();
@@ -70,9 +70,6 @@ public class Sprite
 
 				case RotationStyle.dont_rotate:
 					rotationStyle = "don't rotate";
-					break;
-
-				default:
 					break;
 			}
 		}

@@ -18,11 +18,11 @@ public class CommentConverter : JsonConverter<Comment[]>
 		throw new NotImplementedException();
 	}
 
-	public override Comment[]? ReadJson(JsonReader reader, Type objectType, Comment[]? existingValue, bool hasExistingValue, JsonSerializer serializer)
+	public override Comment[] ReadJson(JsonReader reader, Type objectType, Comment[]? existingValue, bool hasExistingValue, JsonSerializer serializer)
 	{
 		var obj = JToken.Load(reader);
 
-		List<Comment> comments = new() { };
+		List<Comment> comments = new();
 
 		foreach (var item in obj.Values())
 		{
@@ -31,7 +31,7 @@ public class CommentConverter : JsonConverter<Comment[]>
 			if (text.Contains("// _twconfig_"))
 			{
 				Configuration.TryParse(text, out var config);
-				Configuration.Config = config;
+				Configuration.Config = config ?? new();
 			}
 
 			comments.Add(new()

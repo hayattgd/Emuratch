@@ -18,8 +18,8 @@ public class Application
 {
 	public static Project project { get; private set; }
 	public static string projectpath { get; private set; } = "";
-	public static bool projectloaded { get; private set; } = false;
-	public static bool projectloading { get; private set; } = false;
+	public static bool projectloaded { get; private set; }
+	public static bool projectloading { get; private set; }
 
 	public List<Thread> threads { get; private set; }
 
@@ -91,9 +91,6 @@ public class Application
 
 					case Renders.Scratch:
 						break;
-
-					default:
-						break;
 				}
 
 				switch (runnertype)
@@ -107,10 +104,9 @@ public class Application
 
 					case Runners.Scratch:
 						break;
-
-					default:
-						break;
 				}
+				runner.fps = Configuration.Config.framerate;
+
 				messages.Add(new("Project loaded"));
 			}
 			else
@@ -152,6 +148,17 @@ public class Application
 				runner.timer = 0;
 				threads = runner.PressFlag();
 				messages.Add(new("Flag pressed"));
+			}
+
+			if (Raylib.IsKeyPressed(KeyboardKey.LeftBracket))
+			{
+				runner.fps -= 2;
+				if (runner.fps < 2) runner.fps = 2;
+			}
+
+			if (Raylib.IsKeyPressed(KeyboardKey.RightBracket))
+			{
+				runner.fps += 2;
 			}
 
 			render.RenderAll();
@@ -204,7 +211,6 @@ public class Application
 
 		string ext = path.Split('.')[^1];
 		string jsonpath = "";
-		string json = "";
 		if (ext == "sb3" || ext == "zip" || ext == "7z")
 		{
 			string directory = path + suffix;
@@ -252,15 +258,15 @@ public class Application
 
 		Directory.SetCurrentDirectory(projectpath);
 
-		json = File.ReadAllText(jsonpath);
+		string json = File.ReadAllText(jsonpath);
 
-		if (Project.LoadProject(json, out Project project))
+		if (Project.LoadProject(json, out Project LoadedProject))
 		{
-			Configuration.ApplyConfig(ref project);
-			Raylib.SetWindowSize((int?)project?.width ?? (int)Project.defaultWidth, (int?)project?.height ?? (int)Project.defaultHeight);
+			Configuration.ApplyConfig(ref LoadedProject);
+			Raylib.SetWindowSize((int)LoadedProject.width, (int)LoadedProject.height);
 
 			projectloaded = projectpath != "";
-			return project;
+			return LoadedProject;
 		}
 
 		projectloaded = false;

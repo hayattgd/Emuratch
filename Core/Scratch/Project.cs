@@ -36,7 +36,7 @@ public class Project : Unloadable
 	public static bool LoadProject(string json, out Project project)
 	{
 		project = new();
-		Configuration.Config = null;
+		Configuration.Config = new();
 
 		try
 		{
@@ -64,7 +64,7 @@ public class Project : Unloadable
 		}
 		catch (Exception ex)
 		{
-			MessageBox.Show("Error while loading project : " + ex.ToString(), "Error");
+			MessageBox.Show("Error while loading project : " + ex, "Error");
 			return false;
 		}
 	}

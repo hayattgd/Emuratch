@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 using Raylib_cs;
 using System.Collections.Generic;
 using System;
-using System.IO;
 
 namespace Emuratch.Core.Scratch;
 
@@ -25,18 +24,18 @@ public class SoundConverter : JsonConverter<Sound[]>
 		throw new NotImplementedException();
 	}
 
-	public override Sound[]? ReadJson(JsonReader reader, Type objectType, Sound[]? existingValue, bool hasExistingValue, JsonSerializer serializer)
+	public override Sound[] ReadJson(JsonReader reader, Type objectType, Sound[]? existingValue, bool hasExistingValue, JsonSerializer serializer)
 	{
 		var obj = JToken.Load(reader);
 
-		List<Sound> sounds = new() { };
+		List<Sound> sounds = new();
 
 		foreach (var item in obj)
 		{
 			sounds.Add(new()
 			{
 				name = item["name"]?.ToString() ?? "",
-				sound = Raylib.LoadSound($"{item["assetId"]?.ToString()}.{item["dataFormat"]?.ToString()}" ?? "")
+				sound = Raylib.LoadSound($"{item["assetId"]}.{item["dataFormat"]}")
 			});
 		}
 

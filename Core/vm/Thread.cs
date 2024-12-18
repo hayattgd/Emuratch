@@ -49,7 +49,7 @@ public class Thread
 
 	public Block? condition;
 
-	public float delay = 0;
+	public float delay;
 	public int repeats = 0;
 	public bool forever = false;
 	public List<Block> returnto = new();

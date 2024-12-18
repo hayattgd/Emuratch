@@ -202,7 +202,7 @@ public class BlockConverter : JsonConverter<Dictionary<string, Block>>
 	{
 		var obj = JObject.Load(reader);
 
-		Dictionary<string, Block> blocks = new() { };
+		Dictionary<string, Block> blocks = new();
 
 		foreach (var item in obj.Properties())
 		{
@@ -215,13 +215,13 @@ public class BlockConverter : JsonConverter<Dictionary<string, Block>>
 				parentId = item.Value["parent"]?.ToString() ?? "",
 			};
 
-			foreach (var input in item.Value["inputs"].Values())
+			foreach (var input in (item.Value["inputs"] ?? throw new InvalidOperationException()).Values())
 			{
 				if (input[1]?.Type == JTokenType.Array)
 				{
 					block.inputs.Add(new()
 					{
-						value = input[1][1].ToString(),
+						value = input[1][1]?.ToString(),
 						isReference = false
 					});
 				}
@@ -234,8 +234,8 @@ public class BlockConverter : JsonConverter<Dictionary<string, Block>>
 					});
 				}
 			}
-			block.fields.AddRange(from field in item.Value["fields"].Values()
-								  select field[0].ToString());
+			block.fields.AddRange(from field in (item.Value["fields"] ?? throw new InvalidOperationException()).Values()
+								  select field[0]?.ToString());
 			blocks.Add(key, block);
 		}
 

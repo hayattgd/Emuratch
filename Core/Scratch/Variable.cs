@@ -18,11 +18,11 @@ public class VariableConverter : JsonConverter<Variable[]>
 		throw new NotImplementedException();
 	}
 
-	public override Variable[]? ReadJson(JsonReader reader, Type objectType, Variable[]? existingValue, bool hasExistingValue, JsonSerializer serializer)
+	public override Variable[] ReadJson(JsonReader reader, Type objectType, Variable[]? existingValue, bool hasExistingValue, JsonSerializer serializer)
 	{
 		var obj = JObject.Load(reader).Values();
 
-		List<Variable> variables = new() { };
+		List<Variable> variables = new();
 
 		foreach (var item in obj)
 		{

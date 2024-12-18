@@ -1,6 +1,5 @@
 ﻿using Emuratch.Core.Scratch;
 using Raylib_cs;
-using System;
 using System.Linq;
 using System.Numerics;
 
@@ -45,8 +44,8 @@ public class Emurender : RenderType
 		}
 		else if (costume.dataFormat == "svg")
 		{
-			offset = new(-costume.rotationCenterX + costume.image.Width / 2, costume.rotationCenterY - costume.image.Height / 2);
-			offset += new Vector2(costume.image.Width / 4, costume.image.Height / 4);
+			offset = new(-costume.rotationCenterX + costume.image.Width / 2f, costume.rotationCenterY - costume.image.Height / 2f);
+			offset += new Vector2(costume.image.Width / 4f, costume.image.Height / 4f);
 		}
 
 			Vector2 pos = ScratchToRaylib(
@@ -84,7 +83,7 @@ public class Emurender : RenderType
 
 	public Vector2 ScratchToRaylib(float x, float y)
 	{
-		return new(project.width / 2 + x, project.height / 2 + y);
+		return new(project.width / 2f + x, project.height / 2f + y);
 		//return new((int)x, (int)y);
 	}
 }

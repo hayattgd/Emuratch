@@ -1,6 +1,5 @@
 ﻿using System;
 using Raylib_cs;
-using Emuratch.Core;
 
 namespace Emuratch;
 

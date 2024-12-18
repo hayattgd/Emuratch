@@ -40,7 +40,7 @@ public class MonitorConverter : JsonConverter<List<Monitor>>
 		throw new NotImplementedException();
 	}
 
-	public override List<Monitor>? ReadJson(JsonReader reader, Type objectType, List<Monitor>? existingValue, bool hasExistingValue, JsonSerializer serializer)
+	public override List<Monitor> ReadJson(JsonReader reader, Type objectType, List<Monitor>? existingValue, bool hasExistingValue, JsonSerializer serializer)
 	{
 		var obj = JObject.Load(reader);
 

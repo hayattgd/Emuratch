@@ -1,13 +1,11 @@
 ﻿using Emuratch.Core.Scratch;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
 
 namespace Emuratch.Core.Turbowarp;
 
 public class Configuration
 {
-	private static Configuration? config;
+	private static Configuration config = new();
 
 	public struct RuntimeOptions
 	{
@@ -25,23 +23,23 @@ public class Configuration
 	public uint width = 480;
 	public uint height = 360;
 
-	public static Configuration? Config { get => config; set => config = value; }
+	public static Configuration Config { get => config; set => config = value; }
 
 	/// <summary>
 	/// Tries to parse Configuration instance from Turbowarp's comment
 	/// </summary>
 	/// <returns>return process is successfully done or not</returns>
-	public static bool TryParse(string text, out Configuration? config)
+	public static bool TryParse(string text, out Configuration? parsedconfig)
 	{
 		string json = text.Split('\n')[2].Replace(" // _twconfig_", "");
-		config = JsonConvert.DeserializeObject<Configuration>(json);
+		parsedconfig = JsonConvert.DeserializeObject<Configuration>(json);
 
-		return config != null;
+		return parsedconfig != null;
 	}
 
 	public static void ApplyConfig(ref Project project)
 	{
-		project.width = Config?.width ?? Project.defaultWidth;
-		project.height = Config?.height ?? Project.defaultHeight;
+		project.width = Config.width;
+		project.height = Config.height;
 	}
 }
