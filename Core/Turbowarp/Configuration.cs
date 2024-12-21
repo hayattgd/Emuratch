@@ -16,12 +16,12 @@ public class Configuration
 		public bool fencing = true;
 	}
 
-	public int framerate = 30;
+	public readonly int framerate = 30;
 	public RuntimeOptions runtimeOptions;
 	public bool interpolation = false;
 	public bool hq = false;
-	public uint width = 480;
-	public uint height = 360;
+	public readonly uint width = 480;
+	public readonly uint height = 360;
 
 	public static Configuration Config { get => config; set => config = value; }
 

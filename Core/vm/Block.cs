@@ -165,7 +165,7 @@ public class Block
 	public struct Input
 	{
 		public bool isReference;
-		internal Sprite sprite;
+		public Sprite sprite;
 		public string OriginalValue { private set; get; }
 
 		public string value
@@ -182,7 +182,7 @@ public class Block
 	public string nextId = "";
 	public string parentId = "";
 	public List<Input> inputs = new();
-	public List<string> fields = new();
+	public readonly List<string> fields = new();
 
 	public Block Next(Sprite sprite)
 	{

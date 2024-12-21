@@ -12,10 +12,11 @@ public class Project : Unloadable
 	public const uint defaultWidth = 480;
 	public const uint defaultHeight = 360;
 
-	public Sprite background = new();
 	public Sprite[] sprites = Array.Empty<Sprite>();
 	public Comment[] comments = Array.Empty<Comment>();
 	public Meta meta = new();
+	
+	public Sprite stage { get => sprites[0]; }
 
 	public uint width = defaultWidth;
 	public uint height = defaultHeight;
@@ -45,8 +46,6 @@ public class Project : Unloadable
 			//Import sprites
 			Sprite[]? spritesArray = parsed["targets"]?.ToObject<Sprite[]>();
 			if (spritesArray == null) return false;
-
-			project.background = spritesArray[0];
 
 			List<Sprite> spritesList = spritesArray.ToList();
 			spritesList.RemoveAt(0);

@@ -46,7 +46,7 @@ public class Application
 	internal static RenderType render;
 	internal static Runner runner;
 
-	public List<Core.Overlay.Message> messages = new();
+	public readonly List<Core.Overlay.Message> messages = new();
 
 	public void UnloadProject()
 	{
