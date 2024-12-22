@@ -10,8 +10,8 @@ on:
     branches: [ "stable" ]
 
 jobs:
-  build:
-
+  publish:
+    name: Publish
     runs-on: windows-latest
 
     steps:
@@ -23,6 +23,13 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet publish Emuratch.csproj -c Release
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v4.5.0
+      with:
+        name: Windows
+        path: ./bin/publish/
+                  
+              
