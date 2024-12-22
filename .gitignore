@@ -366,3 +366,4 @@ FodyWeavers.xsd
 /.idea/.idea.Emuratch/.idea
 *.DotSettings
 /.vscode
+/build

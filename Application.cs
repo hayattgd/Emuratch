@@ -89,8 +89,10 @@ public class Application
 						render = new Emurender(project);
 						break;
 
+#if DEBUG
 					case Renders.Scratch:
 						break;
+#endif
 				}
 
 				switch (runnertype)
@@ -102,8 +104,10 @@ public class Application
 					case Runners.Compilier:
 						break;
 
+#if DEBUG
 					case Runners.Scratch:
 						break;
+#endif
 				}
 				runner.fps = Configuration.Config.framerate;
 
