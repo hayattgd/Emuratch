@@ -1,12 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <OutputType>exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UseWindowsForms>True</UseWindowsForms>
-    <UseWPF>False</UseWPF>
     <StartupObject>Emuratch.Program</StartupObject>
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -33,13 +31,4 @@
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
-
-  <ItemGroup>
-    <EditorConfigFiles Remove="S:\Workspace\Csharp\raylib\Emuratch\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="S:\Workspace\Csharp\raylib\Emuratch\.editorconfig" />
-  </ItemGroup>
-
 </Project>

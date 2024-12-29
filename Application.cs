@@ -1,16 +1,15 @@
 ﻿#nullable disable
 
 using Emuratch.Core.Scratch;
+using Emuratch.Core.Turbowarp;
+using Emuratch.Core.vm;
+using Emuratch.Core.Render;
+using Emuratch.Core.Overlay;
 using Raylib_cs;
 using System.IO.Compression;
 using System.IO;
 using System;
-using System.Windows.Forms;
-using Emuratch.Core.Turbowarp;
-using Emuratch.Core.vm;
-using Emuratch.Core.Render;
 using System.Collections.Generic;
-using Emuratch.Core.Overlay;
 
 namespace Emuratch;
 
@@ -192,19 +191,17 @@ public class Application
 
 	public Project LoadProject()
 	{
-		OpenFileDialog openFileDialog = new()
-		{
-			Title = "Select .sb3 file.",
-			Filter = "Scratch project file|*.sb3;project.json|" +
-					 "Archived project.json|*.sb3;*.zip;*.7z",
-			RestoreDirectory = true,
-		};
-
-		if (openFileDialog.ShowDialog() == DialogResult.OK)
-		{
-			string filepath = openFileDialog.FileName;
-			return LoadProject(filepath);
-		}
+		IDialogService dialog = DialogServiceFactory.CreateDialogService();
+        projectpath = dialog.ShowFileDialog();
+        if (!string.IsNullOrEmpty(projectpath))
+        {
+            LoadProject(projectpath);
+            messages.Add(new("Project loaded successfully."));
+        }
+        else
+        {
+            dialog.ShowMessageDialog("File selection canceled.");
+        }
 
 		return null;
 	}
@@ -229,7 +226,7 @@ public class Application
 					{
 						alreadyExisted = true;
 					}
-					else if (MessageBox.Show("Folder already exists. Overwrite on it?", "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+					else if (DialogServiceFactory.CreateDialogService().ShowYesNoDialog("Folder already exists. Overwrite on it?"))
 					{
 						Directory.Delete(path + suffix, true);
 					}
@@ -249,7 +246,7 @@ public class Application
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message, "Error");
+				DialogServiceFactory.CreateDialogService().ShowMessageDialog(ex.Message);
 				return null;
 			}
 		}
