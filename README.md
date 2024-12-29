@@ -1,4 +1,4 @@
-﻿# Emuratch
+﻿# ![Emuratch](Images/Logo.svg)
 
 Scratch emulator made with C# & [raylib](https://www.raylib.com/)
 
