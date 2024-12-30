@@ -32,16 +32,26 @@ public class Thread
 			return;
 		}
 
+		if (block == null && returnto[^1] != null) block = returnto[^1];
+		if (block == null) return;
+
 		runner.Execute(sprite, block, this);
 
 		if (block.nextId == string.Empty)
 		{
 			if (forever || repeats > 0)
 			{
-				block = returnto[returnto.Count - 1];
+				block = returnto[^1];
 			}
-
-			return;
+			else if(returnto.Count <= 0)
+			{
+				return;
+			}
+			else
+			{
+				block = returnto[^1];
+				returnto.RemoveAt(returnto.Count - 1);
+			}
 		}
 
 		block = block.Next(sprite);

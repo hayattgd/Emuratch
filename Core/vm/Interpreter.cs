@@ -188,11 +188,6 @@ public class Interpreter : Runner
 	{
 		if (!Application.projectloaded) return string.Empty;
 
-		block.inputs.ForEach(
-			input => {
-				input.sprite = spr;
-			});
-
 		switch (block.opcode)
 		{
 			case Block.opcodes.motion_movesteps:
@@ -675,7 +670,10 @@ public class Interpreter : Runner
 
 			case Block.opcodes.control_if:
 				{
-					if (Strbool(block.inputs[1].value)) return Execute(spr, spr.blocks[block.inputs[0].OriginalValue], thread);
+					if (Strbool(block.inputs[0].value))
+					{
+						return Execute(spr, spr.blocks[block.inputs[1].OriginalValue], thread);
+					}
 
 					break;
 				}
