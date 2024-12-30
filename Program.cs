@@ -5,7 +5,7 @@ namespace Emuratch;
 
 public static class Program
 {
-	public static Application app = new();
+	public static readonly Application app = new();
 
 	[STAThread]
 	public static int Main()

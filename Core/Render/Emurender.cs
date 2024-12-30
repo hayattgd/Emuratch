@@ -12,13 +12,13 @@ public class Emurender : RenderType
 		this.project = project;
 	}
 
-	public Project project;
+	public readonly Project project;
 
 	public void RenderAll()
 	{
 		Raylib.ClearBackground(Color.White);
 
-		RenderSprite(project.background);
+		RenderSprite(project.stage);
 		var list = project.sprites.ToList();
 		list.Sort((a, b) => a.layoutOrder.CompareTo(b.layoutOrder));
 
@@ -34,6 +34,8 @@ public class Emurender : RenderType
 
 	public void RenderSprite(Sprite spr)
 	{
+		if (spr.costumes.Length == 0) return;
+
 		Costume costume = spr.costumes[spr.currentCostume];
 		Vector2 offset = Vector2.Zero;
 
@@ -50,7 +52,7 @@ public class Emurender : RenderType
 
 			Vector2 pos = ScratchToRaylib(
 			spr.x - offset.X,
-			spr.y - offset.Y
+			(spr.y - offset.Y) * -1f
 		);
 		if (spr.isStage) pos = ScratchToRaylib(-costume.rotationCenterX / 2, -costume.rotationCenterY / 2);
 

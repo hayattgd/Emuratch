@@ -5,15 +5,18 @@ name: .NET
 
 on:
   push:
-    branches: [ "stable" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "stable" ]
+    branches: [ "dev" ]
 
 jobs:
-  publish:
-    name: Publish
-    runs-on: windows-latest
-
+  Build:
+    strategy:
+      matrix:
+        config: [ Debug, Release ]
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -23,13 +26,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet publish Emuratch.csproj -c Release
+      run: dotnet build --no-restore -c ${{ matrix.config }}
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal -c ${{ matrix.config }}
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.5.0
       with:
-        name: Windows
-        path: ./bin/
-                  
-              
+        name: ${{ matrix.os }}-${{ matrix.config }}-build
+        path: ./bin/${{ matrix.config }}/

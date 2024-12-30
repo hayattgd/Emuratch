@@ -55,7 +55,7 @@ public class Thread
 	public List<Block> returnto = new();
 	public bool nextframe = true;
 
-	public Sprite sprite;
+	public readonly Sprite sprite;
 	public Block block;
 
 	Runner runner { get => Application.runner; }

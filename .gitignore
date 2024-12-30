@@ -363,3 +363,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/.idea/.idea.Emuratch/.idea
+*.DotSettings
+/.vscode
+/build

@@ -38,6 +38,11 @@ public class Interpreter : Runner
 
 	public List<Thread> PressFlag()
 	{
+		foreach (var sprite in project.sprites)
+		{
+			sprite.UpdateBlocks();
+		}
+
 		List<Thread> threads = new();
 
 		foreach (var spr in Application.project.sprites)
@@ -56,6 +61,77 @@ public class Interpreter : Runner
 		return threads;
 	}
 
+	public KeyboardKey StrKey(string str)
+	{
+		return str switch
+		{
+			"space" => KeyboardKey.Space,
+			"left arrow" => KeyboardKey.Left,
+			"right arrow" => KeyboardKey.Right,
+			"up arrow" => KeyboardKey.Up,
+			"down arrow" => KeyboardKey.Down,
+			"enter" => KeyboardKey.Enter,
+            "a" => KeyboardKey.A,
+            "b" => KeyboardKey.B,
+            "c" => KeyboardKey.C,
+            "d" => KeyboardKey.D,
+            "e" => KeyboardKey.E,
+            "f" => KeyboardKey.F,
+            "g" => KeyboardKey.G,
+            "h" => KeyboardKey.H,
+            "i" => KeyboardKey.I,
+            "j" => KeyboardKey.J,
+            "k" => KeyboardKey.K,
+            "l" => KeyboardKey.L,
+            "m" => KeyboardKey.M,
+            "n" => KeyboardKey.N,
+            "o" => KeyboardKey.O,
+            "p" => KeyboardKey.P,
+            "q" => KeyboardKey.Q,
+            "r" => KeyboardKey.R,
+            "s" => KeyboardKey.S,
+            "t" => KeyboardKey.T,
+            "u" => KeyboardKey.U,
+            "v" => KeyboardKey.V,
+            "w" => KeyboardKey.W,
+            "x" => KeyboardKey.X,
+            "y" => KeyboardKey.Y,
+            "z" => KeyboardKey.Z,
+            "0" => KeyboardKey.Zero,
+            "1" => KeyboardKey.One,
+            "2" => KeyboardKey.Two,
+            "3" => KeyboardKey.Three,
+            "4" => KeyboardKey.Four,
+            "5" => KeyboardKey.Five,
+            "6" => KeyboardKey.Six,
+            "7" => KeyboardKey.Seven,
+            "8" => KeyboardKey.Eight,
+            "9" => KeyboardKey.Nine,
+            "-" => KeyboardKey.Minus,
+            "," => KeyboardKey.Comma,
+            "." => KeyboardKey.Period,
+            "`" => KeyboardKey.Grave,
+            "=" => KeyboardKey.Equal,
+            "[" => KeyboardKey.LeftBracket,
+            "]" => KeyboardKey.RightBracket,
+            "\\" => KeyboardKey.Backslash,
+            ";" => KeyboardKey.Semicolon,
+            "'" => KeyboardKey.Apostrophe,
+            "/" => KeyboardKey.Slash,
+			//Using "join" block, we can do these tricks.
+            "control" => KeyboardKey.LeftControl,
+            "shift" => KeyboardKey.LeftShift,
+            "backspace" => KeyboardKey.Backspace,
+            "insert" => KeyboardKey.Insert,
+            "page up" => KeyboardKey.PageUp,
+            "page down" => KeyboardKey.PageDown,
+            "end" => KeyboardKey.End,
+            "home" => KeyboardKey.Home,
+            "scroll lock" => KeyboardKey.ScrollLock,
+			_ => KeyboardKey.Null
+		};
+	}
+
 	void ClampToStage(Sprite spr)
 	{
 		float width = spr.costume.image.Width / 4f * spr.costume.bitmapResolution;
@@ -68,6 +144,34 @@ public class Interpreter : Runner
 	string Boolstr(bool boolean)
 	{
 		return boolean ? "true" : "false";
+	}
+
+	bool Strbool(string str)
+	{
+		return str == "true";
+	}
+
+	dynamic StrNumber(string str)
+	{
+		if (str == "Infinity") return double.MaxValue;
+		if (str == "-Infinity") return double.MinValue;
+
+		if (str.Contains('.'))
+		{
+			if (float.TryParse(str, out var num))
+			{
+				return num;
+			}
+		}
+		else
+		{
+			if (int.TryParse(str, out var num))
+			{
+				return num;
+			}
+		}
+
+		return str.Length;
 	}
 
 	public string Execute(Thread thread)
@@ -93,21 +197,21 @@ public class Interpreter : Runner
 		{
 			case Block.opcodes.motion_movesteps:
 				{
-					spr.x += MoveMultiplier * float.Parse(block.inputs[0].value) * MathF.Sin(spr.direction * DegToRad);
-					spr.y -= MoveMultiplier * float.Parse(block.inputs[0].value) * MathF.Cos(spr.direction * DegToRad);
+					spr.x += MoveMultiplier * StrNumber(block.inputs[0].value) * MathF.Sin(spr.direction * DegToRad);
+					spr.y -= MoveMultiplier * StrNumber(block.inputs[0].value) * MathF.Cos(spr.direction * DegToRad);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.opcodes.motion_turnright:
 				{
-					spr.direction += float.Parse(block.inputs[0].value) * 2;
+					spr.direction += StrNumber(block.inputs[0].value) * 2;
 					break;
 				}
 
 			case Block.opcodes.motion_turnleft:
 				{
-					spr.direction -= float.Parse(block.inputs[0].value) * 2;
+					spr.direction -= StrNumber(block.inputs[0].value) * 2;
 					break;
 				}
 
@@ -145,15 +249,15 @@ public class Interpreter : Runner
 
 			case Block.opcodes.motion_gotoxy:
 				{
-					spr.x = float.Parse(block.inputs[0].value);
-					spr.y = float.Parse(block.inputs[1].value);
+					spr.x = StrNumber(block.inputs[0].value);
+					spr.y = StrNumber(block.inputs[1].value);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.opcodes.motion_glideto:
 				{
-					thread.delay = float.Parse(block.inputs[0].value);
+					thread.delay = StrNumber(block.inputs[0].value);
 
 					Vector2 pos;
 
@@ -187,15 +291,15 @@ public class Interpreter : Runner
 
 			case Block.opcodes.motion_glidesecstoxy:
 				{
-					spr.x += float.Parse(block.inputs[1].value);
-					spr.y += float.Parse(block.inputs[2].value);
+					spr.x += StrNumber(block.inputs[1].value);
+					spr.y += StrNumber(block.inputs[2].value);
 					ClampToStage(spr);
 					return "";
 				}
 
 			case Block.opcodes.motion_pointindirection:
 				{
-					spr.direction = float.Parse(block.inputs[0].value);
+					spr.direction = StrNumber(block.inputs[0].value);
 					break;
 				}
 
@@ -224,28 +328,28 @@ public class Interpreter : Runner
 
 			case Block.opcodes.motion_changexby:
 				{
-					spr.x += float.Parse(block.inputs[0].value);
+					spr.x += StrNumber(block.inputs[0].value);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.opcodes.motion_setx:
 				{
-					spr.x = float.Parse(block.inputs[0].value);
+					spr.x = StrNumber(block.inputs[0].value);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.opcodes.motion_changeyby:
 				{
-					spr.y += float.Parse(block.inputs[0].value);
+					spr.y += StrNumber(block.inputs[0].value);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.opcodes.motion_sety:
 				{
-					spr.y = float.Parse(block.inputs[0].value);
+					spr.y = StrNumber(block.inputs[0].value);
 					ClampToStage(spr);
 					break;
 				}
@@ -278,7 +382,7 @@ public class Interpreter : Runner
 
 			case Block.opcodes.looks_sayforsecs:
 				{
-					float sec = float.Parse(block.inputs[0].value);
+					float sec = StrNumber(block.inputs[0].value);
 					if (sec > 0)
 					{
 						thread.delay = sec;
@@ -292,13 +396,13 @@ public class Interpreter : Runner
 
 			case Block.opcodes.looks_say:
 				{
-					OverlayRender.RenderDialogue((int)spr.x, (int)spr.y + spr.costumes[spr.currentCostume].image.Height, block.inputs[0].value);
+					OverlayRender.RenderDialogue((int)spr.x, (int)spr.y + spr.costume.image.Height, block.inputs[0].value);
 					break;
 				}
 
 			case Block.opcodes.looks_thinkforsecs:
 				{
-					float sec = float.Parse(block.inputs[0].value);
+					float sec = StrNumber(block.inputs[0].value);
 					if (sec > 0)
 					{
 						thread.delay = sec;
@@ -312,20 +416,26 @@ public class Interpreter : Runner
 
 			case Block.opcodes.looks_think:
 				{
-					OverlayRender.RenderDialogue((int)spr.x, (int)spr.y + spr.costumes[spr.currentCostume].image.Height, block.inputs[0].value);
+					OverlayRender.RenderDialogue((int)spr.x, (int)spr.y + spr.costume.image.Height, block.inputs[0].value);
 					break;
 				}
 
 			case Block.opcodes.looks_switchcostumeto:
 				{
-					spr.currentCostume = int.Parse(block.inputs[0].value);
+					if (int.TryParse(block.inputs[0].value, out int id))
+					{
+						spr.currentCostume = id;
+					}
+					else
+					{
+						spr.costume = spr.costumes.First(x => x.name == block.inputs[0].value);
+					}
 					break;
 				}
 
 			case Block.opcodes.looks_costume:
 				{
-					int index;
-					index =
+					int index =
 						int.TryParse(block.fields[0], out int number) ?
 						number :
 						spr.costumes.ToList().IndexOf(spr.costumes.First(x => x.name == block.fields[0]));
@@ -347,7 +457,7 @@ public class Interpreter : Runner
 
 			case Block.opcodes.looks_backdrops:
 				{
-					break;
+					return project.stage.currentCostume.ToString(); //Need check if it returns id or name
 				}
 
 			case Block.opcodes.looks_nextbackdrop:
@@ -357,13 +467,13 @@ public class Interpreter : Runner
 
 			case Block.opcodes.looks_changesizeby:
 				{
-					spr.size += float.Parse(block.inputs[0].value);
+					spr.size += StrNumber(block.inputs[0].value);
 					break;
 				}
 
 			case Block.opcodes.looks_setsizeto:
 				{
-					spr.size = float.Parse(block.inputs[0].value);
+					spr.size = StrNumber(block.inputs[0].value);
 					break;
 				}
 
@@ -396,22 +506,26 @@ public class Interpreter : Runner
 
 			case Block.opcodes.looks_gotofrontback:
 				{
+					spr.SetLayoutOrder(block.fields[0] == "front" ? project.sprites.Length : 0);
 					break;
 				}
 
 			case Block.opcodes.looks_goforwardbackwardlayers:
 				{
+					spr.SetLayoutOrder(
+						spr.layoutOrder + int.Parse(block.inputs[0].value) * (block.fields[0] == "forward" ? 1 : -1)
+					);
 					break;
 				}
 
 			case Block.opcodes.looks_costumenumbername:
 				{
-					return block.fields[0] == "number" ? spr.currentCostume.ToString() : spr.costumes[spr.currentCostume].name;
+					return block.fields[0] == "number" ? spr.currentCostume.ToString() : spr.costume.name;
 				}
 
 			case Block.opcodes.looks_backdropnumbername:
 				{
-					break;
+					return block.fields[0] == "number" ? project.stage.currentCostume.ToString() : project.stage.costume.name;
 				}
 
 			case Block.opcodes.looks_size:
@@ -463,6 +577,7 @@ public class Interpreter : Runner
 
 			case Block.opcodes.sound_setvolumeto:
 				{
+					spr.volume =	StrNumber	(block.inputs[0].value);
 					break;
 				}
 
@@ -520,12 +635,19 @@ public class Interpreter : Runner
 
 			case Block.opcodes.event_broadcastandwait:
 				{
+					foreach (var sprite in project.sprites)
+					{
+						foreach (var top in sprite.blocks.Where(x => x.Value.opcode == Block.opcodes.event_whenbroadcastreceived))
+						{
+							Execute(sprite, top.Value);
+						}
+					}
 					break;
 				}
 
 			case Block.opcodes.control_wait:
 				{
-					float sec = float.Parse(block.inputs[0].value);
+					float sec = StrNumber(block.inputs[0].value);
 					if (sec > 0)
 					{
 						thread.delay = sec;
@@ -553,6 +675,8 @@ public class Interpreter : Runner
 
 			case Block.opcodes.control_if:
 				{
+					if (Strbool(block.inputs[1].value)) return Execute(spr, spr.blocks[block.inputs[0].OriginalValue], thread);
+
 					break;
 				}
 
@@ -643,12 +767,14 @@ public class Interpreter : Runner
 
 			case Block.opcodes.sensing_keypressed:
 				{
-					break;
+					if (block.inputs[0].value == "any") return Boolstr(Raylib.GetKeyPressed() > 0);
+
+					return Boolstr(Raylib.IsKeyDown(StrKey(block.inputs[0].value)));
 				}
 
 			case Block.opcodes.sensing_keyoptions:
 				{
-					break;
+					return block.fields[0];
 				}
 
 			case Block.opcodes.sensing_mousedown:
@@ -713,7 +839,7 @@ public class Interpreter : Runner
 
 			case Block.opcodes.operator_add:
 				{
-					break;
+					return 0.ToString();
 				}
 
 			case Block.opcodes.operator_subtract:
@@ -733,38 +859,38 @@ public class Interpreter : Runner
 
 			case Block.opcodes.operator_random:
 				{
-					double number = (rng.NextDouble() + float.Parse(block.inputs[0].value) * (float.Parse(block.inputs[1].value) - float.Parse(block.inputs[0].value)));
+					double number = (rng.NextDouble() + StrNumber(block.inputs[0].value) * (StrNumber(block.inputs[1].value) - StrNumber(block.inputs[0].value)));
 					return number.ToString(); //limit this as int or float depending on inputs
 				}
 
 			case Block.opcodes.operator_gt:
 				{
-					return Boolstr(float.Parse(block.inputs[0].value) > float.Parse(block.inputs[1].value));
+					return Boolstr(StrNumber(block.inputs[0].value) > StrNumber(block.inputs[1].value));
 				}
 
 			case Block.opcodes.operator_lt:
 				{
-					return Boolstr(float.Parse(block.inputs[0].value) < float.Parse(block.inputs[1].value));
+					return Boolstr(StrNumber(block.inputs[0].value) < StrNumber(block.inputs[1].value));
 				}
 
 			case Block.opcodes.operator_equals:
 				{
-					return Boolstr(block.inputs[0].value == block.inputs[1].value);
+					return Boolstr(block.inputs[0].value.ToLower() == block.inputs[1].value.ToLower());
 				}
 
 			case Block.opcodes.operator_and:
 				{
-					break;
+					return Boolstr(Strbool(block.inputs[0].value) && Strbool(block.inputs[1].value));
 				}
 
 			case Block.opcodes.operator_or:
 				{
-					break;
+					return Boolstr(Strbool(block.inputs[0].value) || Strbool(block.inputs[1].value));
 				}
 
 			case Block.opcodes.operator_not:
 				{
-					break;
+					return Boolstr(!Strbool(block.inputs[0].value));
 				}
 
 			case Block.opcodes.operator_join:
@@ -779,7 +905,7 @@ public class Interpreter : Runner
 
 			case Block.opcodes.operator_length:
 				{
-					break;
+					return block.inputs[0].value.Length.ToString();
 				}
 
 			case Block.opcodes.operator_contains:
