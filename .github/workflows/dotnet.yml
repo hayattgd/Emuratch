@@ -10,10 +10,12 @@ on:
     branches: [ "dev" ]
 
 jobs:
-  build:
-
-    runs-on: windows-latest
-
+  Build:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -23,12 +25,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore -c Debug
+      run: dotnet build --no-restore -c Release
     - name: Test
       run: dotnet test --no-build --verbosity normal -c Debug
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.5.0
       with:
-        name: Latest-Build
-        path: ./bin/Debug/
-        
+        name: latest-build
+        path: ./bin/Release/
