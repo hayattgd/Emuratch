@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 
 namespace Emuratch.Core.Scratch;
 
@@ -63,7 +62,7 @@ public class Project : Unloadable
 		}
 		catch (Exception ex)
 		{
-			MessageBox.Show("Error while loading project : " + ex, "Error");
+			DialogServiceFactory.CreateDialogService().ShowMessageDialog("Error while loading project : " + ex);
 			return false;
 		}
 	}

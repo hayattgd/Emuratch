@@ -1,15 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <OutputType>exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UseWindowsForms>True</UseWindowsForms>
-    <UseWPF>False</UseWPF>
     <StartupObject>Emuratch.Program</StartupObject>
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([System.OperatingSystem]::IsWindows())">
+    <DefineConstants>_WINDOWS_</DefineConstants>
+    <UseWindowsForms>true</UseWindowsForms>
+    <TargetFramework>net6.0-windows</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([System.OperatingSystem]::IsMacOS())">
+    <DefineConstants>_MACOS_</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([System.OperatingSystem]::IsLinux())">
+    <DefineConstants>_LINUX_</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -33,13 +45,4 @@
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
-
-  <ItemGroup>
-    <EditorConfigFiles Remove="S:\Workspace\Csharp\raylib\Emuratch\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="S:\Workspace\Csharp\raylib\Emuratch\.editorconfig" />
-  </ItemGroup>
-
 </Project>
