@@ -13,6 +13,7 @@ jobs:
   Build:
     strategy:
       matrix:
+        config: [ Debug, Release ]
         os: [windows-latest, ubuntu-latest, macos-latest]
     
     runs-on: ${{ matrix.os }}
@@ -25,11 +26,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore -c Release
+      run: dotnet build --no-restore -c ${{ matrix.config }}
     - name: Test
-      run: dotnet test --no-build --verbosity normal -c Debug
+      run: dotnet test --no-build --verbosity normal -c ${{ matrix.config }}
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.5.0
       with:
-        name: latest-build
-        path: ./bin/Release/
+        name: ${{ matrix.os }}-${{ matrix.config }}-build
+        path: ./bin/${{ matrix.config }}/
