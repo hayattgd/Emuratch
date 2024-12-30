@@ -1,4 +1,4 @@
-#if LINUX
+#if _LINUX_
 using System;
 
 public class LinuxDialogService : IDialogService

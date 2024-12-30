@@ -4,14 +4,12 @@ public static class DialogServiceFactory
 {
     public static IDialogService CreateDialogService()
     {
-#if WINDOWS
+#if _WINDOWS_
         return new WindowsDialogService();
-#elif MACOS
+#elif _MACOS_
         return new MacOSDialogService();
-#elif LINUX
-        return new LinuxDialogService();
 #else
-        throw new PlatformNotSupportedException("This platform is not supported.");
+        return new LinuxDialogService();
 #endif
     }
 }

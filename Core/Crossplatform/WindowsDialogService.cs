@@ -1,4 +1,4 @@
-#if WINDOWS
+#if _WINDOWS_
 using System.Windows.Forms;
 
 public class WindowsDialogService : IDialogService
