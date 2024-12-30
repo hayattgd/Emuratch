@@ -1,6 +1,7 @@
 ﻿# ![Emuratch](Images/Logo.svg)
 
 [![.NET](https://github.com/hayattgd/Emuratch/actions/workflows/dotnet.yml/badge.svg?branch=stable)](https://github.com/hayattgd/Emuratch/actions/workflows/dotnet.yml)
+[![GitHub License](https://img.shields.io/github/license/hayattgd/Emuratch)](https://github.com/hayattgd/Emuratch/blob/stable/LICENSE)
 
 Scratch emulator made with C# & [raylib](https://www.raylib.com/)
 
