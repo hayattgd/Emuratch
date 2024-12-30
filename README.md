@@ -2,6 +2,9 @@
 
 Scratch emulator made with C# & [raylib](https://www.raylib.com/)
 
+Visit [nightly.link](https://nightly.link/hayattgd/Emuratch/workflows/dotnet/dev) for latest builds.
+Emuratch supports Windows, MacOS and Linux.
+
 ## Controls
 
 | Key   | Behaviour           |
