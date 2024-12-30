@@ -12,6 +12,8 @@
 
   <PropertyGroup Condition="$([System.OperatingSystem]::IsWindows())">
     <DefineConstants>_WINDOWS_</DefineConstants>
+    <UseWindowsForms>true</UseWindowsForms>
+    <TargetFramework>net6.0-windows</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="$([System.OperatingSystem]::IsMacOS())">
