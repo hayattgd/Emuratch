@@ -2,12 +2,12 @@ using System;
 
 public static class DialogServiceFactory
 {
-    public static IDialogService CreateDialogService()
-    {
+	public static IDialogService CreateDialogService()
+	{
 #if _WINDOWS_
-        return new WindowsDialogService();
+		return new WindowsDialogService();
 #else
-        return new ConsoleDialogService();
+		return new ConsoleDialogService();
 #endif
-    }
+	}
 }
