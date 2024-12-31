@@ -6,10 +6,8 @@ public static class DialogServiceFactory
     {
 #if _WINDOWS_
         return new WindowsDialogService();
-#elif _MACOS_
-        return new MacOSDialogService();
 #else
-        return new LinuxDialogService();
+        return new ConsoleDialogService();
 #endif
     }
 }
