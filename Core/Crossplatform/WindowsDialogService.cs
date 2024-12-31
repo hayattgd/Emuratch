@@ -6,7 +6,7 @@ public class WindowsDialogService : IDialogService
     public string ShowFileDialog()
     {
         OpenFileDialog openFileDialog = new OpenFileDialog();
-        return openFileDialog.ShowDialog() == DialogResult.OK ? openFileDialog.FileName : null;
+        return openFileDialog.ShowDialog() == DialogResult.OK ? openFileDialog.FileName : "";
     }
 
     public void ShowMessageDialog(string message)
