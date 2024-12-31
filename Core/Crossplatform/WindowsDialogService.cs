@@ -9,15 +9,15 @@ public class WindowsDialogService : IDialogService
         return openFileDialog.ShowDialog() == DialogResult.OK ? openFileDialog.FileName : "";
     }
 
-    public void ShowMessageDialog(string message)
-    {
-        MessageBox.Show(message);
-    }
+	public void ShowMessageDialog(string message)
+	{
+		MessageBox.Show(message);
+	}
 
-    public bool ShowYesNoDialog(string message)
-    {
-        DialogResult result = MessageBox.Show(message, "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-        return result == DialogResult.Yes;
-    }
+	public bool ShowYesNoDialog(string message)
+	{
+		DialogResult result = MessageBox.Show(message, "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+		return result == DialogResult.Yes;
+	}
 }
 #endif
