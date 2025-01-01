@@ -5,6 +5,7 @@ using Emuratch.Core.Turbowarp;
 using Emuratch.Core.vm;
 using Emuratch.Core.Render;
 using Emuratch.Core.Overlay;
+using Emuratch.Core.Crossplatform;
 using Raylib_cs;
 using System.IO.Compression;
 using System.IO;
@@ -192,7 +193,11 @@ public class Application
 	public Project LoadProject()
 	{
 		IDialogService dialog = DialogServiceFactory.CreateDialogService();
-        projectpath = dialog.ShowFileDialog();
+        projectpath = dialog.ShowFileDialog(
+		[
+			new("Archived project", "sb3", "zip", "7z"),
+			new("project.json"),
+		]);
         if (!string.IsNullOrEmpty(projectpath))
         {
             LoadProject(projectpath);

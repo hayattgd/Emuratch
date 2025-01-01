@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <StartupObject>Emuratch.Program</StartupObject>
@@ -13,7 +13,7 @@
   <PropertyGroup Condition="$([System.OperatingSystem]::IsWindows())">
     <DefineConstants>_WINDOWS_</DefineConstants>
     <UseWindowsForms>true</UseWindowsForms>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="$([System.OperatingSystem]::IsMacOS())">

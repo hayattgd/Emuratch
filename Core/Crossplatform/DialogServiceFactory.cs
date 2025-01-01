@@ -1,13 +1,18 @@
 using System;
 
-public static class DialogServiceFactory
+namespace Emuratch.Core.Crossplatform
 {
-	public static IDialogService CreateDialogService()
+	public static class DialogServiceFactory
 	{
-#if _WINDOWS_
-		return new WindowsDialogService();
-#else
-		return new ConsoleDialogService();
-#endif
+		public static IDialogService CreateDialogService()
+		{
+	#if _WINDOWS_
+			return new WindowsDialogService();
+	#elif _MACOS_
+			return new MacOSDialogService();
+	#else
+			return new ConsoleDialogService();
+	#endif
+		}
 	}
 }

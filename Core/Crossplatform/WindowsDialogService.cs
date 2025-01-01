@@ -1,23 +1,35 @@
 #if _WINDOWS_
 using System.Windows.Forms;
 
-public class WindowsDialogService : IDialogService
+namespace Emuratch.Core.Crossplatform
 {
-    public string ShowFileDialog()
-    {
-        OpenFileDialog openFileDialog = new OpenFileDialog();
-        return openFileDialog.ShowDialog() == DialogResult.OK ? openFileDialog.FileName : "";
-    }
-
-	public void ShowMessageDialog(string message)
+	public class WindowsDialogService : IDialogService
 	{
-		MessageBox.Show(message);
-	}
+		public string ShowFileDialog(FileFilter[] filters)
+		{
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			
+			string filterstr = "";
+			foreach (var filter in filters)
+			{
+				filterstr += filter.ToString();
+			}
+			filterstr = filterstr.Substring(0, filterstr.Length - 1);
 
-	public bool ShowYesNoDialog(string message)
-	{
-		DialogResult result = MessageBox.Show(message, "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-		return result == DialogResult.Yes;
+			openFileDialog.Filter = filterstr;
+			return openFileDialog.ShowDialog() == DialogResult.OK ? openFileDialog.FileName : "";
+		}
+
+		public void ShowMessageDialog(string message)
+		{
+			MessageBox.Show(message);
+		}
+
+		public bool ShowYesNoDialog(string message)
+		{
+			DialogResult result = MessageBox.Show(message, "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+			return result == DialogResult.Yes;
+		}
 	}
 }
 #endif
