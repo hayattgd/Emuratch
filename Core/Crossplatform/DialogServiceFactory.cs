@@ -8,8 +8,8 @@ namespace Emuratch.Core.Crossplatform
 		{
 	#if _WINDOWS_
 			return new WindowsDialogService();
-	#elif _MACOS_
-			return new MacOSDialogService();
+//	#elif _MACOS_
+//			return new MacOSDialogService();
 	#else
 			return new ConsoleDialogService();
 	#endif
