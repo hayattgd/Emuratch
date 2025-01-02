@@ -15,7 +15,7 @@ namespace Emuratch.Core.Crossplatform
 
 		public bool ShowYesNoDialog(string message)
 		{
-			return false
+			return false;
 		}
 	}
 }
