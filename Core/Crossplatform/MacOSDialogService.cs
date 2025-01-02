@@ -3,7 +3,7 @@ namespace Emuratch.Core.Crossplatform
 {
 	public class MacOSDialogService : IDialogService
 	{
-		public string ShowFileDialog()
+		public string ShowFileDialog(FileFilter[] filter)
 		{
 			
 		}
@@ -15,7 +15,7 @@ namespace Emuratch.Core.Crossplatform
 
 		public bool ShowYesNoDialog(string message)
 		{
-			
+			return false
 		}
 	}
 }
