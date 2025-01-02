@@ -5,7 +5,7 @@ namespace Emuratch.Core.Crossplatform
 	{
 		public string ShowFileDialog(FileFilter[] filter)
 		{
-			return ""
+			return "";
 		}
 
 		public void ShowMessageDialog(string message)
