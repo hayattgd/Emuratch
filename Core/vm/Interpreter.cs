@@ -156,6 +156,9 @@ public class Interpreter : Runner
 		if (str == "Infinity") return double.MaxValue;
 		if (str == "-Infinity") return double.MinValue;
 
+		if (str == "true") return 1;
+		if (str == "false") return 0;
+
 		if (str.Contains('.'))
 		{
 			if (float.TryParse(str, out var num))
@@ -680,6 +683,15 @@ public class Interpreter : Runner
 
 			case Block.opcodes.control_if_else:
 				{
+					if (Strbool(block.inputs[0].value))
+					{
+						return Execute(spr, spr.blocks[block.inputs[1].OriginalValue], thread);
+					}
+					else
+					{
+						return Execute(spr, spr.blocks[block.inputs[2].OriginalValue], thread);
+					}
+
 					break;
 				}
 
@@ -837,28 +849,28 @@ public class Interpreter : Runner
 
 			case Block.opcodes.operator_add:
 				{
-					return 0.ToString();
+					return (StrNumber(block.inputs[0].value) + StrNumber(block.inputs[1].value)).ToString();
 				}
 
 			case Block.opcodes.operator_subtract:
 				{
-					break;
+					return (StrNumber(block.inputs[0].value) - StrNumber(block.inputs[1].value)).ToString();
 				}
 
 			case Block.opcodes.operator_multiply:
 				{
-					break;
+					return (StrNumber(block.inputs[0].value) * StrNumber(block.inputs[1].value)).ToString();
 				}
 
 			case Block.opcodes.operator_divide:
 				{
-					break;
+					return (StrNumber(block.inputs[0].value) / StrNumber(block.inputs[1].value)).ToString();
 				}
 
 			case Block.opcodes.operator_random:
 				{
-					double number = (rng.NextDouble() + StrNumber(block.inputs[0].value) * (StrNumber(block.inputs[1].value) - StrNumber(block.inputs[0].value)));
-					return number.ToString(); //limit this as int or float depending on inputs
+					double number = rng.NextDouble() + StrNumber(block.inputs[0].value) * (StrNumber(block.inputs[1].value) - StrNumber(block.inputs[0].value));
+					return number.ToString();
 				}
 
 			case Block.opcodes.operator_gt:
