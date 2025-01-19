@@ -200,8 +200,8 @@ public class Application
 		]);
         if (!string.IsNullOrEmpty(projectpath))
         {
-            LoadProject(projectpath);
             messages.Add(new("Project loaded successfully."));
+            return LoadProject(projectpath);
         }
         else
         {
@@ -222,7 +222,7 @@ public class Application
 			string directory = path + suffix;
 			try
 			{
-				jsonpath = directory + @"\project.json";
+				jsonpath = directory + $"{Path.DirectorySeparatorChar}project.json";
 
 				bool alreadyExisted = false;
 				if (Directory.Exists(directory))
