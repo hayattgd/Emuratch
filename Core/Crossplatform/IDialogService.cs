@@ -1,34 +1,32 @@
 using System.IO;
 
-namespace Emuratch.Core.Crossplatform
+namespace Emuratch.Core.Crossplatform;
+public interface IDialogService
 {
-	public interface IDialogService
+	string ShowFileDialog(FileFilter[] filters);
+	void ShowMessageDialog(string message);
+	bool ShowYesNoDialog(string message);
+}
+
+public struct FileFilter
+{
+	public FileFilter(string title, params string[] extensions)
 	{
-		string ShowFileDialog(FileFilter[] filters);
-		void ShowMessageDialog(string message);
-		bool ShowYesNoDialog(string message);
+		Title = title;
+		Extensions = extensions;
 	}
 
-	public struct FileFilter
+	public FileFilter(string extension)
 	{
-		public FileFilter(string title, params string[] extensions)
-		{
-			Title = title;
-			Extensions = extensions;
-		}
+		Title = extension;
+		Extensions = [extension];
+	}
 
-		public FileFilter(string extension)
-		{
-			Title = extension;
-			Extensions = [extension];
-		}
+	public string Title;
+	public string[] Extensions;
 
-		public string Title;
-		public string[] Extensions;
-
-		public override string ToString()
-		{
-			return Title + "|" + string.Join(";", Extensions) + "|";
-		}
+	public override string ToString()
+	{
+		return Title + "|" + string.Join(";", Extensions) + "|";
 	}
 }
