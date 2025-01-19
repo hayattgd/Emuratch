@@ -28,3 +28,5 @@ This repository is distributed under [MIT License](./LICENSE).
 | [raylib-cs](https://github.com/ChrisDill/Raylib-cs) | [Zlib license](https://github.com/chrisdill/raylib-cs/blob/master/LICENSE)         |
 | [Newtonsoft.Json](https://www.newtonsoft.com/json)  | [MIT License](https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md)   |
 | [SVG.NET](https://github.com/svg-net/SVG)           | [Microsoft Public License](https://github.com/svg-net/SVG/blob/master/license.txt) |
+
+(probably [Dependency graph](https://github.com/hayattgd/Emuratch/network/dependencies) has better view)
