@@ -35,7 +35,9 @@ public class Thread
 		if (block == null && returnto[^1] != null) block = returnto[^1];
 		if (block == null) return;
 
-		runner.Execute(sprite, block, this);
+		var self = this;
+		runner.Execute(sprite, block, ref self);
+		block = self.block;
 
 		if (block.nextId == string.Empty)
 		{
@@ -53,8 +55,10 @@ public class Thread
 				returnto.RemoveAt(returnto.Count - 1);
 			}
 		}
-
-		block = block.Next(sprite);
+		else
+		{
+			block = block.Next(sprite);
+		}
 	}
 
 	public Block? condition;

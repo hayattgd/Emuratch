@@ -53,7 +53,7 @@ public class Interpreter : Runner
 				{
 					Thread t = new(spr, block.Value);
 					threads.Add(t);
-					Execute(t);
+					Execute(ref t);
 				}
 			}
 		}
@@ -177,17 +177,18 @@ public class Interpreter : Runner
 		return str.Length;
 	}
 
-	public string Execute(Thread thread)
+	public string Execute(ref Thread thread)
 	{
-		return Execute(thread.sprite, thread.block, thread);
+		return Execute(thread.sprite, thread.block, ref thread);
 	}
 
 	public string Execute(Sprite spr, Block block)
 	{
-		return Execute(spr, block, new(spr, block));
+		Thread thread = new(spr, block);
+		return Execute(spr, block, ref thread);
 	}
 
-	public string Execute(Sprite spr, Block block, Thread thread)
+	public string Execute(Sprite spr, Block block, ref Thread thread)
 	{
 		if (!Application.projectloaded) return string.Empty;
 
@@ -675,7 +676,7 @@ public class Interpreter : Runner
 				{
 					if (Strbool(block.inputs[0].value))
 					{
-						return Execute(spr, spr.blocks[block.inputs[1].OriginalValue], thread);
+						Execute(spr, spr.blocks[block.inputs[1].OriginalValue], ref thread);
 					}
 
 					break;
@@ -685,11 +686,11 @@ public class Interpreter : Runner
 				{
 					if (Strbool(block.inputs[0].value))
 					{
-						return Execute(spr, spr.blocks[block.inputs[1].OriginalValue], thread);
+						Execute(spr, spr.blocks[block.inputs[1].OriginalValue], ref thread);
 					}
 					else
 					{
-						return Execute(spr, spr.blocks[block.inputs[2].OriginalValue], thread);
+						Execute(spr, spr.blocks[block.inputs[2].OriginalValue], ref thread);
 					}
 
 					break;
@@ -1051,7 +1052,11 @@ public class Interpreter : Runner
 
 		if (block.nextId != "")
 		{
-			return Execute(spr, block.Next(spr), thread);
+			return Execute(spr, block.Next(spr), ref thread);
+		}
+		else
+		{
+			thread.block = block;
 		}
 
 		return string.Empty;
