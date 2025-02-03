@@ -2,7 +2,7 @@ using Gtk;
 
 namespace Emuratch.Core.Crossplatform;
 
-public class LinuxDialogService : IDialogService
+public class GtkDialogService : IDialogService
 {
 	public void GtkQuit()
 	{

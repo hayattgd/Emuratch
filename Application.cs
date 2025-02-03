@@ -193,7 +193,7 @@ public class Application
 	public Project LoadProject()
 	{
 		IDialogService dialog = DialogServiceFactory.CreateDialogService();
-        projectpath = dialog.ShowFileDialog(
+		projectpath = dialog.ShowFileDialog(
 		[
 			new("Archived project", "sb3", "zip", "7z"),
 			new("project.json"),
