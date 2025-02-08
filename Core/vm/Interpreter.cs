@@ -810,16 +810,17 @@ public class Interpreter : Runner
 
 			case Block.opcodes.sensing_loudness:
 				{
-					break;
+					return "0";
 				}
 
 			case Block.opcodes.sensing_timer:
 				{
-					break;
+					return timer.ToString();
 				}
 
 			case Block.opcodes.sensing_resettimer:
 				{
+					timer = 0;
 					break;
 				}
 
@@ -845,7 +846,7 @@ public class Interpreter : Runner
 
 			case Block.opcodes.sensing_username:
 				{
-					break;
+					return "USERNAME";
 				}
 
 			case Block.opcodes.operator_add:
