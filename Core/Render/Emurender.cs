@@ -1,4 +1,5 @@
 ﻿using Emuratch.Core.Scratch;
+using GLib;
 using Raylib_cs;
 using System.Linq;
 using System.Numerics;
@@ -19,8 +20,16 @@ public class Emurender : RenderType
 		Raylib.ClearBackground(Color.White);
 
 		RenderSprite(project.stage);
+
+		if (Raylib.IsKeyDown(KeyboardKey.F3))
+		{
+			Raylib.DrawLine(0, (int)project.height / 2, (int)project.width, (int)project.height / 2, Color.Red);
+			Raylib.DrawLine((int)project.width / 2, 0, (int)project.width / 2, (int)project.height, Color.Red);
+		}
+
 		var list = project.sprites.ToList();
 		list.Sort((a, b) => a.layoutOrder.CompareTo(b.layoutOrder));
+		list.Reverse();
 
 		foreach (var sprite in list)
 		{
@@ -39,22 +48,18 @@ public class Emurender : RenderType
 		Costume costume = spr.costumes[spr.currentCostume];
 		Vector2 offset = Vector2.Zero;
 
-		if (costume.dataFormat == "png")
-		{
-			offset = new(-costume.rotationCenterX + costume.image.Width, costume.rotationCenterY - costume.image.Height);
-			offset /= costume.bitmapResolution;
-		}
-		else if (costume.dataFormat == "svg")
-		{
-			offset = new(-costume.rotationCenterX + costume.image.Width / 2f, costume.rotationCenterY - costume.image.Height / 2f);
-			offset += new Vector2(costume.image.Width / 4f, costume.image.Height / 4f);
-		}
+		offset = new((costume.rotationCenterX - costume.image.Width / 4) / costume.bitmapResolution, (costume.rotationCenterY - costume.image.Height / 4) / costume.bitmapResolution);
 
-			Vector2 pos = ScratchToRaylib(
-			spr.x - offset.X,
-			(spr.y - offset.Y) * -1f
+		Vector2 pos = ScratchToRaylib(
+			spr.x,
+			-spr.y
 		);
-		if (spr.isStage) pos = ScratchToRaylib(-costume.rotationCenterX / 2, -costume.rotationCenterY / 2);
+
+		if (spr.isStage)
+		{
+			pos = new(0, 0);
+			offset = new(0, 0);
+		}
 
 		float size = spr.size / 100 / costume.bitmapResolution;
 
@@ -75,12 +80,12 @@ public class Emurender : RenderType
 			Color.White
 		);
 
-		if (!spr.isStage)
-		{
-			Vector2 pivot = pos + offset * 2;
-			Raylib.DrawCircle((int)pivot.X, (int)pivot.Y, 5, Color.Blue);
-			Raylib.DrawCircle((int)pos.X, (int)pos.Y, 5, Color.Yellow);
-		}
+		// if (!spr.isStage)
+		// {
+		// 	Vector2 pivot = pos + offset * 2;
+		// 	Raylib.DrawCircle((int)pivot.X, (int)pivot.Y, 5, Color.Blue);
+		// 	Raylib.DrawCircle((int)pos.X, (int)pos.Y, 5, Color.Yellow);
+		// }
 	}
 
 	public Vector2 ScratchToRaylib(float x, float y)

@@ -16,7 +16,7 @@ public class Project : Unloadable
 	public Comment[] comments = Array.Empty<Comment>();
 	public Meta meta = new();
 	
-	public Sprite stage { get => sprites[0]; }
+	public Sprite stage;
 
 	public uint width = defaultWidth;
 	public uint height = defaultHeight;
@@ -48,6 +48,7 @@ public class Project : Unloadable
 			if (spritesArray == null) return false;
 
 			List<Sprite> spritesList = spritesArray.ToList();
+			project.stage = spritesList[0];
 			spritesList.RemoveAt(0);
 			spritesArray = spritesList.ToArray();
 

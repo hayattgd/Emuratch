@@ -18,6 +18,8 @@ brew install gtk+3
 | Key   | Behaviour           |
 |-------|---------------------|
 | F1    | Load project        |
+| F2    | Fix window size     |
+| F3    | Show line           |
 | F5    | Press flag          |
 | PAUSE | Pause / resume game |
 | -     | Frame advance       |

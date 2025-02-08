@@ -154,6 +154,11 @@ public class Application
 				messages.Add(new("Flag pressed"));
 			}
 
+			if (Raylib.IsKeyPressed(KeyboardKey.F2))
+			{
+				Raylib.SetWindowSize((int)project.width, (int)project.height);
+			}
+
 			if (Raylib.IsKeyPressed(KeyboardKey.LeftBracket))
 			{
 				runner.fps -= 2;
