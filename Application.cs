@@ -66,10 +66,7 @@ public class Application
 		if (threads != null)
 		{
 			threads.Sort((a, b) => a.sprite.layoutOrder.CompareTo(b.sprite.layoutOrder));
-			threads.ForEach((t) =>
-			{
-				t.Step();
-			});
+			threads.ForEach( t => t.Step() );
 		}
 
 		runner.timer += (float)runner.deltatime;
