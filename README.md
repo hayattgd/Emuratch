@@ -13,6 +13,8 @@ For using MacOS build, please execute command below to install gtk.
 brew install gtk+3
 ```
 
+If you're using arm64 cpu, please run `Mac-fix-libgdiplus.sh` on directory where executable is located.
+
 ## Controls
 
 | Key   | Behaviour           |
