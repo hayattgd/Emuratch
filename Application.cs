@@ -1,4 +1,4 @@
-﻿#nullable disable
+#nullable disable
 
 using Emuratch.Core.Scratch;
 using Emuratch.Core.Turbowarp;
@@ -21,7 +21,7 @@ public class Application
 	public static bool projectloaded { get; private set; }
 	public static bool projectloading { get; private set; }
 
-	public List<Thread> threads { get; private set; }
+	public List<Thread> threads { get; set; } = [];
 
 	public enum Runners
 	{
@@ -48,6 +48,9 @@ public class Application
 
 	public readonly List<Message> messages = new();
 
+	public static bool debug = false;
+	public static bool disablerender = false;
+
 	public void UnloadProject()
 	{
 		project?.Unload();
@@ -63,13 +66,21 @@ public class Application
 
 	public void UpdateScratch()
 	{
+		runner.InvokeEvent(Block.Opcodes.event_whenkeypressed);
+
+		runner.timer += (float)runner.deltatime;
+
 		if (threads != null)
 		{
 			threads.Sort((a, b) => a.sprite.layoutOrder.CompareTo(b.sprite.layoutOrder));
-			threads.ForEach( t => t.Step() );
+			// threads.ForEach( t => t.Step() );
+			// This throws InvaildOperationException
+			// So use "for" instead
+			for (int i = 0; i < threads.Count; i++)
+			{
+				threads[i].Step();
+			}
 		}
-
-		runner.timer += (float)runner.deltatime;
 	}
 
 	public void OnUpdate()
@@ -137,8 +148,6 @@ public class Application
 		}
 		else if (runner != null)
 		{
-			Raylib.SetTargetFPS(runner.paused ? int.MaxValue : runner.fps);
-
 			if (Raylib.IsKeyPressed(KeyboardKey.Pause))
 			{
 				runner.paused = !runner.paused;
@@ -147,8 +156,28 @@ public class Application
 			if (Raylib.IsKeyPressed(KeyboardKey.F5))
 			{
 				runner.timer = 0;
-				threads = runner.PressFlag();
+				threads.Clear();
+				threads = runner.InvokeEvent(Block.Opcodes.event_whenflagclicked);
+				project.clones.Clear();
+				Raylib.SetTargetFPS(runner.paused ? int.MaxValue : runner.fps);
 				messages.Add(new("Flag pressed"));
+			}
+
+			if (Raylib.IsKeyPressed(KeyboardKey.F6))
+			{
+				threads.Clear();
+				Raylib.SetTargetFPS(0);
+				messages.Add(new("Project Stopped"));
+			}
+
+			if (Raylib.IsKeyPressed(KeyboardKey.F3))
+			{
+				debug = !debug;
+			}
+
+			if (Raylib.IsKeyPressed(KeyboardKey.F4))
+			{
+				disablerender = !disablerender;
 			}
 
 			if (Raylib.IsKeyPressed(KeyboardKey.F2))
@@ -168,6 +197,7 @@ public class Application
 			}
 
 			render.RenderAll();
+
 			if (!runner.paused || Raylib.IsKeyPressed(KeyboardKey.Minus))
 			{
 				UpdateScratch();
@@ -200,15 +230,15 @@ public class Application
 			new("Archived project", "sb3", "zip", "7z"),
 			new("project.json"),
 		]);
-        if (!string.IsNullOrEmpty(projectpath))
-        {
-            messages.Add(new("Project loaded successfully."));
-            return LoadProject(projectpath);
-        }
-        else
-        {
-            dialog.ShowMessageDialog("File selection canceled.");
-        }
+		if (!string.IsNullOrEmpty(projectpath))
+		{
+			messages.Add(new("Project loaded successfully."));
+			return LoadProject(projectpath);
+		}
+		else
+		{
+			dialog.ShowMessageDialog("File selection canceled.");
+		}
 
 		return null;
 	}

@@ -12,7 +12,7 @@ namespace Emuratch.Core.vm;
 public class Block
 {
 	//https://en.scratch-wiki.info/wiki/List_of_Block_Opcodes
-	public enum opcodes
+	public enum Opcodes
 	{
 		motion_movesteps,
 		motion_turnright,
@@ -166,28 +166,40 @@ public class Block
 	{
 		public bool isReference;
 		public Sprite sprite;
-		public string OriginalValue { private set; get; }
+		public string RawValue { private set; get; }
 
 		public string value
 		{
 			set =>
-				OriginalValue = value;
+				RawValue = value;
 
 			get => 
-				isReference ? Application.runner.Execute(sprite, sprite.blocks[OriginalValue]) : OriginalValue;
+				isReference ? Application.runner.Execute(sprite, sprite.blocks[RawValue]) : RawValue;
 		}
 	}
 
-	public opcodes opcode = opcodes.motion_movesteps;
+	public Opcodes opcode = Opcodes.motion_movesteps;
 	public string nextId = "";
 	public string parentId = "";
 	public List<Input> inputs = new();
 	public readonly List<string> fields = new();
 
+	public Sprite sprite { get; internal set; }
+
 	public Block Next(Sprite sprite)
 	{
-		if (nextId == string.Empty) return null;
-		return sprite.blocks.First((a) => a.Key == nextId).Value;
+		return FindBlock(sprite, nextId);
+	}
+
+	public Block Parent(Sprite sprite)
+	{
+		return FindBlock(sprite, parentId);
+	}
+
+	public static Block FindBlock(Sprite sprite, string id)
+	{
+		if (id == string.Empty) return null;
+		return sprite.blocks.First((a) => a.Key == id).Value;
 	}
 }
 
@@ -210,7 +222,7 @@ public class BlockConverter : JsonConverter<Dictionary<string, Block>>
 
 			Block block = new()
 			{
-				opcode = Enum.Parse<Block.opcodes>(item.Value["opcode"]?.ToString() ?? "motion_movesteps"),
+				opcode = Enum.Parse<Block.Opcodes>(item.Value["opcode"]?.ToString() ?? "motion_movesteps"),
 				nextId = item.Value["next"]?.ToString() ?? "",
 				parentId = item.Value["parent"]?.ToString() ?? "",
 			};
@@ -234,8 +246,7 @@ public class BlockConverter : JsonConverter<Dictionary<string, Block>>
 					});
 				}
 			}
-			block.fields.AddRange(from field in (item.Value["fields"] ?? throw new InvalidOperationException()).Values()
-								  select field[0]?.ToString());
+			block.fields.AddRange(from field in (item.Value["fields"] ?? throw new InvalidOperationException()).Values() select field[0]?.ToString());
 			blocks.Add(key, block);
 		}
 

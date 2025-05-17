@@ -9,10 +9,17 @@ namespace Emuratch.Core.Scratch;
 
 public class Project : Unloadable
 {
+	private Project()
+	{
+		stage = new();
+	}
+
 	public const uint defaultWidth = 480;
 	public const uint defaultHeight = 360;
 
 	public Sprite[] sprites = Array.Empty<Sprite>();
+	public List<Sprite> clones = [];
+
 	public Comment[] comments = Array.Empty<Comment>();
 	public Meta meta = new();
 	

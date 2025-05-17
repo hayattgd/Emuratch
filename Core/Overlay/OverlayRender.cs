@@ -44,7 +44,7 @@ public static class OverlayRender
 	{
 		switch (monitor.mode)
 		{
-			case Monitor.Mode.@default:
+			case Monitor.Mode.normal:
 				{
 					break;
 				}

@@ -5,6 +5,12 @@ namespace Emuratch.Core.vm;
 
 public class Thread
 {
+	public Thread(Block block)
+	{
+		sprite = block.sprite;
+		this.block = block;
+	}
+
 	public Thread(Sprite sprite, Block block)
 	{
 		this.sprite = sprite;
@@ -32,26 +38,37 @@ public class Thread
 			return;
 		}
 
-		if (block == null && returnto[^1] != null) block = returnto[^1];
+		if (block == null && returnto.Count == 0) return;
+		if (block == null && returnto[^1].block != null) block = returnto[^1].block;
 		if (block == null) return;
 
 		var self = this;
 		runner.Execute(sprite, block, ref self);
 		block = self.block;
 
-		if (block.nextId == string.Empty)
+		if (block == null || block.nextId == string.Empty)
 		{
-			if (forever || repeats > 0)
+			if(returnto.Count <= 0)
 			{
-				block = returnto[^1];
-			}
-			else if(returnto.Count <= 0)
-			{
+				Program.app.threads.Remove(this);
 				return;
+			}
+			else if (returnto[^1].forever || returnto[^1].repeats > 0)
+			{
+				block = returnto[^1].block;
+				if (returnto[^1].repeats > 0) returnto[^1] = new(returnto[^1].block, returnto[^1].repeats - 1);
 			}
 			else
 			{
-				block = returnto[^1];
+				if (returnto[^1].forever)
+				{
+					block = returnto[^1].block;
+				}
+				else
+				{
+					block = returnto[^1].block.Parent(sprite).Next(sprite);
+				}
+
 				returnto.RemoveAt(returnto.Count - 1);
 			}
 		}
@@ -64,13 +81,32 @@ public class Thread
 	public Block? condition;
 
 	public float delay;
-	public int repeats = 0;
-	public bool forever = false;
-	public List<Block> returnto = new();
+	public List<Loop> returnto = [];
 	public bool nextframe = true;
 
 	public readonly Sprite sprite;
 	public Block block;
 
 	Runner runner { get => Application.runner; }
+}
+
+public struct Loop
+{
+	public Loop(Block block, int repeats)
+	{
+		this.block = block;
+		this.repeats = repeats;
+		forever = false;
+	}
+
+	public Loop(Block block)
+	{
+		this.block = block;
+		repeats = 0;
+		forever = true;
+	}
+
+	public Block block;
+	public int repeats;
+	public bool forever;
 }

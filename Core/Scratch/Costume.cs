@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System;
 using Svg;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Emuratch.Core.Scratch;
 
@@ -18,10 +19,26 @@ public class Costume : Unloadable
 	public Image image;
 	public Texture2D texture;
 
+	public IntPtr colors;
+
+	public Color GetColor(int x, int y)
+	{
+		if (x > image.Width || x < 0) return Color.Blank;
+		if (y > image.Height || y < 0) return Color.Blank;
+		
+		Color color;
+		unsafe
+		{
+			color = ((Color*)colors)[y * image.Width + x];
+		}
+		return color;
+	}
+
 	public void Unload()
 	{
 		Raylib.UnloadImage(image);
 		Raylib.UnloadTexture(texture);
+		Marshal.FreeCoTaskMem(colors);
 	}
 }
 
@@ -77,6 +94,11 @@ public class CostumeConverter : JsonConverter<Costume[]>
 			}
 
 			costume.texture = Raylib.LoadTextureFromImage(costume.image);
+
+			unsafe
+			{
+				costume.colors = (IntPtr)Raylib.LoadImageColors(costume.image);
+			}
 
 			costumes.Add(costume);
 		}
