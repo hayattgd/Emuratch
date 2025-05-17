@@ -202,21 +202,7 @@ public class Interpreter : Runner
 
 	public bool CheckPixelOverlap(Sprite a, Sprite b)
 	{
-		// for (int y = 0; y < a.costume.image.Height; y++)
-		// {
-		// 	for (int x = 0; x < a.costume.image.Width; x++)
-		// 	{
-		// 		Color acolor = a.costume.GetColor(x, y);
-		// 		Color bcolor = b.costume.GetColor((int)(a.x - b.x + x), (int)(a.x - b.x + x));
-		// 		if (acolor.A > 0 && bcolor.A > 0)
-		// 		{
-		// 			return true;
-		// 		}
-		// 	}
-		// }
-		// return false;
-
-		// バウンディングボックスの交差範囲を求める
+		// Get overlap of 2 bounding boxes
 		int startX = (int)Math.Max(a.RaylibBoundingBox.Min.X, b.RaylibBoundingBox.Min.X);
 		int startY = (int)Math.Max(a.RaylibBoundingBox.Min.Y, b.RaylibBoundingBox.Min.Y);
 		int endX = (int)Math.Min(a.RaylibBoundingBox.Max.X, b.RaylibBoundingBox.Max.X);
@@ -239,9 +225,6 @@ public class Interpreter : Runner
 				int localXB = x - (int)bpos.X;
 				int localYB = y - (int)bpos.Y;
 
-				// if (localXA >= 0 && localXA < a.costume.image.Width && localYA >= 0 && localYA < a.costume.image.Height &&
-				// 	localXB >= 0 && localXB < b.costume.image.Width && localYB >= 0 && localYB < b.costume.image.Height)
-				// {
 				Color pixelA = a.costume.GetColor(localXA, localYA);
 				Color pixelB = b.costume.GetColor(localXB, localYB);
 
@@ -268,12 +251,11 @@ public class Interpreter : Runner
 					}
 				}
 
-				// Scratch の仕様に従い、両方のピクセルが透明でなければ当たり
-					if (pixelA.A > 0 && pixelB.A > 0)
-					{
-						return true;
-					}
-				// }
+				// If Alpha is over 0 then return true as Scratch does.
+				if (pixelA.A > 0 && pixelB.A > 0)
+				{
+					return true;
+				}
 			}
 		}
 
@@ -288,7 +270,6 @@ public class Interpreter : Runner
 	public string Execute(Sprite spr, Block block)
 	{
 		Thread thread = new(spr, block);
-		// Program.app.threads.Add(thread);
 		return Execute(spr, block, ref thread);
 	}
 
