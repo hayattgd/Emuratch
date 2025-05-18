@@ -1,5 +1,3 @@
-#nullable disable
-
 using Emuratch.Core.Overlay;
 using Emuratch.Core.Render;
 using Emuratch.Core.Scratch;
@@ -58,13 +56,28 @@ public class Interpreter : IRunner
 	public Vector2 tasmouse { get; set; }
 	public Vector2 mousepos { get => TAS ? tasmouse : mouse; }
 
+	static readonly Dictionary<Block.Opcodes, Operation> operations = new()
+	{
+		{
+			Block.Opcodes.motion_movesteps,
+			(ref Thread thread, Project project) => {
+				thread.sprite.x += MoveMultiplier * StrNumber(thread.block.inputs[0].value) * MathF.Sin(thread.sprite.direction * DegToRad);
+				thread.sprite.y -= MoveMultiplier * StrNumber(thread.block.inputs[0].value) * MathF.Cos(thread.sprite.direction * DegToRad);
+				ClampToStage(thread.sprite, project);
+				return "";
+			}
+		}
+	};
+
 	Dictionary<Block.Opcodes, List<Block>> eventBlocks;
+
+	delegate string? Operation(ref Thread thread, Project project);
 
 	public List<Thread> InvokeEvent(Block.Opcodes opcode)
 	{
 		List<Thread> threads = [];
 
-		if (!eventBlocks.TryGetValue(opcode, out _)) return null;
+		if (!eventBlocks.TryGetValue(opcode, out _)) return new();
 
 		foreach (var ev in eventBlocks[opcode])
 		{
@@ -149,6 +162,11 @@ public class Interpreter : IRunner
 
 	void ClampToStage(Sprite spr)
 	{
+		ClampToStage(spr, project);
+	}
+
+	static void ClampToStage(Sprite spr, Project project)
+	{
 		float width = spr.costume.image.Width / 4f * spr.costume.bitmapResolution;
 		float height = spr.costume.image.Height / 4f * spr.costume.bitmapResolution;
 
@@ -156,17 +174,17 @@ public class Interpreter : IRunner
 		spr.y = Math.Clamp(spr.y, project.height * -0.5f - height, project.height * 0.5f + height);
 	}
 
-	string Boolstr(bool boolean)
+	static string Boolstr(bool boolean)
 	{
 		return boolean ? "true" : "false";
 	}
 
-	bool Strbool(string str)
+	static bool Strbool(string str)
 	{
 		return str == "true";
 	}
 
-	dynamic StrNumber(string str)
+	static dynamic StrNumber(string str)
 	{
 		if (str == "Infinity") return double.MaxValue;
 		if (str == "-Infinity") return double.MinValue;
@@ -192,7 +210,7 @@ public class Interpreter : IRunner
 		return 0;
 	}
 
-	public bool CheckBoundingBoxOverlap(Sprite a, Sprite b)
+	public static bool CheckBoundingBoxOverlap(Sprite a, Sprite b)
 	{
 		return Raylib.CheckCollisionBoxes(
 			a.RaylibBoundingBox,
@@ -200,7 +218,7 @@ public class Interpreter : IRunner
 		);
 	}
 
-	public bool CheckPixelOverlap(Sprite a, Sprite b)
+	public static bool CheckPixelOverlap(Sprite a, Sprite b)
 	{
 		// Get overlap of 2 bounding boxes
 		int startX = (int)Math.Max(a.RaylibBoundingBox.Min.X, b.RaylibBoundingBox.Min.X);
@@ -230,7 +248,7 @@ public class Interpreter : IRunner
 
 				if (Application.debug && Program.app.rendertype == Application.Renders.Emurender)
 				{
-					const float alphamultiplier = 0.25f;
+					// const float alphamultiplier = 0.25f;
 					Vector2 localoffset = new(Raylib.GetRenderWidth() / 2, Raylib.GetRenderHeight() / 2);
 					if (pixelA.A == 0)
 					{
@@ -238,7 +256,7 @@ public class Interpreter : IRunner
 					}
 					else
 					{
-						Raylib.DrawPixel(localXA + (int)localoffset.X, localYA + (int)localoffset.Y, new(pixelA.R, pixelA.G, pixelA.B, Math.Clamp(pixelA.A * alphamultiplier, 0, 255)));
+						Raylib.DrawPixel(localXA + (int)localoffset.X, localYA + (int)localoffset.Y, new(pixelA.R, pixelA.G, pixelA.B, pixelA.A));
 					}
 
 					if (pixelB.A == 0)
@@ -247,7 +265,7 @@ public class Interpreter : IRunner
 					}
 					else
 					{
-						Raylib.DrawPixel(localXB + (int)localoffset.X, localYB + (int)localoffset.Y, new(pixelB.R, pixelB.G, pixelB.B, Math.Clamp(pixelB.A * alphamultiplier, 0, 255)));
+						Raylib.DrawPixel(localXB + (int)localoffset.X, localYB + (int)localoffset.Y, new(pixelB.R, pixelB.G, pixelB.B, pixelB.A));
 					}
 				}
 
@@ -273,29 +291,21 @@ public class Interpreter : IRunner
 		return Execute(spr, block, ref thread);
 	}
 
-	public string Execute(Sprite spr, Block block, ref Thread thread)
+	string Execute(Sprite spr, Block block, ref Thread thread)
 	{
 		if (!Application.projectloaded) return string.Empty;
 
 		switch (block.opcode)
 		{
-			case Block.Opcodes.motion_movesteps:
-				{
-					spr.x += MoveMultiplier * StrNumber(block.inputs[0].value) * MathF.Sin(spr.direction * DegToRad);
-					spr.y -= MoveMultiplier * StrNumber(block.inputs[0].value) * MathF.Cos(spr.direction * DegToRad);
-					ClampToStage(spr);
-					break;
-				}
-
 			case Block.Opcodes.motion_turnright:
 				{
-					spr.direction += StrNumber(block.inputs[0].value) * 2;
+					spr.direction += Interpreter.StrNumber(block.inputs[0].value) * 2;
 					break;
 				}
 
 			case Block.Opcodes.motion_turnleft:
 				{
-					spr.direction -= StrNumber(block.inputs[0].value) * 2;
+					spr.direction -= Interpreter.StrNumber(block.inputs[0].value) * 2;
 					break;
 				}
 
@@ -333,15 +343,15 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.motion_gotoxy:
 				{
-					spr.x = StrNumber(block.inputs[0].value);
-					spr.y = StrNumber(block.inputs[1].value);
+					spr.x = Interpreter.StrNumber(block.inputs[0].value);
+					spr.y = Interpreter.StrNumber(block.inputs[1].value);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.Opcodes.motion_glideto:
 				{
-					thread.delay = StrNumber(block.inputs[0].value);
+					thread.delay = Interpreter.StrNumber(block.inputs[0].value);
 
 					Vector2 pos;
 
@@ -375,15 +385,15 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.motion_glidesecstoxy:
 				{
-					spr.x += StrNumber(block.inputs[1].value);
-					spr.y += StrNumber(block.inputs[2].value);
+					spr.x += Interpreter.StrNumber(block.inputs[1].value);
+					spr.y += Interpreter.StrNumber(block.inputs[2].value);
 					ClampToStage(spr);
 					return "";
 				}
 
 			case Block.Opcodes.motion_pointindirection:
 				{
-					spr.direction = StrNumber(block.inputs[0].value);
+					spr.direction = Interpreter.StrNumber(block.inputs[0].value);
 					break;
 				}
 
@@ -412,28 +422,28 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.motion_changexby:
 				{
-					spr.x += StrNumber(block.inputs[0].value);
+					spr.x += Interpreter.StrNumber(block.inputs[0].value);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.Opcodes.motion_setx:
 				{
-					spr.x = StrNumber(block.inputs[0].value);
+					spr.x = Interpreter.StrNumber(block.inputs[0].value);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.Opcodes.motion_changeyby:
 				{
-					spr.y += StrNumber(block.inputs[0].value);
+					spr.y += Interpreter.StrNumber(block.inputs[0].value);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.Opcodes.motion_sety:
 				{
-					spr.y = StrNumber(block.inputs[0].value);
+					spr.y = Interpreter.StrNumber(block.inputs[0].value);
 					ClampToStage(spr);
 					break;
 				}
@@ -466,7 +476,7 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.looks_sayforsecs:
 				{
-					float sec = StrNumber(block.inputs[0].value);
+					float sec = Interpreter.StrNumber(block.inputs[0].value);
 					if (sec > 0)
 					{
 						thread.delay = sec;
@@ -486,7 +496,7 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.looks_thinkforsecs:
 				{
-					float sec = StrNumber(block.inputs[0].value);
+					float sec = Interpreter.StrNumber(block.inputs[0].value);
 					if (sec > 0)
 					{
 						thread.delay = sec;
@@ -561,13 +571,13 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.looks_changesizeby:
 				{
-					spr.size += StrNumber(block.inputs[0].value);
+					spr.size += Interpreter.StrNumber(block.inputs[0].value);
 					break;
 				}
 
 			case Block.Opcodes.looks_setsizeto:
 				{
-					spr.size = StrNumber(block.inputs[0].value);
+					spr.size = Interpreter.StrNumber(block.inputs[0].value);
 					break;
 				}
 
@@ -671,7 +681,7 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.sound_setvolumeto:
 				{
-					spr.volume = StrNumber(block.inputs[0].value);
+					spr.volume = Interpreter.StrNumber(block.inputs[0].value);
 					break;
 				}
 
@@ -751,7 +761,7 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.control_wait:
 				{
-					float sec = StrNumber(block.inputs[0].value);
+					float sec = Interpreter.StrNumber(block.inputs[0].value);
 					if (sec > 0)
 					{
 						thread.delay = sec;
@@ -976,38 +986,38 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.operator_add:
 				{
-					return (StrNumber(block.inputs[0].value) + StrNumber(block.inputs[1].value)).ToString();
+					return (Interpreter.StrNumber(block.inputs[0].value) + Interpreter.StrNumber(block.inputs[1].value)).ToString();
 				}
 
 			case Block.Opcodes.operator_subtract:
 				{
-					return (StrNumber(block.inputs[0].value) - StrNumber(block.inputs[1].value)).ToString();
+					return (Interpreter.StrNumber(block.inputs[0].value) - Interpreter.StrNumber(block.inputs[1].value)).ToString();
 				}
 
 			case Block.Opcodes.operator_multiply:
 				{
-					return (StrNumber(block.inputs[0].value) * StrNumber(block.inputs[1].value)).ToString();
+					return (Interpreter.StrNumber(block.inputs[0].value) * Interpreter.StrNumber(block.inputs[1].value)).ToString();
 				}
 
 			case Block.Opcodes.operator_divide:
 				{
-					return (StrNumber(block.inputs[0].value) / StrNumber(block.inputs[1].value)).ToString();
+					return (Interpreter.StrNumber(block.inputs[0].value) / Interpreter.StrNumber(block.inputs[1].value)).ToString();
 				}
 
 			case Block.Opcodes.operator_random:
 				{
-					double number = rng.NextDouble() + StrNumber(block.inputs[0].value) * (StrNumber(block.inputs[1].value) - StrNumber(block.inputs[0].value));
+					double number = rng.NextDouble() + Interpreter.StrNumber(block.inputs[0].value) * (Interpreter.StrNumber(block.inputs[1].value) - Interpreter.StrNumber(block.inputs[0].value));
 					return number.ToString();
 				}
 
 			case Block.Opcodes.operator_gt:
 				{
-					return Boolstr(StrNumber(block.inputs[0].value) > StrNumber(block.inputs[1].value));
+					return Boolstr(Interpreter.StrNumber(block.inputs[0].value) > Interpreter.StrNumber(block.inputs[1].value));
 				}
 
 			case Block.Opcodes.operator_lt:
 				{
-					return Boolstr(StrNumber(block.inputs[0].value) < StrNumber(block.inputs[1].value));
+					return Boolstr(Interpreter.StrNumber(block.inputs[0].value) < Interpreter.StrNumber(block.inputs[1].value));
 				}
 
 			case Block.Opcodes.operator_equals:
@@ -1067,7 +1077,7 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.data_variable:
 				{
-					return project.stage.variables.First(x => x.name == block.fields[0]).value.ToString();
+					return project.stage.variables.First(x => x.name == block.fields[0]).value.ToString() ?? "";
 				}
 
 			case Block.Opcodes.data_setvariableto:
@@ -1175,6 +1185,19 @@ public class Interpreter : IRunner
 				{
 					break;
 				}
+
+			default:
+				{
+					string? returnValue = operations[block.opcode](ref thread, project);
+					if (returnValue != null)
+					{
+						return returnValue;
+					}
+					else
+					{
+						break;
+					}
+				}
 		}
 
 		if (block.nextId != "")
@@ -1183,7 +1206,7 @@ public class Interpreter : IRunner
 		}
 		else
 		{
-			thread.block = null;
+			thread.block.nextId = "";
 		}
 
 		return string.Empty;

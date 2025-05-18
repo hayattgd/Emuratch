@@ -24,7 +24,6 @@ public interface IRunner
 	public Vector2 mousepos { get => TAS ? tasmouse : mouse; }
 
 	public List<Thread> InvokeEvent(Block.Opcodes opcodes);
-	public string Execute(Sprite spr, Block block, ref Thread thread);
 	public string Execute(Sprite spr, Block block);
 	public string Execute(ref Thread thread);
 }

@@ -43,7 +43,7 @@ public class Thread
 		if (block == null) return;
 
 		var self = this;
-		runner.Execute(sprite, block, ref self);
+		runner.Execute(ref self);
 		block = self.block;
 
 		if (block == null || block.nextId == string.Empty)
