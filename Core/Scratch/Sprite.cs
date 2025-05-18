@@ -113,13 +113,13 @@ public class Sprite
 	{
 		get
 		{
-			Vector2 bmin = Emurender.ScratchToRaylib(boundingBox.Min, Application.project);
-			Vector2 bmax = Emurender.ScratchToRaylib(boundingBox.Max, Application.project);
+			Vector2 bmin = Emurender.ScratchToRaylib(boundingBox.Min);
+			Vector2 bmax = Emurender.ScratchToRaylib(boundingBox.Max);
 			return new(new(bmin, 0), new(bmax, 1));
 		}
 	}
 
-	public Vector2 RaylibPosition => Emurender.ScratchToRaylib(x, y, Application.project);
+	public Vector2 RaylibPosition => Emurender.ScratchToRaylib(x, y);
 	public Vector2 RaylibOrigin
 	{
 		get

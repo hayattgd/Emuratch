@@ -92,13 +92,9 @@ public class Emurender : RenderType
 		return new(costume.rotationCenterX / (costume.bitmapResolution * 2), costume.rotationCenterY / (costume.bitmapResolution * 2));
 	}
 
-	public static Vector2 ScratchToRaylib(float x, float y, Project project) => new(Raylib.GetRenderWidth() / 2f + x, Raylib.GetRenderHeight() / 2f - y);
-	public static Vector2 ScratchToRaylib(Vector2 vec, Project project) => ScratchToRaylib(vec.X, vec.Y, project);
-	public static Vector2 ScratchToRaylib(Vector3 vec, Project project) => ScratchToRaylib(vec.X, vec.Y, project);
-
-	public Vector2 ScratchToRaylib(float x, float y) => ScratchToRaylib(x, y, project);
-	public Vector2 ScratchToRaylib(Vector2 vec) => ScratchToRaylib(vec.X, vec.Y, project);
-	public Vector2 ScratchToRaylib(Vector3 vec) => ScratchToRaylib(vec.X, vec.Y, project);
+	public static Vector2 ScratchToRaylib(float x, float y) => new(Raylib.GetScreenWidth() / 2f + x, Raylib.GetScreenHeight() / 2f - y);
+	public static Vector2 ScratchToRaylib(Vector2 vec) => ScratchToRaylib(vec.X, vec.Y);
+	public static Vector2 ScratchToRaylib(Vector3 vec) => ScratchToRaylib(vec.X, vec.Y);
 
 	public Color GetColorOnPixel(int x, int y)
 	{
