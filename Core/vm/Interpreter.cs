@@ -405,6 +405,11 @@ public class Interpreter : IRunner
 					{
 						pos = mousepos;
 					}
+					else if (block.inputs[0].value == "_random_")
+					{
+						spr.direction = rng.Next(-180, 180);
+						break;
+					}
 					else
 					{
 						Sprite destination = Application.project.sprites.First(sprite => sprite.name == block.inputs[0].value);
