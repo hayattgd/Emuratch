@@ -367,3 +367,4 @@ FodyWeavers.xsd
 *.DotSettings
 /.vscode
 /build
+.DS_Store

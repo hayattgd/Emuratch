@@ -23,8 +23,8 @@ public interface Runner
 	public Vector2 tasmouse { get; set; }
 	public Vector2 mousepos { get => TAS ? tasmouse : mouse; }
 
-	public List<Thread> PressFlag();
-	public string Execute(Sprite spr, Block block, Thread thread);
+	public List<Thread> InvokeEvent(Block.Opcodes opcodes);
+	public string Execute(Sprite spr, Block block, ref Thread thread);
 	public string Execute(Sprite spr, Block block);
-	public string Execute(Thread thread);
+	public string Execute(ref Thread thread);
 }

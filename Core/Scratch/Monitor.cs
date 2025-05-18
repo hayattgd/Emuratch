@@ -10,7 +10,7 @@ public class Monitor
 {
 	public enum Mode
 	{
-		@default,
+		normal, //default is a keyword sadly
 		large,
 		slider,
 		list
@@ -18,11 +18,11 @@ public class Monitor
 
 	public static Mode ToMode(string str)
 	{
-		if (str == "default") return Mode.@default;
+		if (str == "default") return Mode.normal;
 		return Enum.Parse<Mode>(str);
 	}
 
-	public Mode mode = Mode.@default;
+	public Mode mode = Mode.normal;
 	public string name = string.Empty;
 	public string sprname = string.Empty;
 	public Vector2 pos = new(5, 5);
