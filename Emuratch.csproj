@@ -39,5 +39,11 @@
     <PackageReference Include="Svg" Version="3.4.7" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="NOTICES.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>
