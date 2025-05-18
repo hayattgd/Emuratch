@@ -3,7 +3,7 @@ using Raylib_cs;
 
 namespace Emuratch.Core.Render;
 
-public interface RenderType
+public interface IRender
 {
 	public void RenderAll();
 	public void RenderSprite(Sprite spr);

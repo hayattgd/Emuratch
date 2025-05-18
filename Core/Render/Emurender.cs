@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace Emuratch.Core.Render;
 
-public class Emurender : RenderType
+public class Emurender : IRender
 {
 	public Emurender(Project project)
 	{

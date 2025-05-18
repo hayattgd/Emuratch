@@ -87,7 +87,7 @@ public class Thread
 	public readonly Sprite sprite;
 	public Block block;
 
-	Runner runner { get => Application.runner; }
+	IRunner runner { get => Application.runner; }
 }
 
 public struct Loop

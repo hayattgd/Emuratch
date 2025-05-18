@@ -11,7 +11,7 @@ using System.Numerics;
 
 namespace Emuratch.Core.vm;
 
-public class Interpreter : Runner
+public class Interpreter : IRunner
 {
 	const float DegToRad = MathF.PI / 180;
 	const float MoveMultiplier = 1f;

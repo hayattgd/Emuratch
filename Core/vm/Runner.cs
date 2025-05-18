@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace Emuratch.Core.vm;
 
-public interface Runner
+public interface IRunner
 {
 	public Project project { get; protected internal set; }
 
