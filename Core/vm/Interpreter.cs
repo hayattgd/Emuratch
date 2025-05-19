@@ -299,13 +299,13 @@ public class Interpreter : IRunner
 		{
 			case Block.Opcodes.motion_turnright:
 				{
-					spr.direction += Interpreter.StrNumber(block.inputs[0].value) * 2;
+					spr.direction += StrNumber(block.inputs[0].value) * 2;
 					break;
 				}
 
 			case Block.Opcodes.motion_turnleft:
 				{
-					spr.direction -= Interpreter.StrNumber(block.inputs[0].value) * 2;
+					spr.direction -= StrNumber(block.inputs[0].value) * 2;
 					break;
 				}
 
@@ -343,15 +343,15 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.motion_gotoxy:
 				{
-					spr.x = Interpreter.StrNumber(block.inputs[0].value);
-					spr.y = Interpreter.StrNumber(block.inputs[1].value);
+					spr.x = StrNumber(block.inputs[0].value);
+					spr.y = StrNumber(block.inputs[1].value);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.Opcodes.motion_glideto:
 				{
-					thread.delay = Interpreter.StrNumber(block.inputs[0].value);
+					thread.delay = StrNumber(block.inputs[0].value);
 
 					Vector2 pos;
 
@@ -385,15 +385,15 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.motion_glidesecstoxy:
 				{
-					spr.x += Interpreter.StrNumber(block.inputs[1].value);
-					spr.y += Interpreter.StrNumber(block.inputs[2].value);
+					spr.x += StrNumber(block.inputs[1].value);
+					spr.y += StrNumber(block.inputs[2].value);
 					ClampToStage(spr);
 					return "";
 				}
 
 			case Block.Opcodes.motion_pointindirection:
 				{
-					spr.direction = Interpreter.StrNumber(block.inputs[0].value);
+					spr.direction = StrNumber(block.inputs[0].value);
 					break;
 				}
 
@@ -422,28 +422,28 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.motion_changexby:
 				{
-					spr.x += Interpreter.StrNumber(block.inputs[0].value);
+					spr.x += StrNumber(block.inputs[0].value);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.Opcodes.motion_setx:
 				{
-					spr.x = Interpreter.StrNumber(block.inputs[0].value);
+					spr.x = StrNumber(block.inputs[0].value);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.Opcodes.motion_changeyby:
 				{
-					spr.y += Interpreter.StrNumber(block.inputs[0].value);
+					spr.y += StrNumber(block.inputs[0].value);
 					ClampToStage(spr);
 					break;
 				}
 
 			case Block.Opcodes.motion_sety:
 				{
-					spr.y = Interpreter.StrNumber(block.inputs[0].value);
+					spr.y = StrNumber(block.inputs[0].value);
 					ClampToStage(spr);
 					break;
 				}
@@ -476,7 +476,7 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.looks_sayforsecs:
 				{
-					float sec = Interpreter.StrNumber(block.inputs[0].value);
+					float sec = StrNumber(block.inputs[0].value);
 					if (sec > 0)
 					{
 						thread.delay = sec;
@@ -496,7 +496,7 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.looks_thinkforsecs:
 				{
-					float sec = Interpreter.StrNumber(block.inputs[0].value);
+					float sec = StrNumber(block.inputs[0].value);
 					if (sec > 0)
 					{
 						thread.delay = sec;
@@ -571,13 +571,13 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.looks_changesizeby:
 				{
-					spr.size += Interpreter.StrNumber(block.inputs[0].value);
+					spr.size += StrNumber(block.inputs[0].value);
 					break;
 				}
 
 			case Block.Opcodes.looks_setsizeto:
 				{
-					spr.size = Interpreter.StrNumber(block.inputs[0].value);
+					spr.size = StrNumber(block.inputs[0].value);
 					break;
 				}
 
@@ -681,7 +681,7 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.sound_setvolumeto:
 				{
-					spr.volume = Interpreter.StrNumber(block.inputs[0].value);
+					spr.volume = StrNumber(block.inputs[0].value);
 					break;
 				}
 
@@ -761,7 +761,7 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.control_wait:
 				{
-					float sec = Interpreter.StrNumber(block.inputs[0].value);
+					float sec = StrNumber(block.inputs[0].value);
 					if (sec > 0)
 					{
 						thread.delay = sec;
@@ -986,38 +986,38 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.operator_add:
 				{
-					return (Interpreter.StrNumber(block.inputs[0].value) + Interpreter.StrNumber(block.inputs[1].value)).ToString();
+					return (StrNumber(block.inputs[0].value) + StrNumber(block.inputs[1].value)).ToString();
 				}
 
 			case Block.Opcodes.operator_subtract:
 				{
-					return (Interpreter.StrNumber(block.inputs[0].value) - Interpreter.StrNumber(block.inputs[1].value)).ToString();
+					return (StrNumber(block.inputs[0].value) - StrNumber(block.inputs[1].value)).ToString();
 				}
 
 			case Block.Opcodes.operator_multiply:
 				{
-					return (Interpreter.StrNumber(block.inputs[0].value) * Interpreter.StrNumber(block.inputs[1].value)).ToString();
+					return (StrNumber(block.inputs[0].value) * StrNumber(block.inputs[1].value)).ToString();
 				}
 
 			case Block.Opcodes.operator_divide:
 				{
-					return (Interpreter.StrNumber(block.inputs[0].value) / Interpreter.StrNumber(block.inputs[1].value)).ToString();
+					return (StrNumber(block.inputs[0].value) / StrNumber(block.inputs[1].value)).ToString();
 				}
 
 			case Block.Opcodes.operator_random:
 				{
-					double number = rng.NextDouble() + Interpreter.StrNumber(block.inputs[0].value) * (Interpreter.StrNumber(block.inputs[1].value) - Interpreter.StrNumber(block.inputs[0].value));
+					double number = rng.NextDouble() + StrNumber(block.inputs[0].value) * (StrNumber(block.inputs[1].value) - StrNumber(block.inputs[0].value));
 					return number.ToString();
 				}
 
 			case Block.Opcodes.operator_gt:
 				{
-					return Boolstr(Interpreter.StrNumber(block.inputs[0].value) > Interpreter.StrNumber(block.inputs[1].value));
+					return Boolstr(StrNumber(block.inputs[0].value) > StrNumber(block.inputs[1].value));
 				}
 
 			case Block.Opcodes.operator_lt:
 				{
-					return Boolstr(Interpreter.StrNumber(block.inputs[0].value) < Interpreter.StrNumber(block.inputs[1].value));
+					return Boolstr(StrNumber(block.inputs[0].value) < StrNumber(block.inputs[1].value));
 				}
 
 			case Block.Opcodes.operator_equals:
