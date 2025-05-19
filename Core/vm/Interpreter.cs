@@ -405,6 +405,11 @@ public class Interpreter : IRunner
 					{
 						pos = mousepos;
 					}
+					else if (block.inputs[0].value == "_random_")
+					{
+						spr.direction = rng.Next(-180, 180);
+						break;
+					}
 					else
 					{
 						Sprite destination = Application.project.sprites.First(sprite => sprite.name == block.inputs[0].value);
@@ -914,6 +919,12 @@ public class Interpreter : IRunner
 			case Block.Opcodes.sensing_keypressed:
 				{
 					if (block.inputs[0].value == "any") return Boolstr(Raylib.GetKeyPressed() > 0);
+
+					if (StrKey(block.inputs[0].value) == KeyboardKey.Null && block.inputs[0].value.Length > 1)
+					{
+						Console.WriteLine(block.inputs[0].value[0]);
+						return Boolstr(Raylib.IsKeyDown(StrKey(block.inputs[0].value[0].ToString())));
+					}
 
 					return Boolstr(Raylib.IsKeyDown(StrKey(block.inputs[0].value)));
 				}
