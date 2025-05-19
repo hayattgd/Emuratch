@@ -1,5 +1,4 @@
 using Emuratch.Core.Overlay;
-using Emuratch.Core.Render;
 using Emuratch.Core.Scratch;
 using Raylib_cs;
 using System;
@@ -399,7 +398,7 @@ public class Interpreter : IRunner
 
 			case Block.Opcodes.motion_pointtowards:
 				{
-					Vector2 pos;
+					Vector2 pos = Vector2.Zero;
 
 					if (block.inputs[0].value == "_mouse_")
 					{
@@ -412,8 +411,15 @@ public class Interpreter : IRunner
 					}
 					else
 					{
-						Sprite destination = Application.project.sprites.First(sprite => sprite.name == block.inputs[0].value);
-						pos = new(destination.x, destination.y);
+						try
+						{
+							Sprite destination = Application.project.sprites.First(sprite => sprite.name == block.inputs[0].value);
+							pos = new(destination.x, destination.y);
+						}
+						catch (Exception ex)
+						{
+							if (ex.Message != "Sequence contains no matching element") throw;
+						}
 					}
 
 					spr.direction = MathF.Atan((pos.X - spr.x) / (pos.Y - spr.y) + 180 * pos.Y < spr.y ? 1 : 0);
