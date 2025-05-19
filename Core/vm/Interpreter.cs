@@ -928,7 +928,6 @@ public class Interpreter : IRunner
 
 					if (StrKey(block.inputs[0].value) == KeyboardKey.Null && block.inputs[0].value.Length > 1)
 					{
-						Console.WriteLine(block.inputs[0].value[0]);
 						return Boolstr(Raylib.IsKeyDown(StrKey(block.inputs[0].value[0].ToString())));
 					}
 
