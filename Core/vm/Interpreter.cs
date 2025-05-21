@@ -1,4 +1,5 @@
 using Emuratch.Core.Overlay;
+using Emuratch.Core.Render;
 using Emuratch.Core.Scratch;
 using Raylib_cs;
 using System;
@@ -51,7 +52,12 @@ public class Interpreter : IRunner
 
 	public float timer { get; set; }
 
-	public Vector2 mouse { get => Raylib.GetMousePosition() - new Vector2(project.width * 0.5f, project.height * 0.5f); }
+	public Vector2 mouse {
+		get {
+			Vector2 inverted = Raylib.GetMousePosition() - new Vector2(Raylib.GetScreenWidth() * 0.5f, Raylib.GetScreenHeight() * 0.5f);
+			return new(inverted.X, -inverted.Y);
+		}
+	}
 	public Vector2 tasmouse { get; set; }
 	public Vector2 mousepos { get => TAS ? tasmouse : mouse; }
 
@@ -59,18 +65,1072 @@ public class Interpreter : IRunner
 	{
 		{
 			Block.Opcodes.motion_movesteps,
-			(ref Thread thread, Project project) => {
+			(ref Thread thread, Project project, Interpreter interpreter) => {
 				thread.sprite.x += MoveMultiplier * StrNumber(thread.block.inputs[0].value) * MathF.Sin(thread.sprite.direction * DegToRad);
-				thread.sprite.y -= MoveMultiplier * StrNumber(thread.block.inputs[0].value) * MathF.Cos(thread.sprite.direction * DegToRad);
-				ClampToStage(thread.sprite, project);
-				return "";
+				thread.sprite.y += MoveMultiplier * StrNumber(thread.block.inputs[0].value) * MathF.Cos(thread.sprite.direction * DegToRad);
+				interpreter.ClampToStage(thread.sprite);
+				return null;
 			}
-		}
+		},
+		{
+			Block.Opcodes.motion_turnright,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.direction += StrNumber(thread.block.inputs[0].value) * 2;
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_turnleft,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.direction -= StrNumber(thread.block.inputs[0].value) * 2;
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_goto,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				Vector2 pos;
+
+				if (thread.block.inputs[0].value == "_random_")
+				{
+					pos = new(
+						interpreter.rng.Next((int)(Application.project.width * -0.5f), (int)(Application.project.width * 0.5f)),
+						interpreter.rng.Next((int)(Application.project.height * -0.5f), (int)(Application.project.height * 0.5f))
+					);
+				}
+				else if (thread.block.inputs[0].value == "_mouse_")
+				{
+					pos = interpreter.mousepos;
+				}
+				else
+				{
+					string destinationstr = thread.block.inputs[0].value;
+					Sprite destination = Application.project.sprites.First(spr => spr.name == destinationstr);
+					pos = new(destination.x, destination.y);
+				}
+
+				thread.sprite.x = pos.X;
+				thread.sprite.y = pos.Y;
+				interpreter.ClampToStage(thread.sprite);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_goto_menu,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.block.fields[0];
+			}
+		},
+		{
+			Block.Opcodes.motion_gotoxy,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.x = StrNumber(thread.block.inputs[0].value);
+				thread.sprite.y = StrNumber(thread.block.inputs[1].value);
+				interpreter.ClampToStage(thread.sprite);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_glideto,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.delay = StrNumber(thread.block.inputs[0].value);
+
+				Vector2 pos;
+
+				if (thread.block.inputs[0].value == "_random_")
+				{
+					pos = new(
+						interpreter.rng.Next((int)(Application.project.width * -0.5f), (int)(Application.project.width * 0.5f)),
+						interpreter.rng.Next((int)(Application.project.height * -0.5f), (int)(Application.project.height * 0.5f))
+					);
+				}
+				else if (thread.block.inputs[0].value == "_mouse_")
+				{
+					pos = interpreter.mousepos;
+				}
+				else
+				{
+					string destinationstr = thread.block.inputs[0].value;
+					Sprite destination = Application.project.sprites.First(spr => spr.name == destinationstr);
+					pos = new(destination.x, destination.y);
+				}
+
+				thread.sprite.x = pos.X;
+				thread.sprite.y = pos.Y;
+				interpreter.ClampToStage(thread.sprite);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_glideto_menu,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.block.fields[0];
+			}
+		},
+		{
+			Block.Opcodes.motion_glidesecstoxy,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.x += StrNumber(thread.block.inputs[1].value);
+				thread.sprite.y += StrNumber(thread.block.inputs[2].value);
+				interpreter.ClampToStage(thread.sprite);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_pointindirection,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.direction = StrNumber(thread.block.inputs[0].value);
+				return "0";
+			}
+		},
+		{
+			Block.Opcodes.motion_pointtowards,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				Vector2 pos = Vector2.Zero;
+
+				if (thread.block.inputs[0].value == "_mouse_")
+				{
+					pos = interpreter.mousepos;
+					Emurender.dbginfo = $"{interpreter.mousepos}, {Raylib.GetMousePosition()}, {Raylib.GetScreenWidth()}x{Raylib.GetScreenHeight()}";
+				}
+				else if (thread.block.inputs[0].value == "_random_")
+				{
+					thread.sprite.direction = interpreter.rng.Next(-180, 180);
+					return null;
+				}
+				else
+				{
+					try
+					{
+						string destinationstr = thread.block.inputs[0].value;
+						Sprite destination = Application.project.sprites.First(spr => spr.name == destinationstr);
+						pos = new(destination.x, destination.y);
+					}
+					catch (Exception ex)
+					{
+						if (ex.Message != "Sequence contains no matching element") throw;
+					}
+				}
+
+				thread.sprite.direction = MathF.Atan2(pos.X - thread.sprite.x, pos.Y - thread.sprite.y) * (180 / MathF.PI);
+				if (thread.sprite.direction > 180) thread.sprite.direction -= 360;
+				if (thread.sprite.direction < -180) thread.sprite.direction += 360;
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_pointtowards_menu,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.block.fields[0];
+			}
+		},
+		{
+			Block.Opcodes.motion_changexby,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.x += StrNumber(thread.block.inputs[0].value);
+				interpreter.ClampToStage(thread.sprite);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_setx,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.x = StrNumber(thread.block.inputs[0].value);
+				interpreter.ClampToStage(thread.sprite);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_changeyby,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.y += StrNumber(thread.block.inputs[0].value);
+				interpreter.ClampToStage(thread.sprite);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_sety,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.y = StrNumber(thread.block.inputs[0].value);
+				interpreter.ClampToStage(thread.sprite);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_ifonedgebounce,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_setrotationstyle,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.rotationStyle = thread.block.fields[0];
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.motion_xposition,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.sprite.x.ToString();
+			}
+		},
+		{
+			Block.Opcodes.motion_yposition,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.sprite.y.ToString();
+			}
+		},
+		{
+			Block.Opcodes.motion_direction,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.sprite.direction.ToString();
+			}
+		},
+		{
+			Block.Opcodes.looks_sayforsecs,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				float sec = StrNumber(thread.block.inputs[0].value);
+				if (sec > 0)
+				{
+					thread.delay = sec;
+				}
+				else
+				{
+					thread.nextframe = false;
+				}
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_say,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				OverlayRender.RenderDialogue(-(int)thread.sprite.x, -(int)thread.sprite.y - thread.sprite.costume.image.Height, thread.block.inputs[0].value);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_thinkforsecs,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				float sec = StrNumber(thread.block.inputs[0].value);
+				if (sec > 0)
+				{
+					thread.delay = sec;
+				}
+				else
+				{
+					thread.nextframe = false;
+				}
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_think,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				OverlayRender.RenderDialogue((int)thread.sprite.x, (int)thread.sprite.y + thread.sprite.costume.image.Height, thread.block.inputs[0].value);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_switchcostumeto,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				try
+				{
+					string costumestr = thread.block.inputs[0].value;
+					thread.sprite.costume = thread.sprite.costumes.First(x => x.name == costumestr);
+				}
+				catch (Exception ex)
+				{
+					if (ex.GetType() != typeof(InvalidOperationException))
+					{
+						throw;
+					}
+					else if (StrNumber(thread.block.inputs[0].value, out var id))
+					{
+						thread.sprite.currentCostume = id;
+					}
+				}
+
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_costume,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				string costume = thread.block.fields[0];
+				int index =
+					int.TryParse(thread.block.fields[0], out int number) ?
+					number :
+					thread.sprite.costumes.ToList().IndexOf(thread.sprite.costumes.First(x => x.name == costume));
+
+				return index.ToString();
+			}
+		},
+		{
+			Block.Opcodes.looks_nextcostume,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.currentCostume++;
+				//add codes to repeat costume
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_switchbackdropto,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_backdrops,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return project.stage.currentCostume.ToString(); //Need check if it returns id or name
+			}
+		},
+		{
+			Block.Opcodes.looks_nextbackdrop,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_changesizeby,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.size += StrNumber(thread.block.inputs[0].value);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_setsizeto,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.size = StrNumber(thread.block.inputs[0].value);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_changeeffectby,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_seteffectto,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_cleargraphiceffects,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_show,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.visible = true;
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_hide,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.visible = false;
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_gotofrontback,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.SetLayoutOrder(thread.block.fields[0] == "front" ? project.sprites.Length : 0);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_goforwardbackwardlayers,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.SetLayoutOrder(
+					thread.sprite.layoutOrder + int.Parse(thread.block.inputs[0].value) * (thread.block.fields[0] == "forward" ? 1 : -1)
+				);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.looks_costumenumbername,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.block.fields[0] == "number" ? thread.sprite.currentCostume.ToString() : thread.sprite.costume.name;
+			}
+		},
+		{
+			Block.Opcodes.looks_backdropnumbername,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.block.fields[0] == "number" ? project.stage.currentCostume.ToString() : project.stage.costume.name;
+			}
+		},
+		{
+			Block.Opcodes.looks_size,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.sprite.size.ToString();
+			}
+		},
+		{
+			Block.Opcodes.sound_playuntildone,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				string sound = thread.block.inputs[0].value;
+				Raylib.PlaySound(thread.sprite.sounds.First(x => x.name == sound).sound);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sound_sounds_menu,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.block.fields[0];
+			}
+		},
+		{
+			Block.Opcodes.sound_play,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				string sound = thread.block.inputs[0].value;
+				Raylib.PlaySound(thread.sprite.sounds.First(x => x.name == sound).sound);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sound_stopallsounds,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sound_changeeffectby,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sound_seteffectto,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sound_cleareffects,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sound_changevolumeby,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sound_setvolumeto,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.sprite.volume = StrNumber(thread.block.inputs[0].value);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sound_volume,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.sprite.volume.ToString();
+			}
+		},
+		{
+			Block.Opcodes.event_whenflagclicked,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.event_whenkeypressed,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				if (thread.block.fields[0] == "any") return Boolstr(Raylib.GetKeyPressed() > 0);
+
+				KeyboardKey key = interpreter.StrKey(thread.block.fields[0]);
+				if (Raylib.IsKeyPressedRepeat(key) || Raylib.IsKeyPressed(key))
+				{
+					return null;
+				}
+				else
+				{
+					return null;
+				}
+			}
+		},
+		{
+			Block.Opcodes.event_whenthisspriteclicked,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.event_whenstageclicked,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.event_whenbackdropswitchesto,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.event_whengreaterthan,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.event_whenbroadcastreceived,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.event_broadcast,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				foreach (Sprite spr in project.sprites)
+				{
+					foreach (var top in spr.blocks.Where(x => x.Value.opcode == Block.Opcodes.event_whenbroadcastreceived))
+					{
+						interpreter.Execute(spr, top.Value);
+					}
+				}
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.event_broadcastandwait,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				foreach (var spr in project.sprites)
+				{
+					foreach (var top in thread.sprite.blocks.Where(x => x.Value.opcode == Block.Opcodes.event_whenbroadcastreceived))
+					{
+						interpreter.Execute(thread.sprite, top.Value);
+					}
+				}
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.control_wait,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				float sec = StrNumber(thread.block.inputs[0].value);
+				if (sec > 0)
+				{
+					thread.delay = sec;
+				}
+				else
+				{
+					thread.nextframe = false;
+				}
+				
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.control_repeat,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
+				thread.returnto.Add(new(thread.block, int.Parse(thread.block.inputs[0].value)));
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.control_forever,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				thread.block = thread.sprite.blocks[thread.block.inputs[0].RawValue];
+				thread.returnto.Add(new(thread.block));
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.control_if,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				if (Strbool(thread.block.inputs[0].value))
+				{
+					thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
+					interpreter.Execute(ref thread);
+				}
+
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.control_if_else,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				if (Strbool(thread.block.inputs[2].value))
+				{
+					thread.block = thread.sprite.blocks[thread.block.inputs[0].RawValue];
+					interpreter.Execute(ref thread);
+				}
+				else
+				{
+					thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
+					interpreter.Execute(ref thread);
+				}
+
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.control_wait_until,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.control_repeat_until,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.control_while,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.control_stop,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.control_create_clone_of,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				string clonemenu = thread.block.inputs[0].value;
+				project.clones.Add(Sprite.Clone(project.sprites.First(x => x.name == clonemenu)));
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.control_create_clone_of_menu,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.block.fields[0] == "_myself_" ? thread.sprite.name : thread.block.fields[0];
+			}
+		},
+		{
+			Block.Opcodes.control_delete_this_clone,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				if (!thread.sprite.isClone) return null;
+
+				project.clones.Remove(thread.sprite);
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sensing_touchingobject,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				string sprite = thread.block.inputs[0].value;
+				if (!project.sprites.Any(x => x.name == sprite)) return "false";
+				Sprite target = project.sprites.First(x => x.name == sprite);
+				if (!CheckBoundingBoxOverlap(thread.sprite, target)) return "false";
+				if (!CheckPixelOverlap(thread.sprite, target)) return "false";
+				return "true";
+			}
+		},
+		{
+			Block.Opcodes.sensing_touchingobjectmenu,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.block.fields[0];
+			}
+		},
+		{
+			Block.Opcodes.sensing_touchingcolor,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				for (int x = 0; x < thread.sprite.costume.image.Width; x++)
+				{
+					for (int y = 0; y < thread.sprite.costume.image.Height; y++)
+					{
+						if (thread.sprite.costume.GetColor(x, y).A != 0)
+						{
+							Color color = Application.render.GetColorOnPixel(x, y);
+							if (thread.block.inputs[0].value == $"#{color.R:X2}{color.G:X2}{color.B:X2}")
+							{
+								return "true";
+							}
+						}
+					}
+				}
+				return "false";
+			}
+		},
+		{
+			Block.Opcodes.sensing_coloristouchingcolor,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sensing_distanceto,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sensing_distancetomenu,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sensing_askandwait,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sensing_answer,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sensing_keypressed,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				if (thread.block.inputs[0].value == "any") return Boolstr(Raylib.GetKeyPressed() > 0);
+
+				if (interpreter.StrKey(thread.block.inputs[0].value) == KeyboardKey.Null && thread.block.inputs[0].value.Length > 1)
+				{
+					return Boolstr(Raylib.IsKeyDown(interpreter.StrKey(thread.block.inputs[0].value[0].ToString())));
+				}
+
+				return Boolstr(Raylib.IsKeyDown(interpreter.StrKey(thread.block.inputs[0].value)));
+			}
+		},
+		{
+			Block.Opcodes.sensing_keyoptions,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.block.fields[0];
+			}
+		},
+		{
+			Block.Opcodes.sensing_mousedown,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return Boolstr(Raylib.IsMouseButtonDown(MouseButton.Left));
+			}
+		},
+		{
+			Block.Opcodes.sensing_mousex,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return Raylib.GetMouseX().ToString();
+			}
+		},
+		{
+			Block.Opcodes.sensing_mousey,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return Raylib.GetMouseY().ToString();
+			}
+		},
+		{
+			Block.Opcodes.sensing_setdragmode,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sensing_loudness,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return "0";
+			}
+		},
+		{
+			Block.Opcodes.sensing_timer,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return interpreter.timer.ToString();
+			}
+		},
+		{
+			Block.Opcodes.sensing_resettimer,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				interpreter.timer = 0;
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sensing_of,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sensing_of_object_menu,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sensing_current,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sensing_dayssince2000,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.sensing_username,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return "USERNAME";
+			}
+		},
+		{
+			Block.Opcodes.operator_add,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return (StrNumber(thread.block.inputs[0].value) + StrNumber(thread.block.inputs[1].value)).ToString();
+			}
+		},
+		{
+			Block.Opcodes.operator_subtract,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return (StrNumber(thread.block.inputs[0].value) - StrNumber(thread.block.inputs[1].value)).ToString();
+			}
+		},
+		{
+			Block.Opcodes.operator_multiply,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return (StrNumber(thread.block.inputs[0].value) * StrNumber(thread.block.inputs[1].value)).ToString();
+			}
+		},
+		{
+			Block.Opcodes.operator_divide,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return (StrNumber(thread.block.inputs[0].value) / StrNumber(thread.block.inputs[1].value)).ToString();
+			}
+		},
+		{
+			Block.Opcodes.operator_random,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				double number = interpreter.rng.NextDouble() + StrNumber(thread.block.inputs[0].value) * (StrNumber(thread.block.inputs[1].value) - StrNumber(thread.block.inputs[0].value));
+				return number.ToString();
+			}
+		},
+		{
+			Block.Opcodes.operator_gt,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return Boolstr(StrNumber(thread.block.inputs[0].value) > StrNumber(thread.block.inputs[1].value));
+			}
+		},
+		{
+			Block.Opcodes.operator_lt,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return Boolstr(StrNumber(thread.block.inputs[0].value) < StrNumber(thread.block.inputs[1].value));
+			}
+		},
+		{
+			Block.Opcodes.operator_equals,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return Boolstr(thread.block.inputs[0].value.ToLower() == thread.block.inputs[1].value.ToLower());
+			}
+		},
+		{
+			Block.Opcodes.operator_and,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return Boolstr(Strbool(thread.block.inputs[0].value) && Strbool(thread.block.inputs[1].value));
+			}
+		},
+		{
+			Block.Opcodes.operator_or,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return Boolstr(Strbool(thread.block.inputs[0].value) || Strbool(thread.block.inputs[1].value));
+			}
+		},
+		{
+			Block.Opcodes.operator_not,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return Boolstr(!Strbool(thread.block.inputs[0].value));
+			}
+		},
+		{
+			Block.Opcodes.operator_join,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.block.inputs[0].value + thread.block.inputs[1].value;
+			}
+		},
+		{
+			Block.Opcodes.operator_letter_of,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.block.inputs[0].value[int.Parse(thread.block.inputs[1].value)].ToString();
+			}
+		},
+		{
+			Block.Opcodes.operator_length,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return thread.block.inputs[0].value.Length.ToString();
+			}
+		},
+		{
+			Block.Opcodes.operator_contains,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.operator_mod,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.operator_round,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.operator_mathop,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_variable,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				string variable = thread.block.fields[0];
+				return project.stage.variables.First(x => x.name == variable).value.ToString() ?? "";
+			}
+		},
+		{
+			Block.Opcodes.data_setvariableto,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				string variable = thread.block.fields[0];
+				project.stage.variables.First(x => x.name == variable).value = thread.block.inputs[0];
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_changevariableby,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_showvariable,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_hidevariable,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_listcontents,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_addtolist,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_deleteoflist,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_deletealloflist,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_insertatlist,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_replaceitemoflist,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_itemoflist,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_itemnumoflist,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_lengthoflist,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_listcontainsitem,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_showlist,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.data_hidelist,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.procedures_definition,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.procedures_prototype,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.procedures_call,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.argument_reporter_string_number,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
+		{
+			Block.Opcodes.argument_reporter_boolean,
+			(ref Thread thread, Project project, Interpreter interpreter) => {
+				return null;
+			}
+		},
 	};
 
 	Dictionary<Block.Opcodes, List<Block>> eventBlocks;
 
-	delegate string? Operation(ref Thread thread, Project project);
+	delegate string? Operation(ref Thread thread, Project project, Interpreter interpreter);
 
 	public List<Thread> InvokeEvent(Block.Opcodes opcode)
 	{
@@ -183,7 +1243,7 @@ public class Interpreter : IRunner
 		return str == "true";
 	}
 
-	static dynamic StrNumber(string str)
+	static dynamic? StrNumber(string str)
 	{
 		if (str == "Infinity") return double.MaxValue;
 		if (str == "-Infinity") return double.MinValue;
@@ -206,7 +1266,36 @@ public class Interpreter : IRunner
 			}
 		}
 
-		return 0;
+		return null;
+	}
+
+	static bool StrNumber(string str, out dynamic value)
+	{
+		if (str == "Infinity") { value = double.MaxValue; return true; }
+		if (str == "-Infinity") { value = double.MinValue; return true; }
+
+		if (str == "true") { value = 1; return true; }
+		if (str == "false") { value = 0; return false; }
+
+		if (str.Contains('.'))
+		{
+			if (float.TryParse(str, out var num))
+			{
+				value = num;
+				return true;
+			}
+		}
+		else
+		{
+			if (int.TryParse(str, out var num))
+			{
+				value = num;
+				return true;
+			}
+		}
+
+		value = 0;
+		return false;
 	}
 
 	public static bool CheckBoundingBoxOverlap(Sprite a, Sprite b)
@@ -247,7 +1336,6 @@ public class Interpreter : IRunner
 
 				if (Application.debug && Program.app.rendertype == Application.Renders.Emurender)
 				{
-					// const float alphamultiplier = 0.25f;
 					Vector2 localoffset = new(Raylib.GetRenderWidth() / 2, Raylib.GetRenderHeight() / 2);
 					if (pixelA.A == 0)
 					{
@@ -279,950 +1367,23 @@ public class Interpreter : IRunner
 		return false;
 	}
 
-	public string Execute(ref Thread thread)
-	{
-		return Execute(thread.sprite, thread.block, ref thread);
-	}
-
 	public string Execute(Sprite spr, Block block)
 	{
 		Thread thread = new(spr, block);
-		return Execute(spr, block, ref thread);
+		return Execute(ref thread);
 	}
 
-	string Execute(Sprite spr, Block block, ref Thread thread)
+	public string Execute(ref Thread thread)
 	{
 		if (!Application.projectloaded) return string.Empty;
 
-		switch (block.opcode)
+		string? returnValue = operations[thread.block.opcode](ref thread, project, this);
+		if (returnValue != null) return returnValue;
+
+		if (!string.IsNullOrEmpty(thread.block.nextId))
 		{
-			case Block.Opcodes.motion_turnright:
-				{
-					spr.direction += StrNumber(block.inputs[0].value) * 2;
-					break;
-				}
-
-			case Block.Opcodes.motion_turnleft:
-				{
-					spr.direction -= StrNumber(block.inputs[0].value) * 2;
-					break;
-				}
-
-			case Block.Opcodes.motion_goto:
-				{
-					Vector2 pos;
-
-					if (block.inputs[0].value == "_random_")
-					{
-						pos = new(
-							rng.Next((int)(Application.project.width * -0.5f), (int)(Application.project.width * 0.5f)),
-							rng.Next((int)(Application.project.height * -0.5f), (int)(Application.project.height * 0.5f))
-						);
-					}
-					else if (block.inputs[0].value == "_mouse_")
-					{
-						pos = mousepos;
-					}
-					else
-					{
-						Sprite destination = Application.project.sprites.First(sprite => sprite.name == block.inputs[0].value);
-						pos = new(destination.x, destination.y);
-					}
-
-					spr.x = pos.X;
-					spr.y = pos.Y;
-					ClampToStage(spr);
-					break;
-				}
-
-			case Block.Opcodes.motion_goto_menu:
-				{
-					return block.fields[0];
-				}
-
-			case Block.Opcodes.motion_gotoxy:
-				{
-					spr.x = StrNumber(block.inputs[0].value);
-					spr.y = StrNumber(block.inputs[1].value);
-					ClampToStage(spr);
-					break;
-				}
-
-			case Block.Opcodes.motion_glideto:
-				{
-					thread.delay = StrNumber(block.inputs[0].value);
-
-					Vector2 pos;
-
-					if (block.inputs[0].value == "_random_")
-					{
-						pos = new(
-							rng.Next((int)(Application.project.width * -0.5f), (int)(Application.project.width * 0.5f)),
-							rng.Next((int)(Application.project.height * -0.5f), (int)(Application.project.height * 0.5f))
-						);
-					}
-					else if (block.inputs[0].value == "_mouse_")
-					{
-						pos = mousepos;
-					}
-					else
-					{
-						Sprite destination = Application.project.sprites.First(sprite => sprite.name == block.inputs[0].value);
-						pos = new(destination.x, destination.y);
-					}
-
-					spr.x = pos.X;
-					spr.y = pos.Y;
-					ClampToStage(spr);
-					return "";
-				}
-
-			case Block.Opcodes.motion_glideto_menu:
-				{
-					return block.fields[0];
-				}
-
-			case Block.Opcodes.motion_glidesecstoxy:
-				{
-					spr.x += StrNumber(block.inputs[1].value);
-					spr.y += StrNumber(block.inputs[2].value);
-					ClampToStage(spr);
-					return "";
-				}
-
-			case Block.Opcodes.motion_pointindirection:
-				{
-					spr.direction = StrNumber(block.inputs[0].value);
-					break;
-				}
-
-			case Block.Opcodes.motion_pointtowards:
-				{
-					Vector2 pos = Vector2.Zero;
-
-					if (block.inputs[0].value == "_mouse_")
-					{
-						pos = mousepos;
-					}
-					else if (block.inputs[0].value == "_random_")
-					{
-						spr.direction = rng.Next(-180, 180);
-						break;
-					}
-					else
-					{
-						try
-						{
-							Sprite destination = Application.project.sprites.First(sprite => sprite.name == block.inputs[0].value);
-							pos = new(destination.x, destination.y);
-						}
-						catch (Exception ex)
-						{
-							if (ex.Message != "Sequence contains no matching element") throw;
-						}
-					}
-
-					spr.direction = MathF.Atan((pos.X - spr.x) / (pos.Y - spr.y) + 180 * pos.Y < spr.y ? 1 : 0);
-					break;
-				}
-
-			case Block.Opcodes.motion_pointtowards_menu:
-				{
-					return block.fields[0];
-				}
-
-			case Block.Opcodes.motion_changexby:
-				{
-					spr.x += StrNumber(block.inputs[0].value);
-					ClampToStage(spr);
-					break;
-				}
-
-			case Block.Opcodes.motion_setx:
-				{
-					spr.x = StrNumber(block.inputs[0].value);
-					ClampToStage(spr);
-					break;
-				}
-
-			case Block.Opcodes.motion_changeyby:
-				{
-					spr.y += StrNumber(block.inputs[0].value);
-					ClampToStage(spr);
-					break;
-				}
-
-			case Block.Opcodes.motion_sety:
-				{
-					spr.y = StrNumber(block.inputs[0].value);
-					ClampToStage(spr);
-					break;
-				}
-
-			case Block.Opcodes.motion_ifonedgebounce:
-				{
-					break;
-				}
-
-			case Block.Opcodes.motion_setrotationstyle:
-				{
-					spr.rotationStyle = block.fields[0];
-					break;
-				}
-
-			case Block.Opcodes.motion_xposition:
-				{
-					return spr.x.ToString();
-				}
-
-			case Block.Opcodes.motion_yposition:
-				{
-					return spr.y.ToString();
-				}
-
-			case Block.Opcodes.motion_direction:
-				{
-					return spr.direction.ToString();
-				}
-
-			case Block.Opcodes.looks_sayforsecs:
-				{
-					float sec = StrNumber(block.inputs[0].value);
-					if (sec > 0)
-					{
-						thread.delay = sec;
-					}
-					else
-					{
-						thread.nextframe = false;
-					}
-					return "";
-				}
-
-			case Block.Opcodes.looks_say:
-				{
-					OverlayRender.RenderDialogue(-(int)spr.x, -(int)spr.y - spr.costume.image.Height, block.inputs[0].value);
-					break;
-				}
-
-			case Block.Opcodes.looks_thinkforsecs:
-				{
-					float sec = StrNumber(block.inputs[0].value);
-					if (sec > 0)
-					{
-						thread.delay = sec;
-					}
-					else
-					{
-						thread.nextframe = false;
-					}
-					return "";
-				}
-
-			case Block.Opcodes.looks_think:
-				{
-					OverlayRender.RenderDialogue((int)spr.x, (int)spr.y + spr.costume.image.Height, block.inputs[0].value);
-					break;
-				}
-
-			case Block.Opcodes.looks_switchcostumeto:
-				{
-					if (int.TryParse(block.inputs[0].value, out int id))
-					{
-						spr.currentCostume = id;
-					}
-					else
-					{
-						try
-						{
-							spr.costume = spr.costumes.First(x => x.name == block.inputs[0].value);
-						}
-						catch (Exception ex)
-						{
-							if (ex.GetType() != typeof(InvalidOperationException))
-							{
-								throw;
-							}
-						}
-					}
-					break;
-				}
-
-			case Block.Opcodes.looks_costume:
-				{
-					int index =
-						int.TryParse(block.fields[0], out int number) ?
-						number :
-						spr.costumes.ToList().IndexOf(spr.costumes.First(x => x.name == block.fields[0]));
-
-					return index.ToString();
-				}
-
-			case Block.Opcodes.looks_nextcostume:
-				{
-					spr.currentCostume++;
-					//add codes to repeat costume
-					break;
-				}
-
-			case Block.Opcodes.looks_switchbackdropto:
-				{
-					break;
-				}
-
-			case Block.Opcodes.looks_backdrops:
-				{
-					return project.stage.currentCostume.ToString(); //Need check if it returns id or name
-				}
-
-			case Block.Opcodes.looks_nextbackdrop:
-				{
-					break;
-				}
-
-			case Block.Opcodes.looks_changesizeby:
-				{
-					spr.size += StrNumber(block.inputs[0].value);
-					break;
-				}
-
-			case Block.Opcodes.looks_setsizeto:
-				{
-					spr.size = StrNumber(block.inputs[0].value);
-					break;
-				}
-
-			case Block.Opcodes.looks_changeeffectby:
-				{
-					break;
-				}
-
-			case Block.Opcodes.looks_seteffectto:
-				{
-					break;
-				}
-
-			case Block.Opcodes.looks_cleargraphiceffects:
-				{
-					break;
-				}
-
-			case Block.Opcodes.looks_show:
-				{
-					spr.visible = true;
-					break;
-				}
-
-			case Block.Opcodes.looks_hide:
-				{
-					spr.visible = false;
-					break;
-				}
-
-			case Block.Opcodes.looks_gotofrontback:
-				{
-					spr.SetLayoutOrder(block.fields[0] == "front" ? project.sprites.Length : 0);
-					break;
-				}
-
-			case Block.Opcodes.looks_goforwardbackwardlayers:
-				{
-					spr.SetLayoutOrder(
-						spr.layoutOrder + int.Parse(block.inputs[0].value) * (block.fields[0] == "forward" ? 1 : -1)
-					);
-					break;
-				}
-
-			case Block.Opcodes.looks_costumenumbername:
-				{
-					return block.fields[0] == "number" ? spr.currentCostume.ToString() : spr.costume.name;
-				}
-
-			case Block.Opcodes.looks_backdropnumbername:
-				{
-					return block.fields[0] == "number" ? project.stage.currentCostume.ToString() : project.stage.costume.name;
-				}
-
-			case Block.Opcodes.looks_size:
-				{
-					return spr.size.ToString();
-				}
-
-			case Block.Opcodes.sound_playuntildone:
-				{
-					Raylib.PlaySound(spr.sounds.First(x => x.name == block.inputs[0].value).sound);
-					return "";
-				}
-
-			case Block.Opcodes.sound_sounds_menu:
-				{
-					return block.fields[0];
-				}
-
-			case Block.Opcodes.sound_play:
-				{
-					Raylib.PlaySound(spr.sounds.First(x => x.name == block.inputs[0].value).sound);
-					break;
-				}
-
-			case Block.Opcodes.sound_stopallsounds:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sound_changeeffectby:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sound_seteffectto:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sound_cleareffects:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sound_changevolumeby:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sound_setvolumeto:
-				{
-					spr.volume = StrNumber(block.inputs[0].value);
-					break;
-				}
-
-			case Block.Opcodes.sound_volume:
-				{
-					return spr.volume.ToString();
-				}
-
-			case Block.Opcodes.event_whenflagclicked:
-				{
-					break;
-				}
-
-			case Block.Opcodes.event_whenkeypressed:
-				{
-					if (block.fields[0] == "any") return Boolstr(Raylib.GetKeyPressed() > 0);
-
-					KeyboardKey key = StrKey(block.fields[0]);
-					if (Raylib.IsKeyPressedRepeat(key) || Raylib.IsKeyPressed(key))
-					{
-						break;
-					}
-					else
-					{
-						return "";
-					}
-				}
-
-			case Block.Opcodes.event_whenthisspriteclicked:
-				{
-					break;
-				}
-
-			case Block.Opcodes.event_whenstageclicked:
-				{
-					break;
-				}
-
-			case Block.Opcodes.event_whenbackdropswitchesto:
-				{
-					break;
-				}
-
-			case Block.Opcodes.event_whengreaterthan:
-				{
-					break;
-				}
-
-			case Block.Opcodes.event_whenbroadcastreceived:
-				{
-					break;
-				}
-
-			case Block.Opcodes.event_broadcast:
-				{
-					foreach (var sprite in project.sprites)
-					{
-						foreach (var top in sprite.blocks.Where(x => x.Value.opcode == Block.Opcodes.event_whenbroadcastreceived))
-						{
-							Execute(sprite, top.Value);
-						}
-					}
-					break;
-				}
-
-			case Block.Opcodes.event_broadcastandwait:
-				{
-					foreach (var sprite in project.sprites)
-					{
-						foreach (var top in sprite.blocks.Where(x => x.Value.opcode == Block.Opcodes.event_whenbroadcastreceived))
-						{
-							Execute(sprite, top.Value);
-						}
-					}
-					break;
-				}
-
-			case Block.Opcodes.control_wait:
-				{
-					float sec = StrNumber(block.inputs[0].value);
-					if (sec > 0)
-					{
-						thread.delay = sec;
-					}
-					else
-					{
-						thread.nextframe = false;
-					}
-
-					return "";
-				}
-
-			case Block.Opcodes.control_repeat:
-				{
-					thread.block = spr.blocks[block.inputs[1].RawValue];
-					thread.returnto.Add(new(thread.block, int.Parse(block.inputs[0].value)));
-					return "";
-				}
-
-			case Block.Opcodes.control_forever:
-				{
-					thread.block = spr.blocks[block.inputs[0].RawValue];
-					thread.returnto.Add(new(thread.block));
-					break;
-				}
-
-			case Block.Opcodes.control_if:
-				{
-					if (Strbool(block.inputs[0].value))
-					{
-						Execute(spr, spr.blocks[block.inputs[1].RawValue], ref thread);
-					}
-
-					break;
-				}
-
-			case Block.Opcodes.control_if_else:
-				{
-					if (Strbool(block.inputs[2].value))
-					{
-						Execute(spr, spr.blocks[block.inputs[0].RawValue], ref thread);
-					}
-					else
-					{
-						Execute(spr, spr.blocks[block.inputs[1].RawValue], ref thread);
-					}
-
-					break;
-				}
-
-			case Block.Opcodes.control_wait_until:
-				{
-					break;
-				}
-
-			case Block.Opcodes.control_repeat_until:
-				{
-					break;
-				}
-
-			case Block.Opcodes.control_while:
-				{
-					break;
-				}
-
-			case Block.Opcodes.control_stop:
-				{
-					break;
-				}
-
-			// case Block.opcodes.control_start_as_clone
-
-			case Block.Opcodes.control_create_clone_of:
-				{
-					project.clones.Add(Sprite.Clone(project.sprites.First(x => x.name == block.inputs[0].value)));
-					break;
-				}
-
-			case Block.Opcodes.control_create_clone_of_menu:
-				{
-					return block.fields[0] == "_myself_" ? spr.name : block.fields[0];
-				}
-
-			case Block.Opcodes.control_delete_this_clone:
-				{
-					if (!spr.isClone) break;
-
-					project.clones.Remove(spr);
-					break;
-				}
-
-			case Block.Opcodes.sensing_touchingobject:
-				{
-					if (!project.sprites.Any(x => x.name == block.inputs[0].value)) return "false";
-					Sprite target = project.sprites.First(x => x.name == block.inputs[0].value);
-					if (!CheckBoundingBoxOverlap(spr, target)) return "false";
-					if (!CheckPixelOverlap(spr, target)) return "false";
-					return "true";
-				}
-
-			case Block.Opcodes.sensing_touchingobjectmenu:
-				{
-					return block.fields[0];
-				}
-
-			case Block.Opcodes.sensing_touchingcolor:
-				{
-					for (int x = 0; x < spr.costume.image.Width; x++)
-					{
-						for (int y = 0; y < spr.costume.image.Height; y++)
-						{
-							if (spr.costume.GetColor(x, y).A != 0)
-							{
-								Color color = Application.render.GetColorOnPixel(x, y);
-								if (block.inputs[0].value == $"#{color.R:X2}{color.G:X2}{color.B:X2}")
-								{
-									return "true";
-								}
-							}
-						}
-					}
-					return "false";
-				}
-
-			case Block.Opcodes.sensing_coloristouchingcolor:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sensing_distanceto:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sensing_distancetomenu:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sensing_askandwait:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sensing_answer:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sensing_keypressed:
-				{
-					if (block.inputs[0].value == "any") return Boolstr(Raylib.GetKeyPressed() > 0);
-
-					if (StrKey(block.inputs[0].value) == KeyboardKey.Null && block.inputs[0].value.Length > 1)
-					{
-						return Boolstr(Raylib.IsKeyDown(StrKey(block.inputs[0].value[0].ToString())));
-					}
-
-					return Boolstr(Raylib.IsKeyDown(StrKey(block.inputs[0].value)));
-				}
-
-			case Block.Opcodes.sensing_keyoptions:
-				{
-					return block.fields[0];
-				}
-
-			case Block.Opcodes.sensing_mousedown:
-				{
-					return Boolstr(Raylib.IsMouseButtonDown(MouseButton.Left));
-				}
-
-			case Block.Opcodes.sensing_mousex:
-				{
-					return Raylib.GetMouseX().ToString();
-				}
-
-			case Block.Opcodes.sensing_mousey:
-				{
-					return Raylib.GetMouseY().ToString();
-				}
-
-			case Block.Opcodes.sensing_setdragmode:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sensing_loudness:
-				{
-					return "0";
-				}
-
-			case Block.Opcodes.sensing_timer:
-				{
-					return timer.ToString();
-				}
-
-			case Block.Opcodes.sensing_resettimer:
-				{
-					timer = 0;
-					break;
-				}
-
-			case Block.Opcodes.sensing_of:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sensing_of_object_menu:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sensing_current:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sensing_dayssince2000:
-				{
-					break;
-				}
-
-			case Block.Opcodes.sensing_username:
-				{
-					return "USERNAME";
-				}
-
-			case Block.Opcodes.operator_add:
-				{
-					return (StrNumber(block.inputs[0].value) + StrNumber(block.inputs[1].value)).ToString();
-				}
-
-			case Block.Opcodes.operator_subtract:
-				{
-					return (StrNumber(block.inputs[0].value) - StrNumber(block.inputs[1].value)).ToString();
-				}
-
-			case Block.Opcodes.operator_multiply:
-				{
-					return (StrNumber(block.inputs[0].value) * StrNumber(block.inputs[1].value)).ToString();
-				}
-
-			case Block.Opcodes.operator_divide:
-				{
-					return (StrNumber(block.inputs[0].value) / StrNumber(block.inputs[1].value)).ToString();
-				}
-
-			case Block.Opcodes.operator_random:
-				{
-					double number = rng.NextDouble() + StrNumber(block.inputs[0].value) * (StrNumber(block.inputs[1].value) - StrNumber(block.inputs[0].value));
-					return number.ToString();
-				}
-
-			case Block.Opcodes.operator_gt:
-				{
-					return Boolstr(StrNumber(block.inputs[0].value) > StrNumber(block.inputs[1].value));
-				}
-
-			case Block.Opcodes.operator_lt:
-				{
-					return Boolstr(StrNumber(block.inputs[0].value) < StrNumber(block.inputs[1].value));
-				}
-
-			case Block.Opcodes.operator_equals:
-				{
-					return Boolstr(block.inputs[0].value.ToLower() == block.inputs[1].value.ToLower());
-				}
-
-			case Block.Opcodes.operator_and:
-				{
-					return Boolstr(Strbool(block.inputs[0].value) && Strbool(block.inputs[1].value));
-				}
-
-			case Block.Opcodes.operator_or:
-				{
-					return Boolstr(Strbool(block.inputs[0].value) || Strbool(block.inputs[1].value));
-				}
-
-			case Block.Opcodes.operator_not:
-				{
-					return Boolstr(!Strbool(block.inputs[0].value));
-				}
-
-			case Block.Opcodes.operator_join:
-				{
-					return block.inputs[0].value + block.inputs[1].value;
-				}
-
-			case Block.Opcodes.operator_letter_of:
-				{
-					return block.inputs[0].value[int.Parse(block.inputs[1].value)].ToString();
-				}
-
-			case Block.Opcodes.operator_length:
-				{
-					return block.inputs[0].value.Length.ToString();
-				}
-
-			case Block.Opcodes.operator_contains:
-				{
-					break;
-				}
-
-			case Block.Opcodes.operator_mod:
-				{
-					break;
-				}
-
-			case Block.Opcodes.operator_round:
-				{
-					break;
-				}
-
-			case Block.Opcodes.operator_mathop:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_variable:
-				{
-					return project.stage.variables.First(x => x.name == block.fields[0]).value.ToString() ?? "";
-				}
-
-			case Block.Opcodes.data_setvariableto:
-				{
-					project.stage.variables.First(x => x.name == block.fields[0]).value = block.inputs[0];
-					break;
-				}
-
-			case Block.Opcodes.data_changevariableby:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_showvariable:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_hidevariable:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_listcontents:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_addtolist:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_deleteoflist:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_deletealloflist:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_insertatlist:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_replaceitemoflist:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_itemoflist:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_itemnumoflist:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_lengthoflist:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_listcontainsitem:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_showlist:
-				{
-					break;
-				}
-
-			case Block.Opcodes.data_hidelist:
-				{
-					break;
-				}
-
-			case Block.Opcodes.procedures_definition:
-				{
-					break;
-				}
-
-			case Block.Opcodes.procedures_prototype:
-				{
-					break;
-				}
-
-			case Block.Opcodes.procedures_call:
-				{
-					break;
-				}
-
-			case Block.Opcodes.argument_reporter_string_number:
-				{
-					break;
-				}
-
-			case Block.Opcodes.argument_reporter_boolean:
-				{
-					break;
-				}
-
-			default:
-				{
-					string? returnValue = operations[block.opcode](ref thread, project);
-					if (returnValue != null)
-					{
-						return returnValue;
-					}
-					else
-					{
-						break;
-					}
-				}
-		}
-
-		if (block.nextId != "")
-		{
-			return Execute(spr, block.Next(spr), ref thread);
-		}
-		else
-		{
-			thread.block.nextId = "";
+			thread.block = thread.block.Next(thread.sprite);
+			return Execute(ref thread);
 		}
 
 		return string.Empty;
