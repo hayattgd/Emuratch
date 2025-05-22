@@ -1,35 +1,39 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: .NET
+name: .NET Check
 
 on:
-  push:
-    branches: [ "dev" ]
   pull_request:
     branches: [ "dev", "stable" ]
+
+env:
+  net_version: 8.0
 
 jobs:
   Build:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-    
+        config: [Release, Debug]
+
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: ${{ env.net_version }}.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore -c Release
+      run: dotnet build --no-restore --verbosity diag -c ${{ matrix.config }}
     - name: Test
-      run: dotnet test --no-build --verbosity normal -c Release
+      run: dotnet test --no-restore --no-build --verbosity diag -c ${{ matrix.config }}
+    - name: Check for NOTICES.txt
+      run: test -f ./bin/${{ matrix.config }}/net${{env.net_version}}/NOTICES.txt
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.5.0
       with:
-        name: ${{ matrix.os }}
-        path: ./bin/Release/
+        name: ${{ github.event.pull_request.title }}:${{ matrix.os }}(${{ matrix.config }})
+        path: ./bin/${{ matrix.config }}/net${{env.net_version}}
