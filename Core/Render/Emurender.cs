@@ -1,6 +1,8 @@
-﻿using Emuratch.Core.Scratch;
+﻿using Emuratch.Core.Overlay;
+using Emuratch.Core.Scratch;
 using Raylib_cs;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -15,6 +17,8 @@ public class Emurender : IRender
 
 	public readonly Project project;
 
+	public Dictionary<string, Variable> variablesFromId { get; internal set; } = [];
+
 	public void RenderAll()
 	{
 		Raylib.ClearBackground(Color.White);
@@ -24,8 +28,8 @@ public class Emurender : IRender
 		{
 			RenderSprite(project.stage);
 			var all = list.Concat(project.clones);
-			
-			list = [..all];
+
+			list = [.. all];
 			list.Sort((a, b) => a.layoutOrder.CompareTo(b.layoutOrder));
 			list.Reverse();
 
@@ -33,6 +37,11 @@ public class Emurender : IRender
 			{
 				RenderSprite(sprite);
 			}
+		}
+
+		foreach (var monitor in project.monitors)
+		{
+			OverlayRender.RenderMonitor(monitor);
 		}
 
 		if (!Application.debug) return;

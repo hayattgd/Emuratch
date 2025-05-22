@@ -30,9 +30,12 @@ jobs:
       run: dotnet build --no-restore --verbosity diag -c ${{ matrix.config }}
     - name: Test
       run: dotnet test --no-restore --no-build --verbosity diag -c ${{ matrix.config }}
-    - name: Check for NOTICES.txt
+    - name: Check for NOTICES.txt (unix)
+      if: ${{ runner.os != 'Windows' }}
       run: test -f ./bin/${{ matrix.config }}/net${{env.net_version}}/NOTICES.txt
-      shell: bash
+    - name: Check for NOTICES.txt (win)
+      if: ${{ runner.os == 'Windows' }}
+      run: Test-Path ./bin/${{ matrix.config }}/net${{env.net_version}}/NOTICES.txt
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.5.0
       with:

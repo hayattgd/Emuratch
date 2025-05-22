@@ -121,10 +121,6 @@ public class Application
 
 				messages.Add(new("Project loaded"));
 			}
-			else
-			{
-				messages.Add(new("Error occurred"));
-			}
 		}
 
 		if (Raylib.IsKeyPressed(KeyboardKey.F1))

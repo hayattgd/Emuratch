@@ -26,6 +26,7 @@ public class VariableConverter : JsonConverter<Variable[]>
 
 		foreach (var item in obj)
 		{
+			Console.WriteLine(item.Path);
 			variables.Add(new()
 			{
 				name = item[0]?.ToString() ?? "",

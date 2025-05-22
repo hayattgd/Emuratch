@@ -46,6 +46,7 @@ public static class OverlayRender
 		{
 			case Monitor.Mode.normal:
 				{
+					RenderDialogue((int)monitor.pos.X, (int)monitor.pos.Y, $"{monitor.DisplayName} : {monitor.name}");
 					break;
 				}
 
