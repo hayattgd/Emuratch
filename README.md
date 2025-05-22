@@ -26,6 +26,45 @@ If you're using arm64 cpu, please run `Mac-fix-libgdiplus.sh` on directory where
 | PAUSE | Pause / resume game |
 | -     | Frame advance       |
 
+## Features (To-do list)
+
+### Blocks
+- [ ] Motion
+- [ ] Looks
+- [ ] Sound
+- [ ] Events
+- [ ] Control
+- [ ] Sensing
+- [ ] Operators
+- [ ] Variables (including List)
+- [ ] My Blocks
+
+### Advanced options
+- [x] 60 FPS / Turbo mode (Speedhack)
+- [ ] Interpolation
+- [ ] High Quality Pen
+- [x] Infinite Clones
+- [x] Remove Fencing
+- [ ] Remove Miscellaneous Limits
+- [x] Custom Stage Size
+
+### Emulation
+- [ ] Interpreter
+- [ ] Cached Interpreter
+- [ ] JIT Compiler
+
+### TAS
+- [x] Pause / resume
+- [x] Frame advance
+- [ ] Savestate
+- [ ] Record / Replay
+
+### UI
+- [ ] Cross-platform GUI (not text UI, but Graphical UI)
+- [ ] Project list
+- [ ] Advanced options
+- [ ] TAS keybind
+
 ## LICENSE
 
 This repository is distributed under [MIT License](./LICENSE).
