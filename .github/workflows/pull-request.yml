@@ -27,7 +27,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore --verbosity diag -c ${{ matrix.config }} -o ./bin/build
+      run: dotnet build --no-restore --verbosity diag -c ${{ matrix.config }} -o ./bin/build ./Emuratch.csproj
     - name: Test
       run: dotnet test --no-restore --no-build --verbosity diag -c ${{ matrix.config }}
     - name: Check for NOTICES.txt (unix)
