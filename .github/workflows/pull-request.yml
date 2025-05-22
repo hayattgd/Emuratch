@@ -35,5 +35,5 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.5.0
       with:
-        name: ${{ github.event.pull_request.title }}:${{ matrix.os }}(${{ matrix.config }})
+        name: ${{ github.event.pull_request.title }}_${{ matrix.os }}(${{ matrix.config }})
         path: ./bin/${{ matrix.config }}/net${{env.net_version}}
