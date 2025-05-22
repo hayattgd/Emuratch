@@ -43,7 +43,7 @@ public class Thread
 		if (block == null) return;
 
 		var self = this;
-		runner.Execute(sprite, block, ref self);
+		runner.Execute(ref self);
 		block = self.block;
 
 		if (block == null || block.nextId == string.Empty)
@@ -87,7 +87,7 @@ public class Thread
 	public readonly Sprite sprite;
 	public Block block;
 
-	Runner runner { get => Application.runner; }
+	IRunner runner { get => Application.runner; }
 }
 
 public struct Loop

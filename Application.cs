@@ -43,8 +43,8 @@ public class Application
 	public Runners runnertype;
 	public Renders rendertype;
 
-	internal static RenderType render;
-	internal static Runner runner;
+	internal static IRender render;
+	internal static IRunner runner;
 
 	public readonly List<Message> messages = new();
 
@@ -120,10 +120,6 @@ public class Application
 				runner.fps = Configuration.Config.framerate;
 
 				messages.Add(new("Project loaded"));
-			}
-			else
-			{
-				messages.Add(new("Error occurred"));
 			}
 		}
 

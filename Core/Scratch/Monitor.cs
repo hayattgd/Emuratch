@@ -6,6 +6,7 @@ using System.Numerics;
 
 namespace Emuratch.Core.Scratch;
 
+[JsonConverter(typeof(MonitorConverter))]
 public class Monitor
 {
 	public enum Mode
@@ -23,6 +24,7 @@ public class Monitor
 	}
 
 	public Mode mode = Mode.normal;
+	public string id = string.Empty;
 	public string name = string.Empty;
 	public string sprname = string.Empty;
 	public Vector2 pos = new(5, 5);
@@ -50,6 +52,7 @@ public class MonitorConverter : JsonConverter<List<Monitor>>
 		{
 			list.Add(new()
 			{
+				id = item.Value["id"]?.ToString() ?? "",
 				name = item.Value["params"]?[0]?.ToString() ?? "my variable",
 				sprname = item.Value["spriteName"]?.ToString() ?? string.Empty,
 				mode = Monitor.ToMode(item.Value["mode"]?.ToString() ?? "default"),

@@ -29,6 +29,7 @@ public class Project : Unloadable
 	public uint height = defaultHeight;
 
 	public bool isTurbowarp = false;
+	public Monitor[] monitors = [];
 
 	public void Unload()
 	{
@@ -49,6 +50,11 @@ public class Project : Unloadable
 		try
 		{
 			JObject parsed = JObject.Parse(json);
+
+			//Import Monitor
+			Monitor[]? monitorArray = parsed["monitors"]?.ToObject<Monitor[]>();
+			if (monitorArray == null) return false;
+			project.monitors = monitorArray;
 
 			//Import sprites
 			Sprite[]? spritesArray = parsed["targets"]?.ToObject<Sprite[]>();

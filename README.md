@@ -1,11 +1,11 @@
 ﻿# ![Emuratch](Images/Logo.svg)
 
-[![.NET](https://github.com/hayattgd/Emuratch/actions/workflows/dotnet.yml/badge.svg?branch=stable)](https://github.com/hayattgd/Emuratch/actions/workflows/dotnet.yml)
+[![.NET Build](https://github.com/hayattgd/Emuratch/actions/workflows/build.yml/badge.svg?branch=dev)](https://github.com/hayattgd/Emuratch/actions/workflows/build.yml)
 [![GitHub License](https://img.shields.io/github/license/hayattgd/Emuratch)](https://github.com/hayattgd/Emuratch/blob/stable/LICENSE)
 
 Scratch emulator made with C# & [raylib](https://www.raylib.com/)
 
-Visit [nightly.link](https://nightly.link/hayattgd/Emuratch/workflows/dotnet/dev) for latest builds.
+Visit [nightly.link](https://nightly.link/hayattgd/Emuratch/workflows/build/dev) for latest builds.
 Emuratch supports Windows, MacOS and Linux.
 
 For using MacOS build, please execute command below to install gtk.
@@ -25,6 +25,45 @@ If you're using arm64 cpu, please run `Mac-fix-libgdiplus.sh` on directory where
 | F5    | Press flag          |
 | PAUSE | Pause / resume game |
 | -     | Frame advance       |
+
+## Features (To-do list)
+
+### Blocks
+- [ ] Motion
+- [ ] Looks
+- [ ] Sound
+- [ ] Events
+- [ ] Control
+- [ ] Sensing
+- [ ] Operators
+- [ ] Variables (including List)
+- [ ] My Blocks
+
+### Advanced options
+- [x] 60 FPS / Turbo mode (Speedhack)
+- [ ] Interpolation
+- [ ] High Quality Pen
+- [x] Infinite Clones
+- [x] Remove Fencing
+- [ ] Remove Miscellaneous Limits
+- [x] Custom Stage Size
+
+### Emulation
+- [ ] Interpreter
+- [ ] Cached Interpreter
+- [ ] JIT Compiler
+
+### TAS
+- [x] Pause / resume
+- [x] Frame advance
+- [ ] Savestate
+- [ ] Record / Replay
+
+### UI
+- [ ] Cross-platform GUI (not text UI, but Graphical UI)
+- [ ] Project list
+- [ ] Advanced options
+- [ ] TAS keybind
 
 ## LICENSE
 
