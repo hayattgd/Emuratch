@@ -32,6 +32,7 @@ jobs:
       run: dotnet test --no-restore --no-build --verbosity diag -c ${{ matrix.config }}
     - name: Check for NOTICES.txt
       run: test -f ./bin/${{ matrix.config }}/net${{env.net_version}}/NOTICES.txt
+      shell: bash
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.5.0
       with:
