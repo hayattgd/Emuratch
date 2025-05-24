@@ -3,7 +3,7 @@
 using Emuratch.Core.Scratch;
 using Emuratch.Core.Turbowarp;
 using Emuratch.Core.vm;
-using Emuratch.Core.Render;
+using Emuratch.Render;
 using Emuratch.Core.Overlay;
 using Emuratch.Core.Crossplatform;
 using Raylib_cs;
@@ -12,7 +12,7 @@ using System.IO;
 using System;
 using System.Collections.Generic;
 
-namespace Emuratch;
+namespace Emuratch.UI;
 
 public class Application
 {
@@ -26,22 +26,17 @@ public class Application
 	public enum Runners
 	{
 		Interpreter,
-		Compilier,
-#if DEBUG
-		Scratch,
-#endif
+		JITCompilier
 	}
 
 	public enum Renders
 	{
-		Emurender,
-#if DEBUG
-		Scratch,
-#endif
+		Null,
+		Raylib
 	}
 
-	public Runners runnertype;
-	public Renders rendertype;
+	public Runners runnertype = Runners.Interpreter;
+	public Renders rendertype = Renders.Raylib;
 
 	internal static IRender render;
 	internal static IRunner runner;
@@ -53,7 +48,7 @@ public class Application
 
 	public void UnloadProject()
 	{
-		project?.Unload();
+		render.Unload();
 		projectloaded = false;
 		projectpath = "";
 	}
@@ -88,35 +83,21 @@ public class Application
 		if (projectloading)
 		{
 			projectloading = false;
-			project = LoadProject();
-			if (project != null)
+			var loaded = LoadProject();
+			if (loaded != null)
 			{
-				switch (rendertype)
+				project = loaded;
+				render?.Unload();
+				render = rendertype switch
 				{
-					case Renders.Emurender:
-						render = new Emurender(project);
-						break;
+					Renders.Raylib => new RaylibRender(project),
+					_ => new NullRender(),
+				};
 
-#if DEBUG
-					case Renders.Scratch:
-						break;
-#endif
-				}
-
-				switch (runnertype)
+				runner = runnertype switch
 				{
-					case Runners.Interpreter:
-						runner = new Interpreter(project);
-						break;
-
-					case Runners.Compilier:
-						break;
-
-#if DEBUG
-					case Runners.Scratch:
-						break;
-#endif
-				}
+					_ => new Interpreter(project, render)
+				};
 				runner.fps = Configuration.Config.framerate;
 
 				messages.Add(new("Project loaded"));
@@ -125,7 +106,6 @@ public class Application
 
 		if (Raylib.IsKeyPressed(KeyboardKey.F1))
 		{
-			if (project != null) UnloadProject();
 			projectloading = true;
 		}
 
@@ -200,10 +180,10 @@ public class Application
 			}
 		}
 
-		foreach (var item in messages)
-		{
-			OverlayRender.RenderMessage(item, messages.IndexOf(item));
-		}
+		// foreach (var item in messages)
+		// {
+		// 	render.RenderMessage(item, messages.IndexOf(item));
+		// }
 
 		messages.RemoveAll((msg) => msg.added + msg.duration < Raylib.GetTime());
 

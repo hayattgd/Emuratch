@@ -25,12 +25,12 @@ jobs:
         dotnet-version: ${{env.net_version}}.x
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore -c Release -o ./bin/build ./Emuratch.csproj
+    - name: Build Core
+      run: dotnet build --no-restore -c Release -o ./bin/build ./src/Core/Emuratch.Core.csproj
     - name: Test
       run: dotnet test --no-restore --no-build --verbosity normal -c Release
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v4.5.0
-      with:
-        name: ${{ matrix.os }}
-        path: ./bin/build
+    # - name: Upload a Build Artifact
+    #   uses: actions/upload-artifact@v4.5.0
+    #   with:
+    #     name: ${{ matrix.os }}
+    #     path: ./bin/build

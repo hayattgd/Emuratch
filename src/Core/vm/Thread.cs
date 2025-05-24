@@ -5,16 +5,18 @@ namespace Emuratch.Core.vm;
 
 public class Thread
 {
-	public Thread(Block block)
+	public Thread(Block block, IRunner runner)
 	{
 		sprite = block.sprite;
 		this.block = block;
+		this.runner = runner;
 	}
 
-	public Thread(Sprite sprite, Block block)
+	public Thread(Sprite sprite, Block block, IRunner runner)
 	{
 		this.sprite = sprite;
 		this.block = block;
+		this.runner = runner;
 	}
 
 	public void Step()
@@ -50,7 +52,7 @@ public class Thread
 		{
 			if(returnto.Count <= 0)
 			{
-				Program.app.threads.Remove(this);
+				runner.threads.Remove(this);
 				return;
 			}
 			else if (returnto[^1].forever || returnto[^1].repeats > 0)
@@ -87,7 +89,7 @@ public class Thread
 	public readonly Sprite sprite;
 	public Block block;
 
-	IRunner runner { get => Application.runner; }
+	internal readonly IRunner runner;
 }
 
 public struct Loop

@@ -1,9 +1,8 @@
-using Emuratch.Core.Overlay;
 using Emuratch.Core.Render;
 using Emuratch.Core.Scratch;
-using Raylib_cs;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 
@@ -14,14 +13,16 @@ public class Interpreter : IRunner
 	const float DegToRad = MathF.PI / 180;
 	const float MoveMultiplier = 1f;
 
-	public Interpreter(Project project)
+	public Interpreter(Project project, IRender render)
 	{
+		this.render = render;
 		this.project = project;
+		threads = [];
 		rng = new();
 
 		eventBlocks = [];
 
-		foreach (var spr in Application.project.sprites)
+		foreach (var spr in project.sprites)
 		{
 			foreach (var block in spr.blocks)
 			{
@@ -41,7 +42,9 @@ public class Interpreter : IRunner
 		}
 	}
 
+	public readonly IRender render;
 	public Project project { get; set; }
+	public List<Thread> threads { get; set; }
 
 	public bool TAS { get; set; }
 	public bool paused { get; set; }
@@ -52,14 +55,27 @@ public class Interpreter : IRunner
 
 	public float timer { get; set; }
 
-	public Vector2 mouse {
-		get {
-			Vector2 inverted = Raylib.GetMousePosition() - new Vector2(Raylib.GetScreenWidth() * 0.5f, Raylib.GetScreenHeight() * 0.5f);
-			return new(inverted.X, -inverted.Y);
-		}
-	}
+	public Vector2 mouse => render.MousePosition;
 	public Vector2 tasmouse { get; set; }
 	public Vector2 mousepos { get => TAS ? tasmouse : mouse; }
+
+	public readonly struct ReturnValue
+	{
+		public ReturnValue()
+		{
+			value = "";
+			interrupt = false;
+		}
+
+		public ReturnValue(string ret)
+		{
+			value = ret;
+			interrupt = true;
+		}
+
+		public readonly string value;
+		public readonly bool interrupt;
+	}
 
 	static readonly Dictionary<Block.Opcodes, Operation> operations = new()
 	{
@@ -94,8 +110,8 @@ public class Interpreter : IRunner
 				if (thread.block.inputs[0].value == "_random_")
 				{
 					pos = new(
-						interpreter.rng.Next((int)(Application.project.width * -0.5f), (int)(Application.project.width * 0.5f)),
-						interpreter.rng.Next((int)(Application.project.height * -0.5f), (int)(Application.project.height * 0.5f))
+						interpreter.rng.Next((int)(project.width * -0.5f), (int)(project.width * 0.5f)),
+						interpreter.rng.Next((int)(project.height * -0.5f), (int)(project.height * 0.5f))
 					);
 				}
 				else if (thread.block.inputs[0].value == "_mouse_")
@@ -105,7 +121,7 @@ public class Interpreter : IRunner
 				else
 				{
 					string destinationstr = thread.block.inputs[0].value;
-					Sprite destination = Application.project.sprites.First(spr => spr.name == destinationstr);
+					Sprite destination = project.sprites.First(spr => spr.name == destinationstr);
 					pos = new(destination.x, destination.y);
 				}
 
@@ -140,8 +156,8 @@ public class Interpreter : IRunner
 				if (thread.block.inputs[0].value == "_random_")
 				{
 					pos = new(
-						interpreter.rng.Next((int)(Application.project.width * -0.5f), (int)(Application.project.width * 0.5f)),
-						interpreter.rng.Next((int)(Application.project.height * -0.5f), (int)(Application.project.height * 0.5f))
+						interpreter.rng.Next((int)(project.width * -0.5f), (int)(project.width * 0.5f)),
+						interpreter.rng.Next((int)(project.height * -0.5f), (int)(project.height * 0.5f))
 					);
 				}
 				else if (thread.block.inputs[0].value == "_mouse_")
@@ -151,7 +167,7 @@ public class Interpreter : IRunner
 				else
 				{
 					string destinationstr = thread.block.inputs[0].value;
-					Sprite destination = Application.project.sprites.First(spr => spr.name == destinationstr);
+					Sprite destination = project.sprites.First(spr => spr.name == destinationstr);
 					pos = new(destination.x, destination.y);
 				}
 
@@ -191,7 +207,6 @@ public class Interpreter : IRunner
 				if (thread.block.inputs[0].value == "_mouse_")
 				{
 					pos = interpreter.mousepos;
-					Emurender.dbginfo = $"{interpreter.mousepos}, {Raylib.GetMousePosition()}, {Raylib.GetScreenWidth()}x{Raylib.GetScreenHeight()}";
 				}
 				else if (thread.block.inputs[0].value == "_random_")
 				{
@@ -203,7 +218,7 @@ public class Interpreter : IRunner
 					try
 					{
 						string destinationstr = thread.block.inputs[0].value;
-						Sprite destination = Application.project.sprites.First(spr => spr.name == destinationstr);
+						Sprite destination = project.sprites.First(spr => spr.name == destinationstr);
 						pos = new(destination.x, destination.y);
 					}
 					catch (Exception ex)
@@ -294,6 +309,13 @@ public class Interpreter : IRunner
 				if (sec > 0)
 				{
 					thread.delay = sec;
+					thread.sprite.dialog = new()
+					{
+						type = Sprite.DialogType.Say,
+						text = thread.block.inputs[0].value,
+						duration = sec,
+						infinite = false
+					};
 				}
 				else
 				{
@@ -305,7 +327,13 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.looks_say,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				OverlayRender.RenderDialogue(-(int)thread.sprite.x, -(int)thread.sprite.y - thread.sprite.costume.image.Height, thread.block.inputs[0].value);
+				thread.sprite.dialog = new()
+				{
+					type = Sprite.DialogType.Say,
+					text = thread.block.inputs[0].value,
+					duration = 0,
+					infinite = true
+				};
 				return null;
 			}
 		},
@@ -316,6 +344,13 @@ public class Interpreter : IRunner
 				if (sec > 0)
 				{
 					thread.delay = sec;
+					thread.sprite.dialog = new()
+					{
+						type = Sprite.DialogType.Think,
+						text = thread.block.inputs[0].value,
+						duration = sec,
+						infinite = false
+					};
 				}
 				else
 				{
@@ -327,7 +362,13 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.looks_think,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				OverlayRender.RenderDialogue((int)thread.sprite.x, (int)thread.sprite.y + thread.sprite.costume.image.Height, thread.block.inputs[0].value);
+				thread.sprite.dialog = new()
+				{
+					type = Sprite.DialogType.Think,
+					text = thread.block.inputs[0].value,
+					duration = 0,
+					infinite = true
+				};
 				return null;
 			}
 		},
@@ -476,7 +517,7 @@ public class Interpreter : IRunner
 			Block.Opcodes.sound_playuntildone,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				string sound = thread.block.inputs[0].value;
-				Raylib.PlaySound(thread.sprite.sounds.First(x => x.name == sound).sound);
+				interpreter.render.PlaySound(thread.sprite.sounds.First(x => x.name == sound));
 				return null;
 			}
 		},
@@ -490,7 +531,7 @@ public class Interpreter : IRunner
 			Block.Opcodes.sound_play,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				string sound = thread.block.inputs[0].value;
-				Raylib.PlaySound(thread.sprite.sounds.First(x => x.name == sound).sound);
+				interpreter.render.PlaySound(thread.sprite.sounds.First(x => x.name == sound));
 				return null;
 			}
 		},
@@ -546,10 +587,9 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.event_whenkeypressed,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				if (thread.block.fields[0] == "any") return Boolstr(Raylib.GetKeyPressed() > 0);
+				if (thread.block.fields[0] == "any") return Boolstr(interpreter.render.IsAnyKeyDown());
 
-				KeyboardKey key = interpreter.StrKey(thread.block.fields[0]);
-				if (Raylib.IsKeyPressedRepeat(key) || Raylib.IsKeyPressed(key))
+				if (interpreter.render.IsKeyRepeated(thread.block.inputs[0].value) || interpreter.render.IsKeyPressedOnce(thread.block.inputs[0].value))
 				{
 					return null;
 				}
@@ -627,7 +667,7 @@ public class Interpreter : IRunner
 				{
 					thread.nextframe = false;
 				}
-				
+
 				return null;
 			}
 		},
@@ -704,7 +744,17 @@ public class Interpreter : IRunner
 			Block.Opcodes.control_create_clone_of,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				string clonemenu = thread.block.inputs[0].value;
-				project.clones.Add(Sprite.Clone(project.sprites.First(x => x.name == clonemenu)));
+				Sprite clone = Sprite.Clone(project.sprites.First(x => x.name == clonemenu));
+				project.clones.Add(clone);
+				foreach (var block in clone.blocks)
+				{
+					if (block.Value.opcode == Block.Opcodes.control_start_as_clone)
+					{
+						Thread t = new(clone, block.Value, interpreter);
+						interpreter.threads.Add(thread);
+						interpreter.Execute(ref thread);
+					}
+				}
 				return null;
 			}
 		},
@@ -730,7 +780,7 @@ public class Interpreter : IRunner
 				if (!project.sprites.Any(x => x.name == sprite)) return "false";
 				Sprite target = project.sprites.First(x => x.name == sprite);
 				if (!CheckBoundingBoxOverlap(thread.sprite, target)) return "false";
-				if (!CheckPixelOverlap(thread.sprite, target)) return "false";
+				if (!interpreter.CheckPixelOverlap(thread.sprite, target)) return "false";
 				return "true";
 			}
 		},
@@ -743,13 +793,13 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.sensing_touchingcolor,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				for (int x = 0; x < thread.sprite.costume.image.Width; x++)
+				for (int x = 0; x < thread.sprite.costume.Width; x++)
 				{
-					for (int y = 0; y < thread.sprite.costume.image.Height; y++)
+					for (int y = 0; y < thread.sprite.costume.Height; y++)
 					{
-						if (thread.sprite.costume.GetColor(x, y).A != 0)
+						if (interpreter.render.GetColorOnPixel(x, y).A != 0)
 						{
-							Color color = Application.render.GetColorOnPixel(x, y);
+							Color color = interpreter.render.GetColorOnPixel(x, y);
 							if (thread.block.inputs[0].value == $"#{color.R:X2}{color.G:X2}{color.B:X2}")
 							{
 								return "true";
@@ -793,14 +843,14 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.sensing_keypressed,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				if (thread.block.inputs[0].value == "any") return Boolstr(Raylib.GetKeyPressed() > 0);
+				if (thread.block.inputs[0].value == "any") return Boolstr(interpreter.render.IsAnyKeyDown());
 
-				if (interpreter.StrKey(thread.block.inputs[0].value) == KeyboardKey.Null && thread.block.inputs[0].value.Length > 1)
+				if (!interpreter.render.IsStringKey(thread.block.inputs[0].value) && thread.block.inputs[0].value.Length > 1)
 				{
-					return Boolstr(Raylib.IsKeyDown(interpreter.StrKey(thread.block.inputs[0].value[0].ToString())));
+					return Boolstr(interpreter.render.IsKeyDown(thread.block.inputs[0].value));
 				}
 
-				return Boolstr(Raylib.IsKeyDown(interpreter.StrKey(thread.block.inputs[0].value)));
+				return Boolstr(interpreter.render.IsKeyDown(thread.block.inputs[0].value));
 			}
 		},
 		{
@@ -812,19 +862,19 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.sensing_mousedown,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return Boolstr(Raylib.IsMouseButtonDown(MouseButton.Left));
+				return Boolstr(interpreter.render.IsMouseDown());
 			}
 		},
 		{
 			Block.Opcodes.sensing_mousex,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return Raylib.GetMouseX().ToString();
+				return interpreter.mousepos.X.ToString();
 			}
 		},
 		{
 			Block.Opcodes.sensing_mousey,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return Raylib.GetMouseY().ToString();
+				return interpreter.mousepos.Y.ToString();
 			}
 		},
 		{
@@ -1173,83 +1223,12 @@ public class Interpreter : IRunner
 
 		foreach (var ev in eventBlocks[opcode])
 		{
-			Thread t = new(ev);
+			Thread t = new(ev, this);
 			threads.Add(t);
 			Execute(ref t);
 		}
 
 		return threads;
-	}
-
-	public KeyboardKey StrKey(string str)
-	{
-		return str switch
-		{
-			"space" => KeyboardKey.Space,
-			"left arrow" => KeyboardKey.Left,
-			"right arrow" => KeyboardKey.Right,
-			"up arrow" => KeyboardKey.Up,
-			"down arrow" => KeyboardKey.Down,
-			"enter" => KeyboardKey.Enter,
-			"a" => KeyboardKey.A,
-			"b" => KeyboardKey.B,
-			"c" => KeyboardKey.C,
-			"d" => KeyboardKey.D,
-			"e" => KeyboardKey.E,
-			"f" => KeyboardKey.F,
-			"g" => KeyboardKey.G,
-			"h" => KeyboardKey.H,
-			"i" => KeyboardKey.I,
-			"j" => KeyboardKey.J,
-			"k" => KeyboardKey.K,
-			"l" => KeyboardKey.L,
-			"m" => KeyboardKey.M,
-			"n" => KeyboardKey.N,
-			"o" => KeyboardKey.O,
-			"p" => KeyboardKey.P,
-			"q" => KeyboardKey.Q,
-			"r" => KeyboardKey.R,
-			"s" => KeyboardKey.S,
-			"t" => KeyboardKey.T,
-			"u" => KeyboardKey.U,
-			"v" => KeyboardKey.V,
-			"w" => KeyboardKey.W,
-			"x" => KeyboardKey.X,
-			"y" => KeyboardKey.Y,
-			"z" => KeyboardKey.Z,
-			"0" => KeyboardKey.Zero,
-			"1" => KeyboardKey.One,
-			"2" => KeyboardKey.Two,
-			"3" => KeyboardKey.Three,
-			"4" => KeyboardKey.Four,
-			"5" => KeyboardKey.Five,
-			"6" => KeyboardKey.Six,
-			"7" => KeyboardKey.Seven,
-			"8" => KeyboardKey.Eight,
-			"9" => KeyboardKey.Nine,
-			"-" => KeyboardKey.Minus,
-			"," => KeyboardKey.Comma,
-			"." => KeyboardKey.Period,
-			"`" => KeyboardKey.Grave,
-			"=" => KeyboardKey.Equal,
-			"[" => KeyboardKey.LeftBracket,
-			"]" => KeyboardKey.RightBracket,
-			"\\" => KeyboardKey.Backslash,
-			";" => KeyboardKey.Semicolon,
-			"'" => KeyboardKey.Apostrophe,
-			"/" => KeyboardKey.Slash,
-			//Using "join" block, we can do these tricks.
-			"control" => KeyboardKey.LeftControl,
-			"shift" => KeyboardKey.LeftShift,
-			"backspace" => KeyboardKey.Backspace,
-			"insert" => KeyboardKey.Insert,
-			"page up" => KeyboardKey.PageUp,
-			"page down" => KeyboardKey.PageDown,
-			"end" => KeyboardKey.End,
-			"home" => KeyboardKey.Home,
-			"scroll lock" => KeyboardKey.ScrollLock,
-			_ => KeyboardKey.Null
-		};
 	}
 
 	public static string ConvertDayOfWeek(DayOfWeek day)
@@ -1274,8 +1253,8 @@ public class Interpreter : IRunner
 
 	static void ClampToStage(Sprite spr, Project project)
 	{
-		float width = spr.costume.image.Width / 4f * spr.costume.bitmapResolution;
-		float height = spr.costume.image.Height / 4f * spr.costume.bitmapResolution;
+		float width = spr.costume.Width / 4f * spr.costume.bitmapResolution;
+		float height = spr.costume.Height / 4f * spr.costume.bitmapResolution;
 
 		spr.x = Math.Clamp(spr.x, project.width * -0.5f - width, project.width * 0.5f + width);
 		spr.y = Math.Clamp(spr.y, project.height * -0.5f - height, project.height * 0.5f + height);
@@ -1348,64 +1327,42 @@ public class Interpreter : IRunner
 
 	public static bool CheckBoundingBoxOverlap(Sprite a, Sprite b)
 	{
-		return Raylib.CheckCollisionBoxes(
-			a.RaylibBoundingBox,
-			b.RaylibBoundingBox
-		);
+		return !(
+			   a.boundingBox.Max.X < b.boundingBox.Min.X
+			|| a.boundingBox.Min.X > b.boundingBox.Max.X
+			|| a.boundingBox.Min.Y < b.boundingBox.Max.Y
+			|| a.boundingBox.Max.Y > b.boundingBox.Min.Y
+			);
 	}
 
-	public static bool CheckPixelOverlap(Sprite a, Sprite b)
+	public bool CheckPixelOverlap(Sprite a, Sprite b)
 	{
 		// Get overlap of 2 bounding boxes
-		int startX = (int)Math.Max(a.RaylibBoundingBox.Min.X, b.RaylibBoundingBox.Min.X);
-		int startY = (int)Math.Max(a.RaylibBoundingBox.Min.Y, b.RaylibBoundingBox.Min.Y);
-		int endX = (int)Math.Min(a.RaylibBoundingBox.Max.X, b.RaylibBoundingBox.Max.X);
-		int endY = (int)Math.Min(a.RaylibBoundingBox.Max.Y, b.RaylibBoundingBox.Max.Y);
-
-		if (Application.debug && Program.app.rendertype == Application.Renders.Emurender)
-		{
-			Raylib.DrawRectangle(startX, startY, endX - startX, endY - startY, new(0, 255, 0, 100));
-		}
+		int startX = (int)Math.Max(a.boundingBox.Min.X, b.boundingBox.Min.X);
+		int startY = (int)Math.Max(a.boundingBox.Min.Y, b.boundingBox.Min.Y);
+		int endX = (int)Math.Min(a.boundingBox.Max.X, b.boundingBox.Max.X);
+		int endY = (int)Math.Min(a.boundingBox.Max.Y, b.boundingBox.Max.Y);
 
 		for (int x = startX; x < endX; x++)
 		{
 			for (int y = startY; y < endY; y++)
 			{
-				Vector2 apos = a.RaylibOrigin;
-				Vector2 bpos = b.RaylibOrigin;
+				Vector2 apos = a.pos;
+				Vector2 bpos = b.pos;
 
 				int localXA = x - (int)apos.X;
 				int localYA = y - (int)apos.Y;
 				int localXB = x - (int)bpos.X;
 				int localYB = y - (int)bpos.Y;
 
-				Color pixelA = a.costume.GetColor(localXA, localYA);
-				Color pixelB = b.costume.GetColor(localXB, localYB);
+				Color? pixelA = render.GetColorOnPixel(a, localXA, localYA);
+				Color? pixelB = render.GetColorOnPixel(b, localXB, localYB);
 
-				if (Application.debug && Program.app.rendertype == Application.Renders.Emurender)
-				{
-					Vector2 localoffset = new(Raylib.GetRenderWidth() / 2, Raylib.GetRenderHeight() / 2);
-					if (pixelA.A == 0)
-					{
-						Raylib.DrawPixel(localXA + (int)localoffset.X, localYA + (int)localoffset.Y, new(0, 0, 255, 127));
-					}
-					else
-					{
-						Raylib.DrawPixel(localXA + (int)localoffset.X, localYA + (int)localoffset.Y, new(pixelA.R, pixelA.G, pixelA.B, pixelA.A));
-					}
-
-					if (pixelB.A == 0)
-					{
-						Raylib.DrawPixel(localXB + (int)localoffset.X, localYB + (int)localoffset.Y, new(255, 0, 0, 127));
-					}
-					else
-					{
-						Raylib.DrawPixel(localXB + (int)localoffset.X, localYB + (int)localoffset.Y, new(pixelB.R, pixelB.G, pixelB.B, pixelB.A));
-					}
-				}
+				if (pixelA == null) return false;
+				if (pixelB == null) return false;
 
 				// If Alpha is over 0 then return true as Scratch does.
-				if (pixelA.A > 0 && pixelB.A > 0)
+				if (pixelA.Value.A > 0 && pixelB.Value.A > 0)
 				{
 					return true;
 				}
@@ -1417,14 +1374,12 @@ public class Interpreter : IRunner
 
 	public string Execute(Sprite spr, Block block)
 	{
-		Thread thread = new(spr, block);
+		Thread thread = new(spr, block, this);
 		return Execute(ref thread);
 	}
 
 	public string Execute(ref Thread thread)
 	{
-		if (!Application.projectloaded) return string.Empty;
-
 		string? returnValue = operations[thread.block.opcode](ref thread, project, this);
 		if (returnValue != null) return returnValue;
 

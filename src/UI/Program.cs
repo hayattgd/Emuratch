@@ -1,7 +1,7 @@
 ﻿using System;
 using Raylib_cs;
 
-namespace Emuratch;
+namespace Emuratch.UI;
 
 public static class Program
 {

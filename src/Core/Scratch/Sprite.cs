@@ -1,23 +1,39 @@
-﻿using Emuratch.Core.Render;
-using Emuratch.Core.vm;
+﻿using Emuratch.Core.vm;
 using Newtonsoft.Json;
-using Raylib_cs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Emuratch.Core.Utils;
+using Emuratch.Core.Render;
 
 namespace Emuratch.Core.Scratch;
 
-public class Sprite
+public class Sprite(Project project)
 {
-	const float DegToRad = MathF.PI / 180;
+	public struct Dialog
+	{
+		public DialogType type;
+		public string text;
+		public float duration;
+		public bool infinite;
+	}
+
+	public enum DialogType
+	{
+		Say,
+		Think
+	};
+
 	public enum RotationStyle
 	{
 		all_around,
 		left_right,
 		dont_rotate
 	};
+
+	public Project project = project;
+	public Dialog dialog;
 
 	public bool isStage = false;
 
@@ -43,7 +59,6 @@ public class Sprite
 		set => currentCostume = costumes.ToList().IndexOf(value);
 	}
 
-	[JsonConverter(typeof(SoundConverter))]
 	public Sound[] sounds = Array.Empty<Sound>();
 
 	public float volume = 100;
@@ -52,13 +67,22 @@ public class Sprite
 
 	public void SetLayoutOrder(int order)
 	{
-		layoutOrder = Math.Clamp(order, 0, Application.project.sprites.Length);
+		layoutOrder = int.Max(order, 0);
 	}
 
 	//Sprite
 	public bool visible = true;
 	public float x = 0;
 	public float y = 0;
+	public Vector2 pos
+	{
+		get => new(x, y);
+		set
+		{
+			x = value.X;
+			y = value.Y;
+		}
+	}
 	public float size = 100;
 	public float direction = 90;
 	public bool draggable = false;
@@ -101,44 +125,10 @@ public class Sprite
 	{
 		get
 		{
-			Vector2 offset = Emurender.GetOffset(costume);
+			Vector2 offset = RenderUtility.GetOffset(costume);
 			Vector2 min = new(x - offset.X * 2, y + offset.Y * 2);
-			Vector2 max = new(min.X + costume.image.Width, min.Y - costume.image.Height);
-			return new(new(min, 0), new(max, 1));
-		}
-	}
-
-	public BoundingBox RaylibBoundingBox
-	{
-		get
-		{
-			Vector2 bmin = Emurender.ScratchToRaylib(boundingBox.Min);
-			Vector2 bmax = Emurender.ScratchToRaylib(boundingBox.Max);
-			return new(new(bmin, 0), new(bmax, 1));
-		}
-	}
-
-	public Vector2 RaylibPosition => Emurender.ScratchToRaylib(x, y);
-	public Vector2 RaylibOrigin
-	{
-		get
-		{
-			Vector2 raylibpos = RaylibPosition;
-			Vector2 offset = Emurender.GetOffset(costume);
-			return new(raylibpos.X - offset.X * 2, raylibpos.Y - offset.Y * 2);
-		}
-	}
-
-	public IEnumerator<Unloadable> GetEnumerator()
-	{
-		foreach (var item in costumes)
-		{
-			yield return item;
-		}
-
-		foreach (var item in sounds)
-		{
-			yield return item;
+			Vector2 max = new(min.X + costume.Width, min.Y - costume.Height);
+			return new(min, max);
 		}
 	}
 	
@@ -161,15 +151,14 @@ public class Sprite
 
 	public static Sprite Clone(Sprite original)
 	{
-		Sprite clone = new();
+		Sprite clone = new(original.project);
 
 		clone.isClone = true;
 		clone.original = original;
 
 		clone.name = original.name;
 
-		clone.x = original.x;
-		clone.y = original.y;
+		clone.pos = original.pos;
 		clone.direction = original.direction;
 		clone.rotationStyle = original.rotationStyle;
 
@@ -194,48 +183,6 @@ public class Sprite
 		clone.videoState = original.videoState;
 		clone.videoTransparency = original.videoTransparency;
 
-		foreach (var block in clone.blocks)
-		{
-			if (block.Value.opcode == Block.Opcodes.control_start_as_clone)
-			{
-				Thread thread = new(clone, block.Value);
-				Program.app.threads.Add(thread);
-				Application.runner.Execute(ref thread);
-			}
-		}
-
 		return clone;
-	}
-
-	// Detects using Bounding boxes
-	public bool SpritesIntersectApproximately(Sprite a, Sprite b)
-	{
-		return Raylib.CheckCollisionRecs(new(a.x, a.y, a.costume.image.Width, a.costume.image.Height), new(b.x, b.y, b.costume.image.Width, b.costume.image.Height));
-	}
-
-	public bool PointInsideSprite(Vector2 pos)
-	{
-		return x <= pos.X && x + costume.image.Width >= pos.X && y <= pos.Y && y + costume.image.Height >= pos.Y;
-	}
-
-	public Raylib_cs.Color? GetColorOnPixel(int x, int y)
-	{
-		// 1. ワールド行列（位置・回転・スケール）
-
-		Matrix3x2 worldMatrix = Matrix3x2.CreateScale(size) * Matrix3x2.CreateRotation(direction * DegToRad) * Matrix3x2.CreateTranslation(new(this.x, this.y));
-
-		// 2. 逆行列を求める（ワールド座標 → ローカル座標）
-
-		if (!Matrix3x2.Invert(worldMatrix, out Matrix3x2 invMatrix)) return null; // 逆行列が求まらない場合は判定不可
-
-		// 3. ポイントをローカル座標に変換
-
-		Vector2 localPoint = Vector2.Transform(new(x, y), invMatrix);
-
-		// 4. 範囲チェック
-
-		if (localPoint.X < 0 || localPoint.Y < 0 || localPoint.X >= costume.image.Width || localPoint.Y >= costume.image.Height) return null;
-
-		return costume.GetColor((int)localPoint.X, (int)localPoint.Y);
 	}
 }

@@ -1,4 +1,4 @@
-namespace Emuratch.Core.Crossplatform;
+namespace Emuratch.UI.Crossplatform;
 public interface IDialogService
 {
 	string ShowFileDialog(FileFilter[] filters);

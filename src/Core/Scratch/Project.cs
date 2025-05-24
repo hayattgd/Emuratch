@@ -1,21 +1,25 @@
 ﻿using Emuratch.Core.Turbowarp;
-using Emuratch.Core.Crossplatform;
+using Emuratch.Core.vm;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Emuratch.Core.Scratch;
 
-public class Project : Unloadable
+public class Project
 {
-	private Project()
+	private Project(IRunner runner)
 	{
-		stage = new();
+		this.runner = runner;
+		stage = new(this);
 	}
 
 	public const uint defaultWidth = 480;
 	public const uint defaultHeight = 360;
+
+	public IRunner runner;
 
 	public Sprite[] sprites = Array.Empty<Sprite>();
 	public List<Sprite> clones = [];
@@ -31,54 +35,38 @@ public class Project : Unloadable
 	public bool isTurbowarp = false;
 	public Monitor[] monitors = [];
 
-	public void Unload()
+	internal static string loadingpath = "";
+	public static Project? LoadProject(string jsonpath, IRunner runner)
 	{
-		foreach (var sprite in sprites)
-		{
-			foreach (var item in sprite)
-			{
-				item.Unload();
-			}
-		}
-	}
-
-	public static bool LoadProject(string json, out Project project)
-	{
-		project = new();
+		string json = File.ReadAllText(jsonpath);
+		loadingpath = jsonpath;
+		Project project = new(runner);
 		Configuration.Config = new();
 
-		try
-		{
-			JObject parsed = JObject.Parse(json);
+		JObject parsed = JObject.Parse(json);
 
-			//Import Monitor
-			Monitor[]? monitorArray = parsed["monitors"]?.ToObject<Monitor[]>();
-			if (monitorArray == null) return false;
-			project.monitors = monitorArray;
+		//Import Monitor
+		Monitor[]? monitorArray = parsed["monitors"]?.ToObject<Monitor[]>();
+		if (monitorArray == null) return null;
+		project.monitors = monitorArray;
 
-			//Import sprites
-			Sprite[]? spritesArray = parsed["targets"]?.ToObject<Sprite[]>();
-			if (spritesArray == null) return false;
+		//Import sprites
+		Sprite[]? spritesArray = parsed["targets"]?.ToObject<Sprite[]>();
+		if (spritesArray == null) return null;
 
-			List<Sprite> spritesList = spritesArray.ToList();
-			project.stage = spritesList[0];
-			spritesList.RemoveAt(0);
-			spritesArray = spritesList.ToArray();
+		List<Sprite> spritesList = spritesArray.ToList();
+		project.stage = spritesList[0];
+		spritesList.RemoveAt(0);
+		spritesArray = spritesList.ToArray();
 
-			project.sprites = spritesArray;
+		project.sprites = spritesArray;
 
-			//Import meta
-			Meta? meta = parsed["meta"]?.ToObject<Meta>();
-			if (meta == null) return false;
+		//Import meta
+		Meta? meta = parsed["meta"]?.ToObject<Meta>();
+		if (meta == null) return null;
 
-			project.meta = meta;
+		project.meta = meta;
 
-			return true;
-		}
-		catch (Exception ex)
-		{
-			DialogServiceFactory.CreateDialogService().ShowMessageDialog("Error while loading project : " + ex);
-			return false;
-		}
+		return project;
 	}
 }

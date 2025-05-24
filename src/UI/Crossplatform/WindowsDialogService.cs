@@ -1,7 +1,7 @@
 #if _WINDOWS_
 using System.Windows.Forms;
 
-namespace Emuratch.Core.Crossplatform;
+namespace Emuratch.UI.Crossplatform;
 
 public class WindowsDialogService : IDialogService
 {

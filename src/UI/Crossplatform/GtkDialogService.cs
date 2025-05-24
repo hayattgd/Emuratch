@@ -1,6 +1,6 @@
 using Gtk;
 
-namespace Emuratch.Core.Crossplatform;
+namespace Emuratch.UI.Crossplatform;
 
 public class GtkDialogService : IDialogService
 {

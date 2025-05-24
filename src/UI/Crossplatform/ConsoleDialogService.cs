@@ -1,6 +1,6 @@
 using System;
 
-namespace Emuratch.Core.Crossplatform;
+namespace Emuratch.UI.Crossplatform;
 
 public class ConsoleDialogService : IDialogService
 {

@@ -26,6 +26,31 @@ If you're using arm64 cpu, please run `Mac-fix-libgdiplus.sh` on directory where
 | PAUSE | Pause / resume game |
 | -     | Frame advance       |
 
+## Build
+
+You need .NET SDK to build, and .NET Runtime to execute Emuratch.
+
+First, clone repository from GitHub. ( only run one of them )
+
+```bash
+git clone https://github.com/hayattgd/Emuratch.git #HTTPS
+git clone git@github.com:hayattgd/Emuratch.git #SSH
+gh repo clone hayattgd/Emuratch #GitHub CLI
+```
+
+Move into repository directory and run `dotnet build`.
+
+```bash
+cd Emuratch
+dotnet build
+```
+
+Executable file is located in `bin` subdirectory
+
+## Contributing
+
+Please take a look at [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Features (To-do list)
 
 ### Blocks
@@ -38,6 +63,8 @@ If you're using arm64 cpu, please run `Mac-fix-libgdiplus.sh` on directory where
 - [ ] Operators
 - [ ] Variables (including List)
 - [ ] My Blocks
+
+Please reference [List](https://github.com/hayattgd/Emuratch/wiki/List-of-blocks-implemented) for more details.
 
 ### Advanced options
 - [x] 60 FPS / Turbo mode (Speedhack)
