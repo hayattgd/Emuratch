@@ -24,7 +24,7 @@ jobs:
       with:
         dotnet-version: ${{env.net_version}}.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ./Emuratch.slnx
     - name: Build Core
       run: dotnet build --no-restore -c Release -o ./bin/build ./src/Emuratch/Emuratch.csproj
     - name: Test
