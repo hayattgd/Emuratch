@@ -8,7 +8,7 @@ on:
     branches: [ "dev", "stable" ]
 
 env:
-  net_version: "8.0"
+  net_version: "9.0"
 
 jobs:
   Build:
