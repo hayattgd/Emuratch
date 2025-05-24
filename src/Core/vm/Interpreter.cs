@@ -868,6 +868,7 @@ public class Interpreter : IRunner
 			Block.Opcodes.sensing_current,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				DateTime time = DateTime.Now;
+				Console.WriteLine(ConvertDayOfWeek(time.DayOfWeek));
 				if (thread.block.inputs[0].value == "YEAR")
 				{
 					return time.Year.ToString();
@@ -882,7 +883,7 @@ public class Interpreter : IRunner
 				}
 				else if (thread.block.inputs[0].value == "DAYOFWEEK")
 				{
-					return DayOfWeek(time.DayOfWeek.ToString());
+					return ConvertDayOfWeek(time.DayOfWeek);
 				}
 				else if (thread.block.inputs[0].value == "HOUR")
 				{
@@ -1252,17 +1253,17 @@ public class Interpreter : IRunner
 		};
 	}
 
-	public static string DayOfWeek(string str)
+	public static string ConvertDayOfWeek(DayOfWeek day)
 	{
-		return str switch
+		return day switch
 		{
-			"Sunday" => "1",
-			"Monday" => "2",
-			"Tuesday" => "3",
-			"Wednesday" => "4",
-			"Thursday" => "5",
-			"Friday" => "6",
-			"Saturday" => "7",
+			DayOfWeek.Sunday => "1",
+			DayOfWeek.Monday => "2",
+			DayOfWeek.Tuesday => "3",
+			DayOfWeek.Wednesday => "4",
+			DayOfWeek.Thursday => "5",
+			DayOfWeek.Friday => "6",
+			DayOfWeek.Saturday => "7",
 			_ => "0"
 		};
 	}
