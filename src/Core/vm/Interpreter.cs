@@ -867,13 +867,46 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.sensing_current,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return null;
+				DateTime time = DateTime.Now;
+				if (thread.block.inputs[0].value == "YEAR")
+				{
+					return time.Year.ToString();
+				}
+				else if (thread.block.inputs[0].value == "MONTH")
+				{
+					return time.Month.ToString();
+				}
+				else if (thread.block.inputs[0].value == "DATE")
+				{
+					return time.Day.ToString();
+				}
+				else if (thread.block.inputs[0].value == "DAYOFWEEK")
+				{
+					return ConvertDayOfWeek(time.DayOfWeek);
+				}
+				else if (thread.block.inputs[0].value == "HOUR")
+				{
+					return time.Hour.ToString();
+				}
+				else if (thread.block.inputs[0].value == "MINUTE")
+				{
+					return time.Minute.ToString();
+				}
+				else if (thread.block.inputs[0].value == "SECOND")
+				{
+					return time.Second.ToString();
+				}
+				return "0";
 			}
 		},
 		{
 			Block.Opcodes.sensing_dayssince2000,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return null;
+				const double msPerDay = 24 * 60 * 60 * 1000;
+				DateTime start = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+				DateTime today = DateTime.UtcNow;
+				double mSecsSinceStart = (today - start).TotalMilliseconds;
+				return (mSecsSinceStart / msPerDay).ToString();
 			}
 		},
 		{
@@ -1216,6 +1249,21 @@ public class Interpreter : IRunner
 			"home" => KeyboardKey.Home,
 			"scroll lock" => KeyboardKey.ScrollLock,
 			_ => KeyboardKey.Null
+		};
+	}
+
+	public static string ConvertDayOfWeek(DayOfWeek day)
+	{
+		return day switch
+		{
+			DayOfWeek.Sunday => "1",
+			DayOfWeek.Monday => "2",
+			DayOfWeek.Tuesday => "3",
+			DayOfWeek.Wednesday => "4",
+			DayOfWeek.Thursday => "5",
+			DayOfWeek.Friday => "6",
+			DayOfWeek.Saturday => "7",
+			_ => "0"
 		};
 	}
 
