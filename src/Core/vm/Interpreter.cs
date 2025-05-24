@@ -868,7 +868,6 @@ public class Interpreter : IRunner
 			Block.Opcodes.sensing_current,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				DateTime time = DateTime.Now;
-				Console.WriteLine(ConvertDayOfWeek(time.DayOfWeek));
 				if (thread.block.inputs[0].value == "YEAR")
 				{
 					return time.Year.ToString();
