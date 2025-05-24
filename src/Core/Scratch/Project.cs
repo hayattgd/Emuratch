@@ -77,7 +77,7 @@ public class Project : Unloadable
 		}
 		catch (Exception ex)
 		{
-			DialogServiceFactory.CreateDialogService().ShowMessageDialog("Error while loading project : " + ex);
+			DialogServiceFactory.CreateDialogService().ShowMessageDialog("Error while loading project : " + ex.Message);
 			return false;
 		}
 	}
