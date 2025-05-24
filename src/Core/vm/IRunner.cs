@@ -17,7 +17,7 @@ public interface IRunner
 	public double deltatime { get => 1d / fps; }
 	public Random rng { get; set; }
 
-	public float timer { protected internal set; get; }
+	public float timer { set; get; }
 
 	public Vector2 mouse { get; }
 	public Vector2 tasmouse { get; set; }

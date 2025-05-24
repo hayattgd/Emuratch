@@ -1,3 +1,4 @@
+using Emuratch.Core.Render;
 using Emuratch.Core.Scratch;
 using System.Drawing;
 using System.Numerics;

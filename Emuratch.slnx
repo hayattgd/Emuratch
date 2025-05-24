@@ -5,4 +5,7 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="src/Core/Emuratch.Core.csproj" />
+  <Project Path="src/Render/Emuratch.Render.csproj" />
+  <Project Path="src/UI/Emuratch.UI.csproj" />
+  <Project Path="src/Emuratch/Emuratch.csproj" />
 </Solution>

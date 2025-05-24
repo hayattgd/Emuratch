@@ -1,4 +1,4 @@
-﻿using Emuratch.Core.Overlay;
+﻿using Emuratch.Core.Render;
 using Emuratch.Core.Scratch;
 using Raylib_cs;
 using Svg;
@@ -48,16 +48,16 @@ public class RaylibRender : IRender
 			}
 			else
 			{
-				if (File.Exists(Program.app.GetAbsolutePath(imagepath)))
+				if (File.Exists(project.GetAbsolutePath(imagepath)))
 				{
 					//Convert .svg to .png
 					string pngpath = Path.ChangeExtension(imagepath, ".png");
 
-					if (!File.Exists(Program.app.GetAbsolutePath(pngpath)))
+					if (!File.Exists(project.GetAbsolutePath(pngpath)))
 					{
-						var svg = SvgDocument.Open(Program.app.GetAbsolutePath(imagepath));
+						var svg = SvgDocument.Open(project.GetAbsolutePath(imagepath));
 						using var bitmap = svg.Draw((int)svg.Width.Value * SVGResolution, (int)svg.Height.Value * SVGResolution);
-						bitmap?.Save(Program.app.GetAbsolutePath(pngpath));
+						bitmap?.Save(project.GetAbsolutePath(pngpath));
 					}
 					Image loadedimage = Raylib.LoadImage(pngpath);
 					images.Add(key, loadedimage);
@@ -128,23 +128,18 @@ public class RaylibRender : IRender
 	{
 		Raylib.ClearBackground(Color.White);
 		var list = project.sprites.ToList();
+		RenderSprite(project.stage);
+		var all = list.Concat(project.clones);
 
-		if (!Application.disablerender)
+		list = [.. all];
+		list.Sort((a, b) => a.layoutOrder.CompareTo(b.layoutOrder));
+		list.Reverse();
+
+		foreach (var sprite in list)
 		{
-			RenderSprite(project.stage);
-			var all = list.Concat(project.clones);
-
-			list = [.. all];
-			list.Sort((a, b) => a.layoutOrder.CompareTo(b.layoutOrder));
-			list.Reverse();
-
-			foreach (var sprite in list)
-			{
-				RenderSprite(sprite);
-			}
+			RenderSprite(sprite);
 		}
 
-		if (!Application.debug) return;
 		Raylib.DrawLine(0, Raylib.GetRenderHeight() / 2, Raylib.GetRenderWidth(), Raylib.GetRenderHeight() / 2, Color.Red);
 		Raylib.DrawLine(Raylib.GetRenderWidth() / 2, 0, Raylib.GetRenderWidth() / 2, Raylib.GetRenderHeight(), Color.Red);
 
@@ -152,13 +147,7 @@ public class RaylibRender : IRender
 		{
 			DrawDebugInfo(sprite);
 		}
-
-#if DEBUG
-		Raylib.DrawText(dbginfo, 2, 2, 20, Color.Lime);
-#endif
 	}
-
-	public static string dbginfo = "";
 
 	public void RenderSprite(Sprite spr)
 	{
@@ -167,7 +156,7 @@ public class RaylibRender : IRender
 
 		Costume costume = spr.costumes[spr.currentCostume];
 
-		Vector2 offset = GetOffset(spr.costume);
+		Vector2 offset = RenderUtility.GetOffset(spr.costume);
 
 		// if (spr.isStage)
 		// {
@@ -242,7 +231,7 @@ public class RaylibRender : IRender
 	{
 		Costume costume = spr.costumes[spr.currentCostume];
 		// Vector2 offset = new((costume.rotationCenterX - costume.image.Width / 4) / costume.bitmapResolution, (costume.rotationCenterY - costume.image.Height / 4) / costume.bitmapResolution);
-		Vector2 offset = GetOffset(costume);
+		Vector2 offset = RenderUtility.GetOffset(costume);
 
 		Vector2 pos = ScratchToRaylib(spr.x, spr.y);
 
@@ -297,7 +286,7 @@ public class RaylibRender : IRender
 	public Vector2 RaylibOrigin(Sprite spr)
 	{
 		Vector2 raylibpos = RaylibPosition(spr);
-		Vector2 offset = GetOffset(spr.costume);
+		Vector2 offset = RenderUtility.GetOffset(spr.costume);
 		return new(raylibpos.X - offset.X * 2, raylibpos.Y - offset.Y * 2);
 	}
 

@@ -35,6 +35,9 @@ public class Project
 	public bool isTurbowarp = false;
 	public Monitor[] monitors = [];
 
+	public string GetAbsolutePath(string relative) => $"{projectpath}{Path.DirectorySeparatorChar}{relative}";
+	string projectpath = "";
+
 	internal static string loadingpath = "";
 	public static Project? LoadProject(string jsonpath, IRunner runner)
 	{
@@ -44,6 +47,9 @@ public class Project
 		Configuration.Config = new();
 
 		JObject parsed = JObject.Parse(json);
+
+		project.projectpath = Path.GetDirectoryName(jsonpath) ?? "";
+		if (string.IsNullOrEmpty(project.projectpath)) return null;
 
 		//Import Monitor
 		Monitor[]? monitorArray = parsed["monitors"]?.ToObject<Monitor[]>();

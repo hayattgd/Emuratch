@@ -4,15 +4,15 @@ using Emuratch.Core.Scratch;
 using Emuratch.Core.Turbowarp;
 using Emuratch.Core.vm;
 using Emuratch.Render;
-using Emuratch.Core.Overlay;
-using Emuratch.Core.Crossplatform;
 using Raylib_cs;
 using System.IO.Compression;
 using System.IO;
 using System;
 using System.Collections.Generic;
+using Emuratch.Core.Render;
+using Emuratch.UI.Crossplatform;
 
-namespace Emuratch.UI;
+namespace Emuratch;
 
 public class Application
 {
@@ -40,8 +40,6 @@ public class Application
 
 	internal static IRender render;
 	internal static IRunner runner;
-
-	public readonly List<Message> messages = new();
 
 	public static bool debug = false;
 	public static bool disablerender = false;
@@ -99,8 +97,6 @@ public class Application
 					_ => new Interpreter(project, render)
 				};
 				runner.fps = Configuration.Config.framerate;
-
-				messages.Add(new("Project loaded"));
 			}
 		}
 
@@ -136,14 +132,12 @@ public class Application
 				threads = runner.InvokeEvent(Block.Opcodes.event_whenflagclicked);
 				project.clones.Clear();
 				Raylib.SetTargetFPS(runner.paused ? int.MaxValue : runner.fps);
-				messages.Add(new("Flag pressed"));
 			}
 
 			if (Raylib.IsKeyPressed(KeyboardKey.F6))
 			{
 				threads.Clear();
 				Raylib.SetTargetFPS(0);
-				messages.Add(new("Project Stopped"));
 			}
 
 			if (Raylib.IsKeyPressed(KeyboardKey.F3))
@@ -180,13 +174,6 @@ public class Application
 			}
 		}
 
-		// foreach (var item in messages)
-		// {
-		// 	render.RenderMessage(item, messages.IndexOf(item));
-		// }
-
-		messages.RemoveAll((msg) => msg.added + msg.duration < Raylib.GetTime());
-
 		Raylib.EndDrawing();
 	}
 
@@ -208,7 +195,6 @@ public class Application
 		]);
 		if (!string.IsNullOrEmpty(projectpath))
 		{
-			messages.Add(new("Project loaded successfully."));
 			return LoadProject(projectpath);
 		}
 		else
@@ -274,17 +260,20 @@ public class Application
 
 		string json = File.ReadAllText(jsonpath);
 
-		if (Project.LoadProject(json, out Project LoadedProject))
+		try
 		{
+			Project LoadedProject = Project.LoadProject(json, runner);
 			Configuration.ApplyConfig(ref LoadedProject);
 			Raylib.SetWindowSize((int)LoadedProject.width, (int)LoadedProject.height);
 
 			projectloaded = projectpath != "";
 			return LoadedProject;
 		}
-
-		projectloaded = false;
-		return null;
+		catch (Exception)
+		{
+			projectloaded = false;
+			return null;
+		}
 	}
 
 	public string GetAbsolutePath(string path)
