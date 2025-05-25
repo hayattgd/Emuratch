@@ -258,11 +258,10 @@ public class Application
 
 		Directory.SetCurrentDirectory(projectpath);
 
-		string json = File.ReadAllText(jsonpath);
-
 		try
 		{
-			Project LoadedProject = Project.LoadProject(json, runner);
+			Project LoadedProject = Project.LoadProject(jsonpath);
+			LoadedProject.runner = runner;
 			Configuration.ApplyConfig(ref LoadedProject);
 			Raylib.SetWindowSize((int)LoadedProject.width, (int)LoadedProject.height);
 

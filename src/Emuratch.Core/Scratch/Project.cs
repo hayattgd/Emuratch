@@ -1,4 +1,5 @@
 ﻿using Emuratch.Core.Turbowarp;
+using Emuratch.Core.Utils;
 using Emuratch.Core.vm;
 using Newtonsoft.Json.Linq;
 using System;
@@ -10,16 +11,16 @@ namespace Emuratch.Core.Scratch;
 
 public class Project
 {
-	private Project(IRunner runner)
+	private Project()
 	{
-		this.runner = runner;
 		stage = new(this);
 	}
 
 	public const uint defaultWidth = 480;
 	public const uint defaultHeight = 360;
 
-	public IRunner runner;
+	public IRunner? runner;
+	public Number.PrecisionMode numberPrecision = Number.PrecisionMode.Float;
 
 	public Sprite[] sprites = Array.Empty<Sprite>();
 	public List<Sprite> clones = [];
@@ -39,11 +40,11 @@ public class Project
 	string projectpath = "";
 
 	internal static string loadingpath = "";
-	public static Project? LoadProject(string jsonpath, IRunner runner)
+	public static Project? LoadProject(string jsonpath)
 	{
 		string json = File.ReadAllText(jsonpath);
 		loadingpath = jsonpath;
-		Project project = new(runner);
+		Project project = new();
 		Configuration.Config = new();
 
 		JObject parsed = JObject.Parse(json);
@@ -63,6 +64,7 @@ public class Project
 		List<Sprite> spritesList = spritesArray.ToList();
 		project.stage = spritesList[0];
 		spritesList.RemoveAt(0);
+		spritesList.ForEach(x => x.project = project);
 		spritesArray = spritesList.ToArray();
 
 		project.sprites = spritesArray;

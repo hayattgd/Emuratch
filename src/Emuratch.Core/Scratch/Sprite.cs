@@ -132,7 +132,7 @@ public class Sprite(Project project)
 		}
 	}
 	
-	public void UpdateBlocks()
+	internal void UpdateBlocks()
 	{
 		foreach (var block in blocks)
 		{

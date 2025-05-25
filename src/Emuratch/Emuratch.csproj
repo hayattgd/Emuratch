@@ -24,12 +24,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../UI/Emuratch.UI.csproj" />
-    <ProjectReference Include="../Render/Emuratch.Render.csproj" />
-    <ProjectReference Include="../Core/Emuratch.Core.csproj" />
+    <ProjectReference Include="../Emuratch.UI/Emuratch.UI.csproj" />
+    <ProjectReference Include="../Emuratch.Render/Emuratch.Render.csproj" />
+    <ProjectReference Include="../Emuratch.Core/Emuratch.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="../../LICENSE">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="../../NOTICES.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

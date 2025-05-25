@@ -31,8 +31,8 @@
 
   <ItemGroup>
     <PackageReference Include="GtkSharp" Version="3.24.24.117-develop" />
-    <ProjectReference Include="../Render/Emuratch.Render.csproj" />
-    <ProjectReference Include="../Core/Emuratch.Core.csproj" />
+    <ProjectReference Include="../Emuratch.Render/Emuratch.Render.csproj" />
+    <ProjectReference Include="../Emuratch.Core/Emuratch.Core.csproj" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>

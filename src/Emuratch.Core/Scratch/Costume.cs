@@ -38,7 +38,7 @@ public class CostumeConverter : JsonConverter<Costume[]>
 		foreach (var item in obj)
 		{
 			string dataformat = item["dataFormat"]?.ToString() ?? "";
-			string imagepath = $"{item["assetId"]}.{dataformat}";
+			string imagepath = $"{Path.GetDirectoryName(Project.loadingpath)}{Path.DirectorySeparatorChar}{item["assetId"]}.{dataformat}";
 			float width = 0;
 			float height = 0;
 			if (dataformat == "png")
@@ -50,7 +50,7 @@ public class CostumeConverter : JsonConverter<Costume[]>
 			}
 			else if (dataformat == "svg")
 			{
-				var svg = SvgDocument.Open($"{Path.GetDirectoryName(Project.loadingpath)}{Path.DirectorySeparatorChar}{imagepath}");
+				var svg = SvgDocument.Open(imagepath);
 				width = svg.Width.Value;
 				height = svg.Height.Value;
 			}

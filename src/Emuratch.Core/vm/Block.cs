@@ -174,7 +174,7 @@ public class Block
 				RawValue = value;
 
 			get => 
-				isReference ? sprite.project.runner.Execute(sprite, sprite.blocks[RawValue]) : RawValue;
+				isReference ? sprite.project.runner?.Execute(sprite, sprite.blocks[RawValue]) ?? "" : RawValue;
 		}
 	}
 

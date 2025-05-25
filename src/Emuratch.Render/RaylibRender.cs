@@ -53,11 +53,16 @@ public class RaylibRender : IRender
 					//Convert .svg to .png
 					string pngpath = Path.ChangeExtension(imagepath, ".png");
 
-					if (!File.Exists(project.GetAbsolutePath(pngpath)))
+					if (costume.dataFormat == "svg")
 					{
-						var svg = SvgDocument.Open(project.GetAbsolutePath(imagepath));
-						using var bitmap = svg.Draw((int)svg.Width.Value * SVGResolution, (int)svg.Height.Value * SVGResolution);
-						bitmap?.Save(project.GetAbsolutePath(pngpath));
+						pngpath = Path.ChangeExtension(pngpath, $"x{SVGResolution}.png");
+						if (!File.Exists(project.GetAbsolutePath(pngpath)))
+						{
+							var svg = SvgDocument.Open(project.GetAbsolutePath(imagepath));
+							using var bitmap = svg.Draw((int)svg.Width.Value * SVGResolution, (int)svg.Height.Value * SVGResolution);
+							bitmap?.Save(project.GetAbsolutePath(pngpath));
+							Console.WriteLine($"exported {pngpath}");
+						}
 					}
 					Image loadedimage = Raylib.LoadImage(pngpath);
 					images.Add(key, loadedimage);

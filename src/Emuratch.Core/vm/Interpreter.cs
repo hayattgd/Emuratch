@@ -1260,17 +1260,17 @@ public class Interpreter : IRunner
 		spr.y = Math.Clamp(spr.y, project.height * -0.5f - height, project.height * 0.5f + height);
 	}
 
-	static string Boolstr(bool boolean)
+	public static string Boolstr(bool boolean)
 	{
 		return boolean ? "true" : "false";
 	}
 
-	static bool Strbool(string str)
+	public static bool Strbool(string str)
 	{
 		return str == "true";
 	}
 
-	static dynamic? StrNumber(string str)
+	public static dynamic? StrNumber(string str)
 	{
 		if (str == "Infinity") return double.MaxValue;
 		if (str == "-Infinity") return double.MinValue;
@@ -1296,7 +1296,7 @@ public class Interpreter : IRunner
 		return null;
 	}
 
-	static bool StrNumber(string str, out dynamic value)
+	public static bool StrNumber(string str, out dynamic value)
 	{
 		if (str == "Infinity") { value = double.MaxValue; return true; }
 		if (str == "-Infinity") { value = double.MinValue; return true; }

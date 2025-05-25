@@ -1,9 +1,8 @@
-using Emuratch.Core.Render;
 using Emuratch.Core.Scratch;
 using System.Drawing;
 using System.Numerics;
 
-namespace Emuratch.Render;
+namespace Emuratch.Core.Render;
 
 public class NullRender : IRender
 {

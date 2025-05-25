@@ -4,8 +4,11 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="src/Core/Emuratch.Core.csproj" />
-  <Project Path="src/Render/Emuratch.Render.csproj" />
-  <Project Path="src/UI/Emuratch.UI.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/Emuratch.Core.Test/Emuratch.Core.Test.csproj" />
+  </Folder>
+  <Project Path="src/Emuratch.Core/Emuratch.Core.csproj" />
+  <Project Path="src/Emuratch.Render/Emuratch.Render.csproj" />
+  <Project Path="src/Emuratch.UI/Emuratch.UI.csproj" />
   <Project Path="src/Emuratch/Emuratch.csproj" />
 </Solution>

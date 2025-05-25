@@ -19,4 +19,4 @@ To add new render, write a code implements `IRender` on `src/Render/`. Should be
 
 ## 3. Testing
 
-Please test on https://scratch.mit.edu/projects/editor without any extension enabled on chrome / chromium.
+Please run [Scratch](https://scratch.mit.edu/projects/editor) without any extension enabled on chrome / chromium.
