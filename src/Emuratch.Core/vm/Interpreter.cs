@@ -1293,7 +1293,7 @@ public class Interpreter : IRunner
 			}
 		}
 
-		return null;
+		return 0;
 	}
 
 	public static bool StrNumber(string str, out dynamic value)
