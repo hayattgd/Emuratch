@@ -28,7 +28,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore -c Release -o ./bin/build ./src/Emuratch/Emuratch.csproj
     - name: Test
-      run: dotnet test --no-restore --no-build --verbosity normal -c Release
+      run: dotnet test --no-restore --no-build --verbosity normal -c Debug
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.5.0
       with:

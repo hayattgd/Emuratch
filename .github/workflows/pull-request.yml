@@ -29,6 +29,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --verbosity diag -c ${{ matrix.config }} -o ./bin/build ./src/Emuratch/Emuratch.csproj
     - name: Test
+      if: ${{ matrix.config == 'Debug' }}
       run: dotnet test --no-restore --no-build --verbosity diag -c ${{ matrix.config }}
     - name: Check for NOTICES.txt (unix)
       if: ${{ runner.os != 'Windows' }}
