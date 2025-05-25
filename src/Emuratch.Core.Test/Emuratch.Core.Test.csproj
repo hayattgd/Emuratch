@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+
+    <ProjectReference Include="../Emuratch.Core/Emuratch.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="./Projects/**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <Target Name="CopyLibgdiplus" BeforeTargets="Build" Condition="!$([System.OperatingSystem]::IsWindows())">
+    <Exec Command="mkdir -p $(Outdir)runtimes/unix/lib/netcoreapp3.0" />
+    <Exec Command="ln -sf /opt/homebrew/lib/libgdiplus.dylib $(ProjectDir)$(Outdir)runtimes/unix/lib/netcoreapp3.0" />
+  </Target>
+</Project>

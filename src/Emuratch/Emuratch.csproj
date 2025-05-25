@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <StartupObject>Emuratch.Program</StartupObject>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([System.OperatingSystem]::IsWindows())">
+    <UseWindowsForms>true</UseWindowsForms>
+    <TargetFramework>net9.0-windows</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Emuratch.UI/Emuratch.UI.csproj" />
+    <ProjectReference Include="../Emuratch.Render/Emuratch.Render.csproj" />
+    <ProjectReference Include="../Emuratch.Core/Emuratch.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="../../LICENSE">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="../../NOTICES.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <Target Name="CopyLibgdiplus" BeforeTargets="Build" Condition="!$([System.OperatingSystem]::IsWindows())">
+    <Exec Command="mkdir -p $(ProjectDir)$(Outdir)runtimes/osx-arm64/native/" />
+    <Exec Command="ln -sf /opt/homebrew/lib/libgdiplus.dylib $(ProjectDir)$(Outdir)runtimes/osx-arm64/native/" />
+  </Target>
+
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
+</Project>

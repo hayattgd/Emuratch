@@ -8,7 +8,7 @@ on:
     branches: [ "dev" ]
 
 env:
-  net_version: "8.0"
+  net_version: "9.0"
 
 jobs:
   Build:
@@ -24,13 +24,17 @@ jobs:
       with:
         dotnet-version: ${{env.net_version}}.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ./Emuratch.slnx
     - name: Build
-      run: dotnet build --no-restore -c Release
+      run: dotnet build --no-restore -c Release -o ./bin/build ./src/Emuratch/Emuratch.csproj
+    - name: Setup libgdiplus for Ubuntu
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: sudo apt install libgdiplus
     - name: Test
-      run: dotnet test --no-restore --no-build --verbosity normal -c Release
+      if: ${{ matrix.os != 'macos-latest' }}
+      run: dotnet test --no-restore --verbosity normal -c Debug
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.5.0
       with:
         name: ${{ matrix.os }}
-        path: ./bin/Release/net${{env.net_version}}
+        path: ./bin/build
