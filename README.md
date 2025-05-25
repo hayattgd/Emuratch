@@ -1,10 +1,12 @@
 ﻿# ![Emuratch](Images/Logo.svg)
 
 [![.NET Build](https://github.com/hayattgd/Emuratch/actions/workflows/build.yml/badge.svg?branch=dev)](https://github.com/hayattgd/Emuratch/actions/workflows/build.yml)
+[![.NET Build](https://github.com/hayattgd/Emuratch/actions/workflows/build.yml/badge.svg?branch=dev)](https://github.com/hayattgd/Emuratch/actions/workflows/build.yml)
 [![GitHub License](https://img.shields.io/github/license/hayattgd/Emuratch)](https://github.com/hayattgd/Emuratch/blob/stable/LICENSE)
 
 Scratch emulator made with C# & [raylib](https://www.raylib.com/)
 
+Visit [nightly.link](https://nightly.link/hayattgd/Emuratch/workflows/build/dev) for latest builds.
 Visit [nightly.link](https://nightly.link/hayattgd/Emuratch/workflows/build/dev) for latest builds.
 Emuratch supports Windows, MacOS and Linux.
 

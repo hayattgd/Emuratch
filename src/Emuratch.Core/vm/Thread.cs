@@ -47,6 +47,7 @@ public class Thread
 
 		var self = this;
 		runner.Execute(ref self);
+		runner.Execute(ref self);
 		block = self.block;
 
 		if (block == null || block.nextId == string.Empty)
