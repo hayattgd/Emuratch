@@ -38,5 +38,10 @@
     </Content>
   </ItemGroup>
 
+  <Target Name="CopyLibgdiplus" BeforeTargets="Build" Condition="!$([System.OperatingSystem]::IsWindows())">
+    <Exec Command="mkdir -p $(Outdir)runtimes/osx-arm64/native/" />
+    <Exec Command="ln -sf /opt/homebrew/lib/libgdiplus.dylib $(ProjectDir)$(Outdir)runtimes/osx-arm64/native/" />
+  </Target>
+
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>

@@ -20,10 +20,5 @@
     <PackageReference Include="Svg" Version="3.4.7" />
   </ItemGroup>
 
-  <Target Name="CopyLibgdiplus" AfterTargets="Build" Condition="!$([System.OperatingSystem]::IsWindows())">
-    <Exec Command="mkdir -p $(Outdir)runtimes/osx-arm64/native/" />
-    <Exec Command="ln -s /opt/homebrew/lib/libgdiplus.dylib $(Outdir)runtimes/osx-arm64/native/" />
-  </Target>
-
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>

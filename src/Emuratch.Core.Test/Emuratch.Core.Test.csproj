@@ -25,4 +25,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+  <Target Name="CopyLibgdiplus" BeforeTargets="Build" Condition="!$([System.OperatingSystem]::IsWindows())">
+    <Exec Command="mkdir -p $(Outdir)runtimes/unix/lib/netcoreapp3.0" />
+    <Exec Command="ln -sf /opt/homebrew/lib/libgdiplus.dylib $(ProjectDir)$(Outdir)runtimes/unix/lib/netcoreapp3.0" />
+  </Target>
 </Project>
