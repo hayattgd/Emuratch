@@ -1,5 +1,6 @@
 using Emuratch.Core.Render;
 using Emuratch.Core.Scratch;
+using Emuratch.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,8 +11,7 @@ namespace Emuratch.Core.vm;
 
 public class Interpreter : IRunner
 {
-	const float DegToRad = MathF.PI / 180;
-	const float MoveMultiplier = 1f;
+	const double DegToRad = Math.PI / 180;
 
 	public Interpreter(Project project, IRender render)
 	{
@@ -50,10 +50,10 @@ public class Interpreter : IRunner
 	public bool paused { get; set; }
 
 	public int fps { get; set; }
-	public float Deltatime { get => (float)(1d / fps); }
+	public Number Deltatime { get => (Number)(1d / fps); }
 	public Random rng { get; set; }
 
-	public float timer { get; set; }
+	public Number timer { get; set; }
 
 	public Vector2 mouse => render.MousePosition;
 	public Vector2 tasmouse { get; set; }
@@ -82,8 +82,8 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.motion_movesteps,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.x += MoveMultiplier * StrNumber(thread.block.inputs[0].value) * MathF.Sin(thread.sprite.direction * DegToRad);
-				thread.sprite.y += MoveMultiplier * StrNumber(thread.block.inputs[0].value) * MathF.Cos(thread.sprite.direction * DegToRad);
+				thread.sprite.x += StrNumber(thread.block.inputs[0].value) * Math.Sin(thread.sprite.direction * DegToRad);
+				thread.sprite.y += StrNumber(thread.block.inputs[0].value) * Math.Cos(thread.sprite.direction * DegToRad);
 				interpreter.ClampToStage(thread.sprite);
 				return null;
 			}
@@ -305,7 +305,7 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.looks_sayforsecs,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				float sec = StrNumber(thread.block.inputs[0].value);
+				Number sec = StrNumber(thread.block.inputs[0].value);
 				if (sec > 0)
 				{
 					thread.delay = sec;
@@ -340,7 +340,7 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.looks_thinkforsecs,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				float sec = StrNumber(thread.block.inputs[0].value);
+				Number sec = StrNumber(thread.block.inputs[0].value);
 				if (sec > 0)
 				{
 					thread.delay = sec;
@@ -658,7 +658,7 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.control_wait,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				float sec = StrNumber(thread.block.inputs[0].value);
+				Number sec = StrNumber(thread.block.inputs[0].value);
 				if (sec > 0)
 				{
 					thread.delay = sec;
@@ -1253,11 +1253,11 @@ public class Interpreter : IRunner
 
 	static void ClampToStage(Sprite spr, Project project)
 	{
-		float width = spr.costume.Width / 4f * spr.costume.bitmapResolution;
-		float height = spr.costume.Height / 4f * spr.costume.bitmapResolution;
+		Number width = spr.costume.Width / 4 * spr.costume.bitmapResolution;
+		Number height = spr.costume.Height / 4 * spr.costume.bitmapResolution;
 
-		spr.x = Math.Clamp(spr.x, project.width * -0.5f - width, project.width * 0.5f + width);
-		spr.y = Math.Clamp(spr.y, project.height * -0.5f - height, project.height * 0.5f + height);
+		spr.x = Math.Clamp((double)spr.x, project.width * -0.5 - width, project.width * 0.5 + width);
+		spr.y = Math.Clamp((double)spr.y, project.height * -0.5 - height, project.height * 0.5 + height);
 	}
 
 	public static string Boolstr(bool boolean)
@@ -1270,33 +1270,9 @@ public class Interpreter : IRunner
 		return str == "true";
 	}
 
-	public static dynamic? StrNumber(string str)
-	{
-		if (str == "Infinity") return double.MaxValue;
-		if (str == "-Infinity") return double.MinValue;
+	public static Number StrNumber(string str) => (Number)str;
 
-		if (str == "true") return 1;
-		if (str == "false") return 0;
-
-		if (str.Contains('.'))
-		{
-			if (float.TryParse(str, out var num))
-			{
-				return num;
-			}
-		}
-		else
-		{
-			if (int.TryParse(str, out var num))
-			{
-				return num;
-			}
-		}
-
-		return 0;
-	}
-
-	public static bool StrNumber(string str, out dynamic value)
+	public static bool StrNumber(string str, out Number value)
 	{
 		if (str == "Infinity") { value = double.MaxValue; return true; }
 		if (str == "-Infinity") { value = double.MinValue; return true; }
@@ -1306,7 +1282,7 @@ public class Interpreter : IRunner
 
 		if (str.Contains('.'))
 		{
-			if (float.TryParse(str, out var num))
+			if (Number.TryParse(str, out var num))
 			{
 				value = num;
 				return true;
@@ -1321,7 +1297,7 @@ public class Interpreter : IRunner
 			}
 		}
 
-		value = 0;
+		value = new(0);
 		return false;
 	}
 
@@ -1347,13 +1323,11 @@ public class Interpreter : IRunner
 		{
 			for (int y = startY; y < endY; y++)
 			{
-				Vector2 apos = a.pos;
-				Vector2 bpos = b.pos;
 
-				int localXA = x - (int)apos.X;
-				int localYA = y - (int)apos.Y;
-				int localXB = x - (int)bpos.X;
-				int localYB = y - (int)bpos.Y;
+				int localXA = x - (int)a.x;
+				int localYA = y - (int)a.y;
+				int localXB = x - (int)b.x;
+				int localYB = y - (int)b.y;
 
 				Color? pixelA = render.GetColorOnPixel(a, localXA, localYA);
 				Color? pixelB = render.GetColorOnPixel(b, localXB, localYB);

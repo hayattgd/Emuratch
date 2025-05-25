@@ -20,7 +20,6 @@ public class Project
 	public const uint defaultHeight = 360;
 
 	public IRunner? runner;
-	// public Number.PrecisionMode numberPrecision = Number.PrecisionMode.Float;
 
 	public Sprite[] sprites = Array.Empty<Sprite>();
 	public List<Sprite> clones = [];

@@ -15,7 +15,7 @@ public class Sprite(Project project)
 	{
 		public DialogType type;
 		public string text;
-		public float duration;
+		public Number duration;
 		public bool infinite;
 	}
 
@@ -61,7 +61,7 @@ public class Sprite(Project project)
 
 	public Sound[] sounds = Array.Empty<Sound>();
 
-	public float volume = 100;
+	public Number volume = 100;
 
 	public int layoutOrder;
 
@@ -72,19 +72,10 @@ public class Sprite(Project project)
 
 	//Sprite
 	public bool visible = true;
-	public float x = 0;
-	public float y = 0;
-	public Vector2 pos
-	{
-		get => new(x, y);
-		set
-		{
-			x = value.X;
-			y = value.Y;
-		}
-	}
-	public float size = 100;
-	public float direction = 90;
+	public Number x = 0;
+	public Number y = 0;
+	public Number size = 100;
+	public Number direction = 90;
 	public bool draggable = false;
 	public string rotationStyle = "all around";
 
@@ -113,8 +104,8 @@ public class Sprite(Project project)
 	}
 
 	//Stage
-	public float tempo = 60;
-	public float videoTransparency = 50;
+	public Number tempo = 60;
+	public Number videoTransparency = 50;
 	public string videoState = "on";
 	public string textToSpeechLanguage = "";
 
@@ -158,7 +149,8 @@ public class Sprite(Project project)
 
 		clone.name = original.name;
 
-		clone.pos = original.pos;
+		clone.x = original.x;
+		clone.y = original.y;
 		clone.direction = original.direction;
 		clone.rotationStyle = original.rotationStyle;
 

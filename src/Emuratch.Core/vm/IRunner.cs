@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using System.Numerics;
+using Emuratch.Core.Utils;
 
 namespace Emuratch.Core.vm;
 
@@ -17,7 +18,7 @@ public interface IRunner
 	public double deltatime { get => 1d / fps; }
 	public Random rng { get; set; }
 
-	public float timer { set; get; }
+	public Number timer { set; get; }
 
 	public Vector2 mouse { get; }
 	public Vector2 tasmouse { get; set; }

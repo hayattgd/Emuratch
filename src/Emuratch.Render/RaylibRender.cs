@@ -240,8 +240,8 @@ public class RaylibRender : IRender
 
 		Vector2 pos = ScratchToRaylib(spr.x, spr.y);
 
-		Vector2 origin = ScratchToRaylib((int)Math.Round(spr.x - GetImage(spr, costume).Width / 2), (int)Math.Round(spr.y + GetImage(spr, costume).Height / 2));
-		Vector2 max = ScratchToRaylib((int)Math.Round(spr.x + GetImage(spr, costume).Width / 2), (int)Math.Round(spr.y - GetImage(spr, costume).Height / 2));
+		Vector2 origin = ScratchToRaylib((int)MathF.Round(spr.x - GetImage(spr, costume).Width / 2), (int)MathF.Round(spr.y + GetImage(spr, costume).Height / 2));
+		Vector2 max = ScratchToRaylib((int)MathF.Round(spr.x + GetImage(spr, costume).Width / 2), (int)MathF.Round(spr.y - GetImage(spr, costume).Height / 2));
 
 		Vector2 pivot = pos + offset * 2;
 		Raylib.DrawCircle((int)pivot.X, (int)pivot.Y, 3, Color.Yellow);

@@ -61,7 +61,7 @@ public class Application
 	{
 		runner.InvokeEvent(Block.Opcodes.event_whenkeypressed);
 
-		runner.timer += (float)runner.deltatime;
+		runner.timer += runner.deltatime;
 
 		if (threads != null)
 		{

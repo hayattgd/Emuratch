@@ -5,6 +5,7 @@ using System;
 using System.Drawing;
 using Svg;
 using System.IO;
+using Emuratch.Core.Utils;
 
 namespace Emuratch.Core.Scratch;
 
@@ -12,14 +13,14 @@ public class Costume
 {
 	public string name = "";
 	public int bitmapResolution = 1;
-	public float rotationCenterX;
-	public float rotationCenterY;
+	public Number rotationCenterX;
+	public Number rotationCenterY;
 
 	public string assetId = "";
 	public string dataFormat = "";
 
-	public float Width = 0;
-	public float Height = 0;
+	public Number Width = 0;
+	public Number Height = 0;
 }
 
 public class CostumeConverter : JsonConverter<Costume[]>
@@ -39,8 +40,8 @@ public class CostumeConverter : JsonConverter<Costume[]>
 		{
 			string dataformat = item["dataFormat"]?.ToString() ?? "";
 			string imagepath = $"{Path.GetDirectoryName(Project.loadingpath)}{Path.DirectorySeparatorChar}{item["assetId"]}.{dataformat}";
-			float width = 0;
-			float height = 0;
+			Number width = 0;
+			Number height = 0;
 			if (dataformat == "png")
 			{
 				Image img = Image.FromFile(imagepath);

@@ -1,4 +1,5 @@
 ﻿using Emuratch.Core.Scratch;
+using Emuratch.Core.Utils;
 using System.Collections.Generic;
 
 namespace Emuratch.Core.vm;
@@ -29,7 +30,7 @@ public class Thread
 
 		if (delay > 0)
 		{
-			delay -= (float)runner.deltatime;
+			delay -= runner.deltatime;
 
 			//clamp
 			if (delay < 0)
@@ -82,7 +83,7 @@ public class Thread
 
 	public Block? condition;
 
-	public float delay;
+	public Number delay;
 	public List<Loop> returnto = [];
 	public bool nextframe = true;
 

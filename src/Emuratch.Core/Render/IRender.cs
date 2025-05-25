@@ -8,7 +8,7 @@ namespace Emuratch.Core.Render;
 
 public interface IRender : IUnloadable
 {
-	const float DegToRad = MathF.PI / 180;
+	const double DegToRad = Math.PI / 180;
 
 	public void RenderAll();
 	public void RenderSprite(Sprite spr);
