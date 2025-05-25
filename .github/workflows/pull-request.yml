@@ -28,8 +28,11 @@ jobs:
       run: dotnet restore ./Emuratch.slnx
     - name: Build
       run: dotnet build --no-restore --verbosity diag -c ${{ matrix.config }} -o ./bin/build ./src/Emuratch/Emuratch.csproj
+    - name: Setup libgdiplus for Ubuntu
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: sudo apt install libgdiplus
     - name: Test
-      if: ${{ matrix.config == 'Debug' }}
+      if: ${{ matrix.config == 'Debug' && matrix.os != 'macos-latest' }}
       run: dotnet test --no-restore --verbosity diag -c ${{ matrix.config }}
     - name: Check for NOTICES.txt (unix)
       if: ${{ runner.os != 'Windows' }}

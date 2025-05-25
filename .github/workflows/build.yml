@@ -27,7 +27,11 @@ jobs:
       run: dotnet restore ./Emuratch.slnx
     - name: Build
       run: dotnet build --no-restore -c Release -o ./bin/build ./src/Emuratch/Emuratch.csproj
+    - name: Setup libgdiplus for Ubuntu
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: sudo apt install libgdiplus
     - name: Test
+      if: ${{ matrix.os != 'macos-latest' }}
       run: dotnet test --no-restore --verbosity normal -c Debug
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.5.0
