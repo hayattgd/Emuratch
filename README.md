@@ -1,4 +1,4 @@
-﻿# ![Emuratch](Images/Logo.svg)
+# ![Emuratch](Images/Logo.svg)
 
 [![.NET Build](https://github.com/hayattgd/Emuratch/actions/workflows/build.yml/badge.svg?branch=dev)](https://github.com/hayattgd/Emuratch/actions/workflows/build.yml)
 [![.NET Build](https://github.com/hayattgd/Emuratch/actions/workflows/build.yml/badge.svg?branch=dev)](https://github.com/hayattgd/Emuratch/actions/workflows/build.yml)
@@ -10,12 +10,11 @@ Visit [nightly.link](https://nightly.link/hayattgd/Emuratch/workflows/build/dev)
 Visit [nightly.link](https://nightly.link/hayattgd/Emuratch/workflows/build/dev) for latest builds.
 Emuratch supports Windows, MacOS and Linux.
 
-For using MacOS build, please execute command below to install gtk.
+For using MacOS build, please execute command below to install gtk and libgdiplus.
 ```
 brew install gtk+3
+brew install mono-libgdiplus
 ```
-
-If you're using arm64 cpu, please run `Mac-fix-libgdiplus.sh` on directory where executable is located.
 
 ## Controls
 
