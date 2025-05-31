@@ -37,4 +37,6 @@ To add new render, write a code implements `IRender` on `src/Render/`. Should be
 
 ## 4. Testing
 
-Please run [Scratch](https://scratch.mit.edu/projects/editor) without any extension enabled on chrome / chromium.
+Please run [Scratch](https://scratch.mit.edu/projects/editor) with every extensions disabled on chrome / chromium.
+
+For Turbowarp, use [Website](https://turbowarp.org/editor) with same condition as above or use [Desktop](https://desktop.turbowarp.org/) one.
