@@ -42,7 +42,7 @@ public class Interpreter : IRunner
 		}
 	}
 
-	public readonly IRender render;
+	public IRender render { get; }
 	public Project project { get; set; }
 	public List<Thread> threads { get; set; }
 
@@ -174,7 +174,7 @@ public class Interpreter : IRunner
 				thread.sprite.x = pos.X;
 				thread.sprite.y = pos.Y;
 				interpreter.ClampToStage(thread.sprite);
-				return null;
+				return "";
 			}
 		},
 		{
@@ -189,14 +189,14 @@ public class Interpreter : IRunner
 				thread.sprite.x += StrNumber(thread.block.inputs[1].value);
 				thread.sprite.y += StrNumber(thread.block.inputs[2].value);
 				interpreter.ClampToStage(thread.sprite);
-				return null;
+				return "";
 			}
 		},
 		{
 			Block.Opcodes.motion_pointindirection,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				thread.sprite.direction = StrNumber(thread.block.inputs[0].value);
-				return "0";
+				return null;
 			}
 		},
 		{
@@ -321,7 +321,7 @@ public class Interpreter : IRunner
 				{
 					thread.nextframe = false;
 				}
-				return null;
+				return "";
 			}
 		},
 		{
@@ -356,7 +356,7 @@ public class Interpreter : IRunner
 				{
 					thread.nextframe = false;
 				}
-				return null;
+				return "";
 			}
 		},
 		{
@@ -518,7 +518,7 @@ public class Interpreter : IRunner
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				string sound = thread.block.inputs[0].value;
 				interpreter.render.PlaySound(thread.sprite.sounds.First(x => x.name == sound));
-				return null;
+				return "";
 			}
 		},
 		{
@@ -589,13 +589,13 @@ public class Interpreter : IRunner
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				if (thread.block.fields[0] == "any") return Boolstr(interpreter.render.IsAnyKeyDown());
 
-				if (interpreter.render.IsKeyRepeated(thread.block.inputs[0].value) || interpreter.render.IsKeyPressedOnce(thread.block.inputs[0].value))
+				if (interpreter.render.IsKeyRepeated(thread.block.fields[0]) || interpreter.render.IsKeyPressedOnce(thread.block.fields[0]))
 				{
 					return null;
 				}
 				else
 				{
-					return null;
+					return "";
 				}
 			}
 		},
@@ -668,7 +668,7 @@ public class Interpreter : IRunner
 					thread.nextframe = false;
 				}
 
-				return null;
+				return "";
 			}
 		},
 		{
@@ -676,7 +676,7 @@ public class Interpreter : IRunner
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
 				thread.returnto.Add(new(thread.block, int.Parse(thread.block.inputs[0].value)));
-				return null;
+				return "";
 			}
 		},
 		{
@@ -692,8 +692,9 @@ public class Interpreter : IRunner
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				if (Strbool(thread.block.inputs[0].value))
 				{
-					thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
-					interpreter.Execute(ref thread);
+					// thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
+					// interpreter.Execute(ref thread);
+					interpreter.Execute(thread.sprite, thread.sprite.blocks[thread.block.inputs[1].RawValue]);
 				}
 
 				return null;
@@ -702,14 +703,14 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.control_if_else,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				if (Strbool(thread.block.inputs[2].value))
+				if (Strbool(thread.block.inputs[0].value))
 				{
-					thread.block = thread.sprite.blocks[thread.block.inputs[0].RawValue];
+					thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
 					interpreter.Execute(ref thread);
 				}
 				else
 				{
-					thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
+					thread.block = thread.sprite.blocks[thread.block.inputs[2].RawValue];
 					interpreter.Execute(ref thread);
 				}
 

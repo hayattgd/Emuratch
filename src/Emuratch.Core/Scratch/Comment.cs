@@ -2,7 +2,6 @@
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Emuratch.Core.Turbowarp;
 
 namespace Emuratch.Core.Scratch;
 
@@ -26,17 +25,9 @@ public class CommentConverter : JsonConverter<Comment[]>
 
 		foreach (var item in obj.Values())
 		{
-			string text = item["text"]?.ToString() ?? "";
-
-			if (text.Contains("// _twconfig_"))
-			{
-				Configuration.TryParse(text, out var config);
-				Configuration.Config = config ?? new();
-			}
-
 			comments.Add(new()
 			{
-				text = text
+				text = item["text"]?.ToString() ?? ""
 			});
 		}
 

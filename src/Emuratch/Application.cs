@@ -41,7 +41,6 @@ public class Application
 	internal static IRender render;
 	internal static IRunner runner;
 
-	public static bool debug = false;
 	public static bool disablerender = false;
 
 	public void UnloadProject()
@@ -56,6 +55,17 @@ public class Application
 		Raylib.SetConfigFlags(ConfigFlags.VSyncHint | ConfigFlags.ResizableWindow);
 		Raylib.InitWindow((int)Project.defaultWidth, (int)Project.defaultHeight, "Emuratch");
 	}
+
+	public Type GetRunner() => runnertype switch
+	{
+		_ => typeof(Interpreter)
+	};
+
+	public Type GetRender() => rendertype switch
+	{
+		Renders.Raylib => typeof(RaylibRender),
+		_ => typeof(NullRender),
+	};
 
 	public void UpdateScratch()
 	{
@@ -85,18 +95,8 @@ public class Application
 			if (loaded != null)
 			{
 				project = loaded;
-				render?.Unload();
-				render = rendertype switch
-				{
-					Renders.Raylib => new RaylibRender(project),
-					_ => new NullRender(),
-				};
-
-				runner = runnertype switch
-				{
-					_ => new Interpreter(project, render)
-				};
-				runner.fps = Configuration.Config.framerate;
+				runner = project.runner;
+				render = runner.render;
 			}
 		}
 
@@ -142,7 +142,7 @@ public class Application
 
 			if (Raylib.IsKeyPressed(KeyboardKey.F3))
 			{
-				debug = !debug;
+				project.debug = !project.debug;
 			}
 
 			if (Raylib.IsKeyPressed(KeyboardKey.F4))
@@ -166,12 +166,9 @@ public class Application
 				runner.fps += 2;
 			}
 
-			render.RenderAll();
+			if (!disablerender) render.RenderAll();
 
-			if (!runner.paused || Raylib.IsKeyPressed(KeyboardKey.Minus))
-			{
-				UpdateScratch();
-			}
+			if (!runner.paused || Raylib.IsKeyPressed(KeyboardKey.Minus)) UpdateScratch();
 		}
 
 		Raylib.EndDrawing();
@@ -260,9 +257,7 @@ public class Application
 
 		try
 		{
-			Project LoadedProject = Project.LoadProject(jsonpath);
-			LoadedProject.runner = runner;
-			Configuration.ApplyConfig(ref LoadedProject);
+			Project LoadedProject = Project.LoadProject(jsonpath, GetRunner(), GetRender());
 			Raylib.SetWindowSize((int)LoadedProject.width, (int)LoadedProject.height);
 
 			projectloaded = projectpath != "";

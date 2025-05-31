@@ -145,6 +145,8 @@ public class RaylibRender : IRender
 			RenderSprite(sprite);
 		}
 
+		if (!project.debug) return;
+
 		Raylib.DrawLine(0, Raylib.GetRenderHeight() / 2, Raylib.GetRenderWidth(), Raylib.GetRenderHeight() / 2, Color.Red);
 		Raylib.DrawLine(Raylib.GetRenderWidth() / 2, 0, Raylib.GetRenderWidth() / 2, Raylib.GetRenderHeight(), Color.Red);
 

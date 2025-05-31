@@ -170,11 +170,13 @@ public class Block
 
 		public string value
 		{
-			set =>
-				RawValue = value;
+			set => RawValue = value;
 
-			get => 
-				isReference ? sprite.project.runner?.Execute(sprite, sprite.blocks[RawValue]) ?? "" : RawValue;
+			get
+			{
+				if (!isReference) return RawValue;
+				return sprite.project.runner?.Execute(sprite, sprite.blocks[RawValue]) ?? throw new NullReferenceException();
+			}
 		}
 	}
 

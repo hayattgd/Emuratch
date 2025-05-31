@@ -1,5 +1,5 @@
-﻿using Emuratch.Core.Turbowarp;
-using Emuratch.Core.Utils;
+﻿using Emuratch.Core.Render;
+using Emuratch.Core.Turbowarp;
 using Emuratch.Core.vm;
 using Newtonsoft.Json.Linq;
 using System;
@@ -15,6 +15,8 @@ public class Project
 	{
 		stage = new(this);
 	}
+
+	public bool debug;
 
 	public const uint defaultWidth = 480;
 	public const uint defaultHeight = 360;
@@ -35,16 +37,17 @@ public class Project
 	public bool isTurbowarp = false;
 	public Monitor[] monitors = [];
 
+	public Configuration config = new();
+
 	public string GetAbsolutePath(string relative) => $"{projectpath}{Path.DirectorySeparatorChar}{relative}";
 	string projectpath = "";
 
 	internal static string loadingpath = "";
-	public static Project? LoadProject(string jsonpath)
+	public static Project? LoadProject(string jsonpath, Type runner, Type render)
 	{
 		string json = File.ReadAllText(jsonpath);
 		loadingpath = jsonpath;
 		Project project = new();
-		Configuration.Config = new();
 
 		JObject parsed = JObject.Parse(json);
 
@@ -73,6 +76,24 @@ public class Project
 		if (meta == null) return null;
 
 		project.meta = meta;
+
+		foreach (var comment in project.comments)
+		{
+			if (comment.text.Contains("// _twconfig_"))
+			{
+				if (Configuration.TryParse(comment.text, out var config))
+				{
+					project.config = config ?? new();
+				}
+			}
+		}
+
+		project.runner = (IRunner?)Activator.CreateInstance(runner, project, (IRender?)Activator.CreateInstance(render, project));
+
+		if (project.runner == null) throw new NullReferenceException();
+		if (project.runner.render == null) throw new NullReferenceException();
+
+		project.runner.fps = project.config.framerate;
 
 		return project;
 	}

@@ -5,7 +5,6 @@ namespace Emuratch.Core.Turbowarp;
 
 public class Configuration
 {
-	private static Configuration config = new();
 
 	public struct RuntimeOptions
 	{
@@ -23,8 +22,6 @@ public class Configuration
 	public readonly uint width = 480;
 	public readonly uint height = 360;
 
-	public static Configuration Config { get => config; set => config = value; }
-
 	/// <summary>
 	/// Tries to parse Configuration instance from Turbowarp's comment
 	/// </summary>
@@ -37,9 +34,9 @@ public class Configuration
 		return parsedconfig != null;
 	}
 
-	public static void ApplyConfig(ref Project project)
+	public void ApplyConfig(ref Project project)
 	{
-		project.width = Config.width;
-		project.height = Config.height;
+		project.width = width;
+		project.height = height;
 	}
 }
