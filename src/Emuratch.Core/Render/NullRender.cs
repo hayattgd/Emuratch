@@ -6,6 +6,11 @@ namespace Emuratch.Core.Render;
 
 public class NullRender : IRender
 {
+	public NullRender(Project project)
+	{
+		
+	}
+
 	public void RenderAll() { }
 	public void RenderSprite(Sprite spr) { }
 	public Color GetColorOnPixel(int x, int y) => new();

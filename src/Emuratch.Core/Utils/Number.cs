@@ -8,55 +8,16 @@ public struct Number
 		Default = precision;
 	}
 
-	public Number(float value, PrecisionMode precision)
-	{
-		this.precision = precision;
-		this.value = 0;
-
-		switch (precision)
-		{
-			case PrecisionMode.Float:
-				this.value = value;
-				break;
-
-			case PrecisionMode.Double:
-				this.value = (double)value;
-				break;
-		}
-	}
-
-	public Number(double value, PrecisionMode precision)
-	{
-		this.precision = precision;
-		this.value = 0;
-
-		switch (precision)
-		{
-			case PrecisionMode.Float:
-				this.value = (float)value;
-				break;
-
-			case PrecisionMode.Double:
-				this.value = value;
-				break;
-		}
-	}
-
 	public Number(float value)
 	{
 		precision = Default;
 		this.value = 0;
 
-		switch (precision)
+		this.value = precision switch
 		{
-			case PrecisionMode.Float:
-				this.value = value;
-				break;
-
-			case PrecisionMode.Double:
-				this.value = (double)value;
-				break;
-		}
+			PrecisionMode.Double => (double)value,
+			_ => value
+		};
 	}
 
 	public Number(double value)
@@ -64,16 +25,11 @@ public struct Number
 		precision = Default;
 		this.value = 0;
 
-		switch (precision)
+		this.value = precision switch
 		{
-			case PrecisionMode.Float:
-				this.value = (float)value;
-				break;
-
-			case PrecisionMode.Double:
-				this.value = value;
-				break;
-		}
+			PrecisionMode.Float => (float)value,
+			_ => value
+		};
 	}
 
 	public Number()
@@ -114,11 +70,11 @@ public struct Number
 			switch (precision)
 			{
 				case PrecisionMode.Float:
-					fval = value;
+					fval = (float)value;
 					break;
 
 				case PrecisionMode.Double:
-					dval = value;
+					dval = (double)value;
 					break;
 			}
 		}

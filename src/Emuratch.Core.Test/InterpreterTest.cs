@@ -18,11 +18,10 @@ public class InterpreterTest
 		Number.SetDefaultPrecision(precision);
 		IRunner runner;
 
-		Project? project = Project.LoadProject($"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}LoadTest{Path.DirectorySeparatorChar}project.json");
+		Project? project = Project.LoadProject($"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}LoadTest{Path.DirectorySeparatorChar}project.json", typeof(Interpreter), typeof(NullRender));
 		if (project == null) Assert.Fail("Project didn't load");
 
-		runner = new Interpreter(project, new NullRender());
-		project.runner = runner;
+		runner = project.runner ?? throw new NullReferenceException();
 
 		Assert.Equal(10, (double)Interpreter.StrNumber(runner.Execute(project.sprites[0], new()
 		{

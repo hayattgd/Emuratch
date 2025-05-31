@@ -1,4 +1,6 @@
-﻿using Emuratch.Core.Scratch;
+﻿using Emuratch.Core.Render;
+using Emuratch.Core.Scratch;
+using Emuratch.Core.vm;
 
 namespace Emuratch.Core.Test;
 
@@ -7,7 +9,7 @@ public class ProjectTest
 	[Fact]
 	public void Load()
 	{
-		Project? project = Project.LoadProject($"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}LoadTest{Path.DirectorySeparatorChar}project.json");
+		Project? project = Project.LoadProject($"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}Projects{Path.DirectorySeparatorChar}LoadTest{Path.DirectorySeparatorChar}project.json", typeof(Interpreter), typeof(NullRender));
 		if (project == null) Assert.Fail("Project didn't load");
 
 		Assert.Equal("Here's sprite name", project.sprites[0].name);
