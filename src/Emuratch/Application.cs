@@ -21,8 +21,6 @@ public class Application
 	public static bool projectloaded { get; private set; }
 	public static bool projectloading { get; private set; }
 
-	public List<Thread> threads { get; set; } = [];
-
 	public enum Runners
 	{
 		Interpreter,
@@ -73,15 +71,15 @@ public class Application
 
 		runner.timer += runner.deltatime;
 
-		if (threads != null)
+		if (runner.threads != null)
 		{
-			threads.Sort((a, b) => a.sprite.layoutOrder.CompareTo(b.sprite.layoutOrder));
-			// threads.ForEach( t => t.Step() );
+			runner.threads.Sort((a, b) => a.sprite.layoutOrder.CompareTo(b.sprite.layoutOrder));
+			// runner.threads.ForEach( t => t.Step() );
 			// This throws InvaildOperationException
 			// So use "for" instead
-			for (int i = 0; i < threads.Count; i++)
+			for (int i = 0; i < runner.threads.Count; i++)
 			{
-				threads[i].Step();
+				runner.threads[i].Step();
 			}
 		}
 	}
@@ -128,15 +126,15 @@ public class Application
 			if (Raylib.IsKeyPressed(KeyboardKey.F5))
 			{
 				runner.timer = 0;
-				threads.Clear();
-				threads = runner.InvokeEvent(Block.Opcodes.event_whenflagclicked);
+				runner.threads.Clear();
+				runner.threads = runner.InvokeEvent(Block.Opcodes.event_whenflagclicked);
 				project.clones.Clear();
 				Raylib.SetTargetFPS(runner.paused ? int.MaxValue : runner.fps);
 			}
 
 			if (Raylib.IsKeyPressed(KeyboardKey.F6))
 			{
-				threads.Clear();
+				runner.threads.Clear();
 				Raylib.SetTargetFPS(0);
 			}
 

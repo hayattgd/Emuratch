@@ -589,8 +589,10 @@ public class Interpreter : IRunner
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				if (thread.block.fields[0] == "any") return Boolstr(interpreter.render.IsAnyKeyDown());
 
+				Console.WriteLine("Still running");
 				if (interpreter.render.IsKeyRepeated(thread.block.fields[0]) || interpreter.render.IsKeyPressedOnce(thread.block.fields[0]))
 				{
+					Console.WriteLine("pressed!!");
 					return null;
 				}
 				else
