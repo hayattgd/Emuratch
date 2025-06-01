@@ -33,7 +33,7 @@ To add new engine (like JIT compiler, cached Interpreter) write new code impleme
 
 ### Adding render
 
-To add new render, write a code implements `IRender` on `src/Render/`. Should be named like `RaylibRender`, not `Raylib`. Same as adding a engine, please describe a reason if you can't / don't want to implement `IRender` or naming like `XXXRender`.
+To add new render, write a code implements `IRender` on `src/Render/`. Should be named like `RaylibRender`, not `Raylib`. Same as adding a engine, please describe a reason if you can't / don't want to implement `IRender` or naming like `XXXRender`. Also you need to implement `new(Project)` to work properly.
 
 ## 4. Testing
 
