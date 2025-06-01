@@ -11,6 +11,7 @@ Visit [nightly.link](https://nightly.link/hayattgd/Emuratch/workflows/build/dev)
 Emuratch supports Windows, MacOS and Linux.
 
 For using MacOS build, please execute command below to install gtk and libgdiplus.
+
 ```
 brew install gtk+3
 brew install mono-libgdiplus
@@ -55,6 +56,7 @@ Please take a look at [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Features (To-do list)
 
 ### Blocks
+
 - [ ] Motion
 - [ ] Looks
 - [ ] Sound
@@ -68,6 +70,7 @@ Please take a look at [CONTRIBUTING.md](CONTRIBUTING.md).
 Please reference [List](https://github.com/hayattgd/Emuratch/wiki/List-of-blocks-implemented) for more details.
 
 ### Advanced options
+
 - [x] 60 FPS / Turbo mode (Speedhack)
 - [ ] Interpolation
 - [ ] High Quality Pen
@@ -77,17 +80,20 @@ Please reference [List](https://github.com/hayattgd/Emuratch/wiki/List-of-blocks
 - [x] Custom Stage Size
 
 ### Emulation
+
 - [ ] Interpreter
 - [ ] Cached Interpreter
 - [ ] JIT Compiler
 
 ### TAS
+
 - [x] Pause / resume
 - [x] Frame advance
 - [ ] Savestate
 - [ ] Record / Replay
 
 ### UI
+
 - [ ] Cross-platform GUI (not text UI, but Graphical UI)
 - [ ] Project list
 - [ ] Advanced options

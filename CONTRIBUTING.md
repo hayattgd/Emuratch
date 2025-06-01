@@ -5,6 +5,7 @@ Please write programs with following rules.
 ## 1. Commit prefix
 
 Commit message should be:
+
 ```
 (prefix): (description)
 ```
@@ -21,6 +22,7 @@ Commit message should be:
 | chore   | Others                                                                              |
 
 ## 2. Namespace
+
 - `Emuratch.Core` : Scratch Logics (or only helper for rendering)
 - `Emuratch.Render` : Only rendering comes here, no logics are allowed.
 - `Emuratch.UI` : Contains User interface like Dialogs.
