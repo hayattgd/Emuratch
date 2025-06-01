@@ -5,8 +5,7 @@
 
 Scratch emulator made with C# & [raylib](https://www.raylib.com/)
 
-Visit [nightly.link](https://nightly.link/hayattgd/Emuratch/workflows/build/dev) for latest builds.
-Visit [nightly.link](https://nightly.link/hayattgd/Emuratch/workflows/build/dev) for latest builds.
+**Visit [nightly.link](https://nightly.link/hayattgd/Emuratch/workflows/build/dev) for latest builds.**
 Emuratch supports Windows, MacOS and Linux.
 
 For using MacOS build, please execute command below to install gtk and libgdiplus.
