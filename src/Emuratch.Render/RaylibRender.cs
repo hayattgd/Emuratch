@@ -61,7 +61,6 @@ public class RaylibRender : IRender
 							var svg = SvgDocument.Open(project.GetAbsolutePath(imagepath));
 							using var bitmap = svg.Draw((int)svg.Width.Value * SVGResolution, (int)svg.Height.Value * SVGResolution);
 							bitmap?.Save(project.GetAbsolutePath(pngpath));
-							Console.WriteLine($"exported {pngpath}");
 						}
 					}
 					Image loadedimage = Raylib.LoadImage(pngpath);
