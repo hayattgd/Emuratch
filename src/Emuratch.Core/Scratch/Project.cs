@@ -28,7 +28,7 @@ public class Project
 
 	public Comment[] comments = Array.Empty<Comment>();
 	public Meta meta = new();
-	
+
 	public Sprite stage;
 
 	public uint width = defaultWidth;

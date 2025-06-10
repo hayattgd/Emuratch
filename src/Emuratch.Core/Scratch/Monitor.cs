@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 
 namespace Emuratch.Core.Scratch;
@@ -35,34 +34,27 @@ public class Monitor
 	public string DisplayName => $"{(sprname == "" ? "" : sprname + " : ")}{name}";
 }
 
-public class MonitorConverter : JsonConverter<List<Monitor>>
+public class MonitorConverter : JsonConverter<Monitor>
 {
-	public override void WriteJson(JsonWriter writer, List<Monitor>? value, JsonSerializer serializer)
+	public override void WriteJson(JsonWriter writer, Monitor? value, JsonSerializer serializer)
 	{
 		throw new NotImplementedException();
 	}
 
-	public override List<Monitor> ReadJson(JsonReader reader, Type objectType, List<Monitor>? existingValue, bool hasExistingValue, JsonSerializer serializer)
+	public override Monitor ReadJson(JsonReader reader, Type objectType, Monitor? existingValue, bool hasExistingValue, JsonSerializer serializer)
 	{
-		var obj = JObject.Load(reader);
+		var obj = JToken.Load(reader);
 
-		List<Monitor> list = new();
-
-		foreach (var item in obj.Properties())
+		return new()
 		{
-			list.Add(new()
-			{
-				id = item.Value["id"]?.ToString() ?? "",
-				name = item.Value["params"]?[0]?.ToString() ?? "my variable",
-				sprname = item.Value["spriteName"]?.ToString() ?? string.Empty,
-				mode = Monitor.ToMode(item.Value["mode"]?.ToString() ?? "default"),
-				pos = new(item.Value["x"]?.ToObject<int>() ?? 2, item.Value["y"]?.ToObject<int>() ?? 2),
-				size = new(item.Value["width"]?.ToObject<int>() ?? 100, item.Value["height"]?.ToObject<int>() ?? 200),
-				sliderrange = new(item.Value["sliderMin"]?.ToObject<float>() ?? 0f, item.Value["sliderMax"]?.ToObject<float>() ?? 0f),
-				visible = item.Value["visible"]?.ToObject<bool>() ?? true
-			});
-		}
-
-		return list;
+			id = obj["id"]?.ToString() ?? "",
+			name = obj["params"]?["VARIABLES"]?.ToString() ?? "my variable",
+			sprname = obj["spriteName"]?.ToString() ?? string.Empty,
+			mode = Monitor.ToMode(obj["mode"]?.ToString() ?? "default"),
+			pos = new(obj["x"]?.ToObject<int>() ?? 2, obj["y"]?.ToObject<int>() ?? 2),
+			size = new(obj["width"]?.ToObject<int>() ?? 100, obj["height"]?.ToObject<int>() ?? 200),
+			sliderrange = new(obj["sliderMin"]?.ToObject<float>() ?? 0f, obj["sliderMax"]?.ToObject<float>() ?? 0f),
+			visible = obj["visible"]?.ToObject<bool>() ?? true
+		};
 	}
 }
