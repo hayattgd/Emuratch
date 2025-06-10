@@ -17,7 +17,7 @@ Commit message should be:
 | style   | Code style changes (indents, brackets)                                              |
 | perf    | Performance Improvements                                                            |
 | refactor| Refactoring that doesn't affect on behavior                                         |
-| improve | Improvements that changes behavior (please prefer "perf" or "refactor" if possible) |
+| improve | Improvements that changes behavior (please prefer "perf" or "feat" if possible) |
 | feat    | New feature and not improvements                                                    |
 | chore   | Others                                                                              |
 
