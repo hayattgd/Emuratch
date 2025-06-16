@@ -45,7 +45,9 @@ cd Emuratch
 dotnet build
 ```
 
-Executable file is located in `bin` subdirectory
+Executable file is located in `bin` subdirectory.
+
+If you encounter any problem while building, please [open new issue](https://github.com/hayattgd/Emuratch/issues/new?template=bug_report.md).
 
 ## Contributing
 
