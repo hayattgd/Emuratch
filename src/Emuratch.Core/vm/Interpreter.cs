@@ -82,9 +82,9 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.motion_movesteps,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.x += StrNumber(thread.block.inputs[0].value) * Math.Sin(thread.sprite.direction * DegToRad);
-				thread.sprite.y += StrNumber(thread.block.inputs[0].value) * Math.Cos(thread.sprite.direction * DegToRad);
-				interpreter.ClampToStage(thread.sprite);
+				Number x = thread.sprite.x + StrNumber(thread.block.inputs[0].value) * Math.Sin(thread.sprite.direction * DegToRad);
+				Number y = thread.sprite.y + StrNumber(thread.block.inputs[0].value) * Math.Cos(thread.sprite.direction * DegToRad);
+				thread.sprite.SetPosition(x, y);
 				return null;
 			}
 		},
@@ -125,9 +125,7 @@ public class Interpreter : IRunner
 					pos = new(destination.x, destination.y);
 				}
 
-				thread.sprite.x = pos.X;
-				thread.sprite.y = pos.Y;
-				interpreter.ClampToStage(thread.sprite);
+				thread.sprite.SetPosition(pos.X, pos.Y);
 				return null;
 			}
 		},
@@ -140,9 +138,7 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.motion_gotoxy,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.x = StrNumber(thread.block.inputs[0].value);
-				thread.sprite.y = StrNumber(thread.block.inputs[1].value);
-				interpreter.ClampToStage(thread.sprite);
+				thread.sprite.SetPosition(StrNumber(thread.block.inputs[0].value),  StrNumber(thread.block.inputs[1].value));
 				return null;
 			}
 		},
@@ -171,9 +167,7 @@ public class Interpreter : IRunner
 					pos = new(destination.x, destination.y);
 				}
 
-				thread.sprite.x = pos.X;
-				thread.sprite.y = pos.Y;
-				interpreter.ClampToStage(thread.sprite);
+				thread.sprite.SetPosition(pos.X, pos.Y);
 				return "";
 			}
 		},
@@ -186,9 +180,7 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.motion_glidesecstoxy,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.x += StrNumber(thread.block.inputs[1].value);
-				thread.sprite.y += StrNumber(thread.block.inputs[2].value);
-				interpreter.ClampToStage(thread.sprite);
+				thread.sprite.SetPosition(StrNumber(thread.block.inputs[1].value), StrNumber(thread.block.inputs[2].value));
 				return "";
 			}
 		},
@@ -242,32 +234,28 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.motion_changexby,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.x += StrNumber(thread.block.inputs[0].value);
-				interpreter.ClampToStage(thread.sprite);
+				thread.sprite.SetPosition(thread.sprite.x + StrNumber(thread.block.inputs[0].value), thread.sprite.y);
 				return null;
 			}
 		},
 		{
 			Block.Opcodes.motion_setx,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.x = StrNumber(thread.block.inputs[0].value);
-				interpreter.ClampToStage(thread.sprite);
+				thread.sprite.SetPosition(StrNumber(thread.block.inputs[0].value), thread.sprite.y);
 				return null;
 			}
 		},
 		{
 			Block.Opcodes.motion_changeyby,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.y += StrNumber(thread.block.inputs[0].value);
-				interpreter.ClampToStage(thread.sprite);
+				thread.sprite.SetPosition(thread.sprite.x, thread.sprite.y + StrNumber(thread.block.inputs[0].value));
 				return null;
 			}
 		},
 		{
 			Block.Opcodes.motion_sety,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.y = StrNumber(thread.block.inputs[0].value);
-				interpreter.ClampToStage(thread.sprite);
+				thread.sprite.SetPosition(thread.sprite.x, StrNumber(thread.block.inputs[0].value));
 				return null;
 			}
 		},
@@ -1245,20 +1233,6 @@ public class Interpreter : IRunner
 			DayOfWeek.Saturday => "7",
 			_ => "0"
 		};
-	}
-
-	void ClampToStage(Sprite spr)
-	{
-		ClampToStage(spr, project);
-	}
-
-	static void ClampToStage(Sprite spr, Project project)
-	{
-		Number width = spr.costume.Width / 4 * spr.costume.bitmapResolution;
-		Number height = spr.costume.Height / 4 * spr.costume.bitmapResolution;
-
-		spr.x = Math.Clamp((double)spr.x, project.width * -0.5 - width, project.width * 0.5 + width);
-		spr.y = Math.Clamp((double)spr.y, project.height * -0.5 - height, project.height * 0.5 + height);
 	}
 
 	public static string Boolstr(bool boolean)
