@@ -135,6 +135,22 @@ public class Sprite(Project project)
 		KeepInsideStage(project.width, project.height);
 	}
 
+	public void ClampInsideStage(uint width, uint height)
+	{
+		float halfwidth = width / 2;
+		float halfheight = height / 2;
+
+		Number up = halfheight - boundingBox.Min.Y;
+		Number down = -halfheight - boundingBox.Max.Y;
+		Number right = halfwidth - boundingBox.Max.X;
+		Number left = -halfwidth - boundingBox.Min.X;
+
+		if (up < 0) { y += up; }
+		if (down > 0) { y += down; }
+		if (right < 0) { x += right; }
+		if (left > 0) { x += left; }
+	}
+
 	public void KeepInsideStage(uint width, uint height)
 	{
 		float halfwidth = width / 2;
