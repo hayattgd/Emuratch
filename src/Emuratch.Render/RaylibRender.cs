@@ -131,8 +131,8 @@ public class RaylibRender : IRender
 	public void RenderAll()
 	{
 		Raylib.ClearBackground(Color.White);
-		var list = project.sprites.ToList();
 		RenderSprite(project.stage);
+		var list = project.sprites.ToList();
 		var all = list.Concat(project.clones);
 
 		list = [.. all];
