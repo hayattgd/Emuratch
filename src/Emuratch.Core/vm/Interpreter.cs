@@ -12,6 +12,7 @@ namespace Emuratch.Core.vm;
 public class Interpreter : IRunner
 {
 	const double DegToRad = Math.PI / 180;
+	const double RadToDeg = 180 / Math.PI;
 
 	public Interpreter(Project project, IRender render)
 	{
@@ -262,6 +263,27 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.motion_ifonedgebounce,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
+				double angle = thread.sprite.direction;
+
+				double radians = (90 - angle) * DegToRad;
+
+				double dx = Math.Cos(radians);
+				double dy = Math.Sin(radians);
+				float halfwidth = project.width / 2;
+				float halfheight = project.height / 2;
+
+				if (thread.sprite.boundingBox.Min.Y > halfheight || thread.sprite.boundingBox.Max.Y < -halfheight)
+				{
+					dy = -dy;
+					thread.sprite.ClampInsideStage(project.width, project.height);
+				}
+				else if (thread.sprite.boundingBox.Min.X < -halfwidth || thread.sprite.boundingBox.Max.X > halfwidth)
+				{
+					dx = -dx;
+					thread.sprite.ClampInsideStage(project.width, project.height);
+				}
+
+				thread.sprite.direction = 90 - Math.Atan2(dy, dx) * RadToDeg;
 				return null;
 			}
 		},
