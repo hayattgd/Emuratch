@@ -127,7 +127,31 @@ public class Sprite(Project project)
 			return new(min, max);
 		}
 	}
-	
+
+	public void SetPosition(Number x, Number y)
+	{
+		this.x = x;
+		this.y = y;
+		KeepInsideStage(project.width, project.height);
+	}
+
+	public void KeepInsideStage(uint width, uint height)
+	{
+		float halfwidth = width / 2;
+		float halfheight = height / 2;
+
+		Number up = halfheight - boundingBox.Max.Y;
+		Number down = -halfheight - boundingBox.Min.Y;
+		Number right = halfwidth - boundingBox.Min.X;
+		Number left = -halfwidth - boundingBox.Max.X;
+
+		if (up < 0) { y += up; }
+		if (down > 0) { y += down; }
+		if (right < 0) { x += right; }
+		if (left > 0) { x += left; }
+		Console.WriteLine($"x:{x}, y:{y}");
+	}
+
 	internal void UpdateBlocks()
 	{
 		foreach (var block in blocks)
