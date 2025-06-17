@@ -388,7 +388,8 @@ public class RaylibRender : IRender
 	public bool IsMouseDown() => Raylib.IsMouseButtonDown(MouseButton.Left);
 	public Vector2 MousePosition
 	{
-		get {
+		get
+		{
 			Vector2 inverted = Raylib.GetMousePosition() - new Vector2(Raylib.GetScreenWidth() * 0.5f, Raylib.GetScreenHeight() * 0.5f);
 			return new(inverted.X, -inverted.Y);
 		}
