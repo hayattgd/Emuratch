@@ -376,7 +376,7 @@ public class Interpreter : IRunner
 					}
 					else if (StrNumber(thread.block.inputs[0].value, out var id))
 					{
-						thread.sprite.currentCostume = id;
+						thread.sprite.SetCostume(id);
 					}
 				}
 
