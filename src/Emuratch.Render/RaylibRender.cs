@@ -169,8 +169,11 @@ public class RaylibRender : IRender
 		// 	pos = new(0, 0);
 		// 	offset = new(0, 0);
 		// }
+		int bitmapRes = costume.bitmapResolution;
+		if (bitmapRes == 0) { bitmapRes = 1; }
+		if (costume.dataFormat == "svg") { bitmapRes *= SVGResolution; }
 
-		float size = spr.size / 100 / costume.bitmapResolution / SVGResolution;
+		float size = spr.size / 100 / bitmapRes;
 
 		Vector2 raylibpos = RaylibPosition(spr);
 
