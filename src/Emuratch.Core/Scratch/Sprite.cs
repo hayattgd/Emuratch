@@ -48,11 +48,11 @@ public class Sprite(Project project)
 	[JsonConverter(typeof(CommentConverter))]
 	public Comment[] comments = Array.Empty<Comment>();
 
-	int _currentcostume;
-	public int currentCostume
+	public int currentCostume;
+
+	public void SetCostume(int idx)
 	{
-		get => _currentcostume;
-		set => _currentcostume = (value + 1) % (costumes.Length + 1);
+		currentCostume = (idx + 1) % (costumes.Length + 1);
 	}
 
 	[JsonConverter(typeof(CostumeConverter))]
