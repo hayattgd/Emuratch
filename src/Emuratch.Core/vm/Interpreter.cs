@@ -748,7 +748,13 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.control_stop,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return null;
+				switch (thread.block.fields[0])
+				{
+					case "all":
+						interpreter.threads.Clear();
+						break;
+				}
+				return "";
 			}
 		},
 		{
