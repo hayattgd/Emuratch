@@ -5,7 +5,7 @@ name: .NET Build
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: ["*"]
 
 env:
   net_version: "9.0"
