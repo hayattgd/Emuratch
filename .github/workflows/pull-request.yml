@@ -19,29 +19,30 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.net_version }}.x
-    - name: Restore dependencies
-      run: dotnet restore ./Emuratch.slnx
-    - name: Build
-      run: dotnet build --no-restore --verbosity diag -c ${{ matrix.config }} -o ./bin/build ./src/Emuratch/Emuratch.csproj
-    - name: Setup libgdiplus for Ubuntu
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: sudo apt install libgdiplus
-    - name: Test
-      if: ${{ matrix.config == 'Debug' && matrix.os != 'macos-latest' }}
-      run: dotnet test --no-restore --verbosity diag -c ${{ matrix.config }}
-    - name: Check for NOTICES.txt (unix)
-      if: ${{ runner.os != 'Windows' }}
-      run: test -f ./bin/build/NOTICES.txt
-    - name: Check for NOTICES.txt (windows)
-      if: ${{ runner.os == 'Windows' }}
-      run: Test-Path ./bin/build/NOTICES.txt
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v4.5.0
-      with:
-        name: ${{ github.event.pull_request.title }}_${{ matrix.os }}(${{ matrix.config }})
-        path: ./bin/build
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.net_version }}.x
+      - name: Restore dependencies
+        run: dotnet restore ./Emuratch.slnx
+      - name: Build
+        run: dotnet build --no-restore --verbosity diag -c ${{ matrix.config }} -o ./bin/build ./src/Emuratch/Emuratch.csproj
+      - name: Setup libgdiplus for Ubuntu
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: sudo apt install libgdiplus
+      - name: Test
+        if: ${{ matrix.config == 'Debug' && matrix.os != 'macos-latest' }}
+        run: dotnet test --no-restore --verbosity diag -c ${{ matrix.config }}
+      - name: Check for NOTICES.txt (unix)
+        if: ${{ runner.os != 'Windows' }}
+        run: test -f ./bin/build/NOTICES.txt
+      - name: Check for NOTICES.txt (windows)
+        if: ${{ runner.os == 'Windows' }}
+        run: Test-Path ./bin/build/NOTICES.txt
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4.5.0
+        with:
+          name: ${{ github.event.pull_request.title }}_${{ matrix.os }}(${{ matrix.config }})
+          path: ./bin/build
+
