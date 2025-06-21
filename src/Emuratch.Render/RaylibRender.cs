@@ -176,22 +176,45 @@ public class RaylibRender : IRender
 		float size = spr.size / 100 / bitmapRes;
 
 		Vector2 raylibpos = RaylibPosition(spr);
-
 		Image img = GetImage(spr, costume);
-		Raylib.DrawTexturePro(
-			GetTexture(spr, costume),
-			new Rectangle(
+
+		float direction = spr.direction - 90;
+		if (spr.Rotationstyle == Sprite.RotationStyle.dont_rotate ||
+			spr.Rotationstyle == Sprite.RotationStyle.left_right)
+		{
+			direction = 0;
+		}
+
+		Rectangle source;
+
+		if (spr.Rotationstyle == Sprite.RotationStyle.left_right &&
+			spr.direction < 0)
+		{
+			source = new(
+				img.Width, 0,
+				-img.Width,
+				img.Height
+			);
+		}
+		else
+		{
+			source = new(
 				0, 0,
 				img.Width,
 				img.Height
-			),
+			);
+		}
+
+		Raylib.DrawTexturePro(
+			GetTexture(spr, costume),
+			source,
 			new Rectangle(
 				raylibpos.X, raylibpos.Y,
 				img.Width * size,
 				img.Height * size
 			),
 			offset * 2,
-			spr.direction - 90,
+			direction,
 			Color.White
 		);
 	}
