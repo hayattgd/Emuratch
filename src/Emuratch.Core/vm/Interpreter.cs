@@ -43,6 +43,8 @@ public class Interpreter : IRunner
 		}
 	}
 
+	Dictionary<Block.Opcodes, List<Block>> eventBlocks;
+
 	public IRender render { get; }
 	public Project project { get; set; }
 	public List<Thread> threads { get; set; }
@@ -1219,8 +1221,6 @@ public class Interpreter : IRunner
 			}
 		},
 	};
-
-	Dictionary<Block.Opcodes, List<Block>> eventBlocks;
 
 	delegate string? Operation(ref Thread thread, Project project, Interpreter interpreter);
 
