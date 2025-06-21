@@ -135,6 +135,21 @@ public class Sprite(Project project)
 		KeepInsideStage(project.width, project.height);
 	}
 
+	public void SetRotation(Number dir)
+	{
+		float result = dir;
+		if (dir > 180)
+		{
+			result = -180 - (180 - dir);
+		}
+		else if (dir < -179)
+		{
+			result = 180 + (180 + dir);
+		}
+
+		direction = result;
+	}
+
 	public void ClampInsideStage(uint width, uint height)
 	{
 		float halfwidth = width / 2;

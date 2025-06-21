@@ -92,14 +92,14 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.motion_turnright,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.direction += StrNumber(thread.block.inputs[0].value) * 2;
+				thread.sprite.SetRotation(thread.sprite.direction + StrNumber(thread.block.inputs[0].value));
 				return null;
 			}
 		},
 		{
 			Block.Opcodes.motion_turnleft,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.direction -= StrNumber(thread.block.inputs[0].value) * 2;
+				thread.sprite.SetRotation(thread.sprite.direction -= StrNumber(thread.block.inputs[0].value));
 				return null;
 			}
 		},
@@ -188,7 +188,7 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.motion_pointindirection,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.direction = StrNumber(thread.block.inputs[0].value);
+				thread.sprite.SetRotation(StrNumber(thread.block.inputs[0].value));
 				return null;
 			}
 		},
@@ -220,9 +220,7 @@ public class Interpreter : IRunner
 					}
 				}
 
-				thread.sprite.direction = MathF.Atan2(pos.X - thread.sprite.x, pos.Y - thread.sprite.y) * (180 / MathF.PI);
-				if (thread.sprite.direction > 180) thread.sprite.direction -= 360;
-				if (thread.sprite.direction < -180) thread.sprite.direction += 360;
+				thread.sprite.SetRotation(MathF.Atan2(pos.X - thread.sprite.x, pos.Y - thread.sprite.y) * (180 / MathF.PI));
 				return null;
 			}
 		},
