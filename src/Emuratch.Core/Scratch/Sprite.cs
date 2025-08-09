@@ -52,7 +52,7 @@ public class Sprite(Project project)
 
 	public void SetCostume(int idx)
 	{
-		currentCostume = (idx + 1) % (costumes.Length + 1);
+		currentCostume = (idx + 1) % (costumes.Length + 1) - 1;
 	}
 
 	[JsonConverter(typeof(CostumeConverter))]
@@ -79,6 +79,7 @@ public class Sprite(Project project)
 	public bool visible = true;
 	public Number x = 0;
 	public Number y = 0;
+	public Vector2 Position => new(x, y);
 	public Number size = 100;
 	public Number direction = 90;
 	public bool draggable = false;
@@ -180,7 +181,6 @@ public class Sprite(Project project)
 		if (down > 0) { y += down; }
 		if (right < 0) { x += right; }
 		if (left > 0) { x += left; }
-		Console.WriteLine($"x:{x}, y:{y}");
 	}
 
 	internal void UpdateBlocks()

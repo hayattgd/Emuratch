@@ -160,8 +160,6 @@ public class RaylibRender : IRender
 		if (!spr.visible) return;
 		if (spr.costumes.Length == 0) return;
 
-		Costume costume = spr.costumes[spr.currentCostume];
-
 		Vector2 offset = RenderUtility.GetOffset(spr.costume);
 
 		// if (spr.isStage)
@@ -169,14 +167,14 @@ public class RaylibRender : IRender
 		// 	pos = new(0, 0);
 		// 	offset = new(0, 0);
 		// }
-		int bitmapRes = costume.bitmapResolution;
+		int bitmapRes = spr.costume.bitmapResolution;
 		if (bitmapRes == 0) { bitmapRes = 1; }
-		if (costume.dataFormat == "svg") { bitmapRes *= SVGResolution; }
+		if (spr.costume.dataFormat == "svg") { bitmapRes *= SVGResolution; }
 
 		float size = spr.size / 100 / bitmapRes;
 
 		Vector2 raylibpos = RaylibPosition(spr);
-		Image img = GetImage(spr, costume);
+		Image img = GetImage(spr, spr.costume);
 
 		float direction = spr.direction - 90;
 		if (spr.Rotationstyle == Sprite.RotationStyle.dont_rotate ||
@@ -206,7 +204,7 @@ public class RaylibRender : IRender
 		}
 
 		Raylib.DrawTexturePro(
-			GetTexture(spr, costume),
+			GetTexture(spr, spr.costume),
 			source,
 			new Rectangle(
 				raylibpos.X, raylibpos.Y,
@@ -238,25 +236,41 @@ public class RaylibRender : IRender
 
 	public System.Drawing.Color? GetColorOnPixel(Sprite spr, int x, int y)
 	{
-		// Apply Position, Rotation, Scale
+		float scale = spr.size / 100f;
+		float rotationRad = (float)((90 - spr.direction) * IRender.DegToRad);
+		
+		Matrix3x2 worldMatrix = 
+			Matrix3x2.CreateScale(scale) *
+			Matrix3x2.CreateRotation(rotationRad) *
+			Matrix3x2.CreateTranslation(new(spr.x, spr.y));
 
-		Matrix3x2 worldMatrix = Matrix3x2.CreateScale(spr.size) * Matrix3x2.CreateRotation(spr.direction * IRender.DegToRad) * Matrix3x2.CreateTranslation(new(spr.x, spr.y));
+		if (!Matrix3x2.Invert(worldMatrix, out Matrix3x2 invMatrix))
+		{
+			return null;
+		}
+		var worldPoint = new Vector2(x, y);
+		var localPoint = Vector2.Transform(worldPoint, invMatrix);
+		
+		var costume = spr.costume;
+		Image img = GetImage(spr, costume);
 
-		// Convert World Position to Local Position
+		float resolutionFactor = (costume.Width > 0) ? (img.Width / costume.Width) : 1.0f;
 
-		if (!Matrix3x2.Invert(worldMatrix, out Matrix3x2 invMatrix)) return null; // 逆行列が求まらない場合は判定不可
+		var scaledLocalPoint = localPoint * resolutionFactor;
+		var scaledRotCenter = new Vector2(costume.rotationCenterX, costume.rotationCenterY) * resolutionFactor;
 
-		// Convert Point to Local Position
+		var imagePoint = new Vector2(
+			scaledLocalPoint.X + scaledRotCenter.X,
+			-scaledLocalPoint.Y + scaledRotCenter.Y
+		);
+		if (imagePoint.X >= 0 && imagePoint.X < img.Width &&
+			imagePoint.Y >= 0 && imagePoint.Y < img.Height)
+		{
+			Color color = GetColor((int)imagePoint.X, (int)imagePoint.Y, spr);
+			return System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+		}
 
-		Vector2 localPoint = Vector2.Transform(new(x, y), invMatrix);
-
-		// Check for limit
-
-		Image img = GetImage(spr, spr.costume);
-		if (localPoint.X < 0 || localPoint.Y < 0 || localPoint.X >= img.Width || localPoint.Y >= img.Height) return null;
-
-		Color color = GetColor((int)localPoint.X, (int)localPoint.Y, spr);
-		return System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+		return null;
 	}
 
 	public void DrawDebugInfo(Sprite spr)
@@ -270,7 +284,7 @@ public class RaylibRender : IRender
 		Vector2 origin = ScratchToRaylib((int)MathF.Round(spr.x - GetImage(spr, costume).Width / 2), (int)MathF.Round(spr.y + GetImage(spr, costume).Height / 2));
 		Vector2 max = ScratchToRaylib((int)MathF.Round(spr.x + GetImage(spr, costume).Width / 2), (int)MathF.Round(spr.y - GetImage(spr, costume).Height / 2));
 
-		Vector2 pivot = pos + offset * 2;
+		Vector2 pivot = pos - offset * 2;
 		Raylib.DrawCircle((int)pivot.X, (int)pivot.Y, 3, Color.Yellow);
 		Raylib.DrawCircle((int)pos.X, (int)pos.Y, 3, Color.Red);
 		Raylib.DrawCircle((int)max.X, (int)max.Y, 3, Color.Blue);
@@ -296,9 +310,9 @@ public class RaylibRender : IRender
 	public Color GetColor(int x, int y, Sprite spr)
 	{
 		Image img = GetImage(spr, spr.costume);
-		if (x > img.Width || x < 0) return Color.Blank;
-		if (y > img.Height || y < 0) return Color.Blank;
-
+		// if (rayliborigin.X > img.Width || rayliborigin.X < 0) return Color.Blank;
+		// if (rayliborigin.Y > img.Height || rayliborigin.Y < 0) return Color.Blank;
+		// Console.WriteLine($"x:{rayliborigin.X}, y:{rayliborigin.Y}");
 		Color color;
 		unsafe
 		{
@@ -315,12 +329,6 @@ public class RaylibRender : IRender
 	}
 
 	public Vector2 RaylibPosition(Sprite spr) => ScratchToRaylib(spr.x, spr.y);
-	public Vector2 RaylibOrigin(Sprite spr)
-	{
-		Vector2 raylibpos = RaylibPosition(spr);
-		Vector2 offset = RenderUtility.GetOffset(spr.costume);
-		return new(raylibpos.X - offset.X * 2, raylibpos.Y - offset.Y * 2);
-	}
 
 	public void PlaySound(Core.Scratch.Sound sound)
 	{
@@ -416,6 +424,27 @@ public class RaylibRender : IRender
 			Vector2 inverted = Raylib.GetMousePosition() - new Vector2(Raylib.GetScreenWidth() * 0.5f, Raylib.GetScreenHeight() * 0.5f);
 			return new(inverted.X, -inverted.Y);
 		}
+	}
+
+	public void DrawRectangle(int x, int y, int w, int h, System.Drawing.Color color)
+	{
+		Raylib_cs.Color raylibcolor = new(color.R, color.G, color.B, color.A);
+		var pos = ScratchToRaylib(x, y);
+		Raylib.DrawRectangleLines((int)pos.X, (int)pos.Y, w, h, raylibcolor);
+	}
+
+	public void DrawPoint(int x, int y, System.Drawing.Color color)
+	{
+		Raylib_cs.Color raylibcolor = new(color.R, color.G, color.B, color.A);
+		var pos = ScratchToRaylib(x, y);
+		Raylib.DrawCircle((int)pos.X, (int)pos.Y, 3, raylibcolor);
+	}
+
+	public void DrawPixel(int x, int y, System.Drawing.Color color)
+	{
+		Raylib_cs.Color raylibcolor = new(color.R, color.G, color.B, color.A);
+		var pos = ScratchToRaylib(x, y);
+		Raylib.DrawPixel((int)pos.X, (int)pos.Y, raylibcolor);
 	}
 
 	public void Unload()

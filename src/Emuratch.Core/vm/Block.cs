@@ -180,11 +180,22 @@ public class Block
 		}
 	}
 
+	public struct Mutation
+	{
+		public string tagName;
+		//Array "children" isnt used in Scratch 3.0
+		public string proccode;
+		public string argumentids;
+		public string argumentnames;
+		public bool warp;
+	}
+
 	public Opcodes opcode = Opcodes.motion_movesteps;
 	public string nextId = "";
 	public string parentId = "";
 	public List<Input> inputs = new();
 	public readonly List<string> fields = new();
+	public Mutation mutation;
 
 	public Sprite sprite { get; internal set; }
 
@@ -239,7 +250,7 @@ public class BlockConverter : JsonConverter<Dictionary<string, Block>>
 						isReference = false
 					});
 				}
-				else if(input[1]?.Type == JTokenType.String)
+				else if (input[1]?.Type == JTokenType.String)
 				{
 					block.inputs.Add(new()
 					{
@@ -250,6 +261,19 @@ public class BlockConverter : JsonConverter<Dictionary<string, Block>>
 			}
 			block.fields.AddRange(from field in (item.Value["fields"] ?? throw new InvalidOperationException()).Values() select field[0]?.ToString());
 			blocks.Add(key, block);
+
+			if (item.Value["mutation"] == null) continue;
+
+			Block.Mutation mutation = new()
+			{
+				tagName = item.Value["mutation"]?["tagName"]?.ToString() ?? "",
+				proccode = item.Value["mutation"]?["proccode"]?.ToString() ?? "",
+				argumentids = item.Value["mutation"]?["argumentids"]?.ToString() ?? "",
+				argumentnames = item.Value["mutation"]?["argumentnames"]?.ToString() ?? "",
+				// warp = (bool)item.Value["mutation"]["warp"].ToObject(typeof(bool))
+			};
+
+			block.mutation = mutation;
 		}
 
 		return blocks;

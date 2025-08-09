@@ -22,6 +22,7 @@ public class Interpreter : IRunner
 		rng = new();
 
 		eventBlocks = [];
+		procedures = [];
 
 		foreach (var spr in project.sprites)
 		{
@@ -34,6 +35,13 @@ public class Interpreter : IRunner
 
 					eventBlocks[block.Value.opcode].Add(block.Value);
 				}
+
+				if (block.Value.opcode == Block.Opcodes.procedures_definition)
+				{
+					string proccode = spr.blocks[block.Value.inputs[0].RawValue].mutation.proccode;
+					if (procedures.ContainsKey(proccode)) { continue; }
+					procedures.Add(proccode, block.Value);
+				}
 			}
 		}
 
@@ -44,6 +52,7 @@ public class Interpreter : IRunner
 	}
 
 	Dictionary<Block.Opcodes, List<Block>> eventBlocks;
+	Dictionary<string, Block> procedures;
 
 	public IRender render { get; }
 	public Project project { get; set; }
@@ -385,23 +394,14 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.looks_switchcostumeto,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				try
+				if (StrNumber(thread.block.inputs[0].value, out var id))
 				{
+					thread.sprite.SetCostume(id);
+				}
+				else {
 					string costumestr = thread.block.inputs[0].value;
 					thread.sprite.costume = thread.sprite.costumes.First(x => x.name == costumestr);
 				}
-				catch (Exception ex)
-				{
-					if (ex.GetType() != typeof(InvalidOperationException))
-					{
-						throw;
-					}
-					else if (StrNumber(thread.block.inputs[0].value, out var id))
-					{
-						thread.sprite.SetCostume(id);
-					}
-				}
-
 				return null;
 			}
 		},
@@ -420,8 +420,7 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.looks_nextcostume,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.currentCostume++;
-				//add codes to repeat costume
+				thread.sprite.SetCostume(thread.sprite.currentCostume + 1);
 				return null;
 			}
 		},
@@ -1096,7 +1095,7 @@ public class Interpreter : IRunner
 			Block.Opcodes.data_setvariableto,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				string variable = thread.block.fields[0];
-				project.stage.variables.First(x => x.name == variable).value = thread.block.inputs[0];
+					project.stage.variables.First(x => x.name == variable).value = thread.block.inputs[0];
 				return null;
 			}
 		},
@@ -1205,6 +1204,10 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.procedures_call,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
+				if (interpreter.procedures.ContainsKey(thread.block.mutation.proccode))
+				{
+					interpreter.Execute(thread.sprite, interpreter.procedures[thread.block.mutation.proccode]);
+				}
 				return null;
 			}
 		},
@@ -1308,33 +1311,123 @@ public class Interpreter : IRunner
 
 	public bool CheckPixelOverlap(Sprite a, Sprite b)
 	{
+		// Matrix3x2 transformA = Matrix3x2.CreateScale(a.size / 100f) * Matrix3x2.CreateRotation((float)((90 - a.direction) * DegToRad)) * Matrix3x2.CreateTranslation(a.x, a.y);
+		// Matrix3x2 transformB = Matrix3x2.CreateScale(b.size / 100f) * Matrix3x2.CreateRotation((float)((90 - b.direction) * DegToRad)) * Matrix3x2.CreateTranslation(b.x, b.y);
+		// Vector2 rotCenterA = new Vector2(a.costume.rotationCenterX, a.costume.rotationCenterY);
+		// Vector2[] localCornersA = { new Vector2(-rotCenterA.X, rotCenterA.Y), new Vector2(a.costume.Width - rotCenterA.X, rotCenterA.Y), new Vector2(a.costume.Width - rotCenterA.X, -(a.costume.Height - rotCenterA.Y)), new Vector2(-rotCenterA.X, -(a.costume.Height - rotCenterA.Y)) };
+		// Vector2[] worldCornersA = new Vector2[localCornersA.Length];
+		// for (int i = 0; i < localCornersA.Length; i++)
+		// {
+		// 	worldCornersA[i] = Vector2.Transform(localCornersA[i], transformA);
+		// }
+		// Vector2 rotCenterB = new Vector2(b.costume.rotationCenterX, b.costume.rotationCenterY);
+		// Vector2[] localCornersB = { new Vector2(-rotCenterB.X, rotCenterB.Y), new Vector2(b.costume.Width - rotCenterB.X, rotCenterB.Y), new Vector2(b.costume.Width - rotCenterB.X, -(b.costume.Height - rotCenterB.Y)), new Vector2(-rotCenterB.X, -(b.costume.Height - rotCenterB.Y)) };
+		// Vector2[] worldCornersB = new Vector2[localCornersB.Length];
+		// for (int i = 0; i < localCornersB.Length; i++)
+		// {
+		// 	worldCornersB[i] = Vector2.Transform(localCornersB[i], transformB);
+		// }
+		// Vector2 aMin = new(worldCornersA.Min(v => v.X), worldCornersA.Max(v => v.Y));
+		// Vector2 aMax = new(worldCornersA.Max(v => v.X), worldCornersA.Min(v => v.Y));
+		// render.DrawRectangle((int)aMin.X, (int)aMin.Y, (int)(aMax.X - aMin.X), (int)(aMax.Y - aMin.Y), Color.Blue);
+
+		// Vector2 bMin = new(worldCornersB.Min(v => v.X), worldCornersB.Max(v => v.Y));
+		// Vector2 bMax = new(worldCornersB.Max(v => v.X), worldCornersB.Min(v => v.Y));
+		// render.DrawRectangle((int)bMin.X, (int)bMin.Y, (int)(bMax.X - bMin.X), (int)(bMax.Y - bMin.Y), Color.Red);
+		// float overlapStartX = Math.Max(worldCornersA.Min(v => v.X), worldCornersB.Min(v => v.X));
+		// float overlapEndX = Math.Min(worldCornersA.Max(v => v.X), worldCornersB.Max(v => v.X));
+		// float overlapStartY = Math.Max(worldCornersA.Min(v => v.Y), worldCornersB.Min(v => v.Y));
+		// float overlapEndY = Math.Min(worldCornersA.Max(v => v.Y), worldCornersB.Max(v => v.Y));
+		// if (overlapStartX >= overlapEndX || overlapStartY >= overlapEndY)
+		// {
+		// 	return false;
+		// }
+		// for (int y = (int)overlapStartY; y < (int)overlapEndY; y++)
+		// {
+		// 	for (int x = (int)overlapStartX; x < (int)overlapEndX; x++)
+		// 	{
+		// 		var pixelA = render.GetColorOnPixel(a, x, y);
+		// 		if (pixelA.HasValue && pixelA.Value.A > 0)
+		// 		{
+		// 			var pixelB = render.GetColorOnPixel(b, x, y);
+		// 			if (pixelB.HasValue && pixelB.Value.A > 0)
+		// 			{
+		// 				return true;
+		// 			}
+		// 		}
+		// 	}
+		// }
+		// return false;
+		
+		// Adjust origin to Left-Top
+		var abounding = new BoundingBox(
+			new(
+				project.width / 2f + a.boundingBox.Min.X,
+				project.height / 2f - a.boundingBox.Min.Y
+			),
+			new(
+				project.width / 2f + a.boundingBox.Max.X,
+				project.height / 2f - a.boundingBox.Max.Y
+			)
+		);
+		var bbounding = new BoundingBox(
+			new(
+				project.width / 2f + b.boundingBox.Min.X,
+				project.height / 2f - b.boundingBox.Min.Y
+			),
+			new(
+				project.width / 2f + b.boundingBox.Max.X,
+				project.height / 2f - b.boundingBox.Max.Y
+			)
+		);
+
 		// Get overlap of 2 bounding boxes
 		int startX = (int)Math.Max(a.boundingBox.Min.X, b.boundingBox.Min.X);
-		int startY = (int)Math.Max(a.boundingBox.Min.Y, b.boundingBox.Min.Y);
+		int startY = (int)Math.Min(a.boundingBox.Min.Y, b.boundingBox.Min.Y);
 		int endX = (int)Math.Min(a.boundingBox.Max.X, b.boundingBox.Max.X);
-		int endY = (int)Math.Min(a.boundingBox.Max.Y, b.boundingBox.Max.Y);
+		int endY = (int)Math.Max(a.boundingBox.Max.Y, b.boundingBox.Max.Y);
 
+		// int startX = (int)Math.Min(a.boundingBox.Min.X, b.boundingBox.Min.X);
+		// int startY = (int)Math.Max(a.boundingBox.Min.Y, b.boundingBox.Min.Y);
+		// int endX = (int)Math.Max(a.boundingBox.Max.X, b.boundingBox.Max.X);
+		// int endY = (int)Math.Min(a.boundingBox.Max.Y, b.boundingBox.Max.Y);
+
+		if (project.debug)
+		{
+			render.DrawRectangle(startX, startY, endX - startX, startY - endY, Color.Red);
+			render.DrawPoint(startX, startY, Color.Green);
+			render.DrawPoint(endX, endY, Color.Blue);
+		}
+		
 		for (int x = startX; x < endX; x++)
 		{
-			for (int y = startY; y < endY; y++)
+			for (int y = startY; y > endY; y--)
 			{
+				Color? pixelA = render.GetColorOnPixel(a, x, y);
+				Color? pixelB = render.GetColorOnPixel(b, x, y);
 
-				int localXA = x - (int)a.x;
-				int localYA = y - (int)a.y;
-				int localXB = x - (int)b.x;
-				int localYB = y - (int)b.y;
-
-				Color? pixelA = render.GetColorOnPixel(a, localXA, localYA);
-				Color? pixelB = render.GetColorOnPixel(b, localXB, localYB);
-
-				if (pixelA == null) return false;
-				if (pixelB == null) return false;
-
-				// If Alpha is over 0 then return true as Scratch does.
-				if (pixelA.Value.A > 0 && pixelB.Value.A > 0)
+				if (pixelA == null || pixelB == null)
 				{
-					return true;
+					continue;
 				}
+
+				if (project.debug)
+				{
+					if (pixelA.Value.A > 0)
+					{
+						render.DrawPixel(x, y, pixelA.Value);
+					}
+
+					if (pixelB.Value.A > 0)
+					{
+						render.DrawPixel(x, y, pixelB.Value);
+					}
+				}
+
+				if (pixelA.Value.A > 0 && pixelB.Value.A > 0)
+					{
+						return true;
+					}
 			}
 		}
 

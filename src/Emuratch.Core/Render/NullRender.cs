@@ -8,7 +8,7 @@ public class NullRender : IRender
 {
 	public NullRender(Project project)
 	{
-		
+
 	}
 
 	public void RenderAll() { }
@@ -26,6 +26,10 @@ public class NullRender : IRender
 
 	public bool IsMouseDown() => false;
 	public Vector2 MousePosition { get => new(); }
+
+	public void DrawRectangle(int x, int y, int w, int h, Color color) { }
+	public void DrawPoint(int x, int y, Color color) { }
+	public void DrawPixel(int x, int y, Color color) { }
 
 	public void Unload() { }
 }

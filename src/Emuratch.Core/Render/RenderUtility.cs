@@ -9,4 +9,10 @@ public static class RenderUtility
 	{
 		return new(costume.rotationCenterX / (costume.bitmapResolution * 2), costume.rotationCenterY / (costume.bitmapResolution * 2));
 	}
+
+	public static Vector2 GetOrigin(Costume costume, Vector2 fixedPosition)
+	{
+		Vector2 offset = GetOffset(costume);
+		return new(fixedPosition.X - offset.X * 2, fixedPosition.Y - offset.Y * 2);
+	}
 }

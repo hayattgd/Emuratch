@@ -1,9 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using System;
-
-namespace Emuratch.Core.Scratch;
+﻿namespace Emuratch.Core.Scratch;
 
 public class Sound
 {

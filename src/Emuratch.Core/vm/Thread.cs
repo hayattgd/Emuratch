@@ -51,10 +51,17 @@ public class Thread
 
 		if (block == null || block.nextId == string.Empty)
 		{
-			if(returnto.Count <= 0)
+			if (returnto.Count <= 0)
 			{
-				runner.threads.Remove(this);
-				return;
+				if (warp)
+				{
+					return;
+				}
+				else
+				{
+					runner.threads.Remove(this);
+					return;
+				}
 			}
 			else if (returnto[^1].forever || returnto[^1].repeats > 0)
 			{
@@ -86,6 +93,7 @@ public class Thread
 	public Number delay;
 	public List<Loop> returnto = [];
 	public bool nextframe = true;
+	public bool warp = false;
 
 	public readonly Sprite sprite;
 	public Block block;
