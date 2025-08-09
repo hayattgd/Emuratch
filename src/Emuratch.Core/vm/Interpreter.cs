@@ -1088,14 +1088,22 @@ public class Interpreter : IRunner
 			Block.Opcodes.data_variable,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				string variable = thread.block.fields[0];
-				return project.stage.variables.First(x => x.name == variable).value.ToString() ?? "";
+				return project.stage.variables.First(x => x.name == variable).value.ToString() ?? thread.sprite.variables.First(x => x.name == variable).value.ToString() ?? "";
 			}
 		},
 		{
 			Block.Opcodes.data_setvariableto,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				string variable = thread.block.fields[0];
+				try
+				{
 					project.stage.variables.First(x => x.name == variable).value = thread.block.inputs[0];
+				}
+				catch (InvalidOperationException)
+				{
+					thread.sprite.variables.First(x => x.name == variable).value = thread.block.inputs[0];
+				}
+				
 				return null;
 			}
 		},
