@@ -1110,6 +1110,16 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.data_changevariableby,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
+				string variable = thread.block.fields[0];
+				try
+				{
+					project.stage.variables.First(x => x.name == variable).value = thread.block.inputs[0];
+				}
+				catch (InvalidOperationException)
+				{
+					thread.sprite.variables.First(x => x.name == variable).value = thread.block.inputs[0];
+				}
+
 				return null;
 			}
 		},
