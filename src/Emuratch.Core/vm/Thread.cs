@@ -53,15 +53,8 @@ public class Thread
 		{
 			if (returnto.Count <= 0)
 			{
-				if (warp)
-				{
-					return;
-				}
-				else
-				{
-					runner.threads.Remove(this);
-					return;
-				}
+				runner.threads.Remove(this);
+				return;
 			}
 			else if (returnto[^1].forever || returnto[^1].repeats > 0)
 			{
@@ -70,15 +63,7 @@ public class Thread
 			}
 			else
 			{
-				if (returnto[^1].forever)
-				{
-					block = returnto[^1].block;
-				}
-				else
-				{
-					block = returnto[^1].block.Parent(sprite).Next(sprite);
-				}
-
+				block = returnto[^1].block.Parent(sprite).Next(sprite);
 				returnto.RemoveAt(returnto.Count - 1);
 			}
 		}

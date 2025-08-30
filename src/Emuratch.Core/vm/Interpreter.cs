@@ -701,9 +701,9 @@ public class Interpreter : IRunner
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				if (Strbool(thread.block.inputs[0].value))
 				{
-					// thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
-					// interpreter.Execute(ref thread);
-					interpreter.Execute(thread.sprite, thread.sprite.blocks[thread.block.inputs[1].RawValue]);
+					thread.returnto.Add(new(thread.block));
+					thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
+					interpreter.Execute(ref thread);
 				}
 
 				return null;
@@ -715,11 +715,13 @@ public class Interpreter : IRunner
 				if (Strbool(thread.block.inputs[0].value))
 				{
 					thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
+					thread.returnto.Add(new(thread.block));
 					interpreter.Execute(ref thread);
 				}
 				else
 				{
 					thread.block = thread.sprite.blocks[thread.block.inputs[2].RawValue];
+					thread.returnto.Add(new(thread.block));
 					interpreter.Execute(ref thread);
 				}
 
