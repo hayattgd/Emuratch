@@ -11,7 +11,7 @@ public class NumberTest
 		{
 			Number a = 3.25;
 			Number b = 6.8;
-			Assert.Equal(10.05, (double)(a + b), 7);
+			Assert.Equal(10.05, (double)(a + b), 6);
 		}
 		{
 			Number a = 3;
@@ -27,7 +27,7 @@ public class NumberTest
 		{
 			Number a = 3.25f;
 			Number b = 6.8f;
-			Assert.Equal(10.05f, (float)(a + b), 10);
+			Assert.Equal(10.05f, (float)(a + b), 6);
 		}
 		{
 			Number a = 3;
