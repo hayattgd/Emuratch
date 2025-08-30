@@ -122,10 +122,45 @@ public class Sprite(Project project)
 	{
 		get
 		{
-			Vector2 offset = RenderUtility.GetOffset(costume);
-			Vector2 min = new(x - offset.X * 2, y + offset.Y * 2);
-			Vector2 max = new(min.X + costume.Width, min.Y - costume.Height);
-			return new(min, max);
+			if (costume.Width == 0 || costume.Height == 0)
+			{
+				return new BoundingBox(new Vector2(x, y), new Vector2(x, y));
+			}
+			float rcX = costume.rotationCenterX;
+			float rcY = costume.rotationCenterY;
+			float width = costume.Width;
+			float height = costume.Height;
+	
+			var corners = new Vector2[4]
+			{
+				new(0 - rcX, -(0 - rcY)),        // Top-Left     -> (-rcX, rcY)
+				new(width - rcX, -(0 - rcY)),      // Top-Right    -> (width - rcX, rcY)
+				new(width - rcX, -(height - rcY)),  // Bottom-Right -> (width - rcX, rcY - height)
+				new(0 - rcX, -(height - rcY))     // Bottom-Left  -> (-rcX, rcY - height)
+			};
+			float scale = size / 100.0f;
+			float rotationRad = (float)((90 - direction) * IRender.DegToRad);
+
+			var transformMatrix = Matrix3x2.CreateScale(scale) * Matrix3x2.CreateRotation(rotationRad);
+
+			for (int i = 0; i < corners.Length; i++)
+			{
+				corners[i] = Vector2.Transform(corners[i], transformMatrix);
+			}
+			float minX = float.MaxValue;
+			float minY = float.MaxValue;
+			float maxX = float.MinValue;
+			float maxY = float.MinValue;
+			foreach (var corner in corners)
+			{
+				var worldCorner = corner + new Vector2(x, y);
+		
+				minX = Math.Min(minX, worldCorner.X);
+				minY = Math.Min(minY, worldCorner.Y);
+				maxX = Math.Max(maxX, worldCorner.X);
+				maxY = Math.Max(maxY, worldCorner.Y);
+			}
+			return new(new Vector2(minX, maxY), new Vector2(maxX, minY));
 		}
 	}
 

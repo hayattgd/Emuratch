@@ -107,14 +107,6 @@ public struct Number
 					n = new(double.NegativeInfinity);
 					return true;
 
-				case "true":
-					n = new(1);
-					return true;
-
-				case "false":
-					n = new(0);
-					return true;
-
 				default:
 					n = new(0);
 					return false;

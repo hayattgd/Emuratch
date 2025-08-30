@@ -187,7 +187,8 @@ public class Block
 		public string proccode;
 		public string argumentids;
 		public string argumentnames;
-		public bool warp;
+		public string warp;
+		// public readonly bool Warp => Interpreter.Strbool(warp);
 	}
 
 	public Opcodes opcode = Opcodes.motion_movesteps;

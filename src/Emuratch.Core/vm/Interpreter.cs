@@ -104,13 +104,15 @@ public class Interpreter : IRunner
 			Block.Opcodes.motion_turnright,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				thread.sprite.SetRotation(thread.sprite.direction + StrNumber(thread.block.inputs[0].value));
+				System.Console.WriteLine("right");
 				return null;
 			}
 		},
 		{
 			Block.Opcodes.motion_turnleft,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				thread.sprite.SetRotation(thread.sprite.direction -= StrNumber(thread.block.inputs[0].value));
+				thread.sprite.SetRotation(thread.sprite.direction - StrNumber(thread.block.inputs[0].value));
+				System.Console.WriteLine("left");
 				return null;
 			}
 		},
@@ -692,7 +694,7 @@ public class Interpreter : IRunner
 			Block.Opcodes.control_forever,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				thread.block = thread.sprite.blocks[thread.block.inputs[0].RawValue];
-				thread.returnto.Add(new(thread.block));
+				thread.returnto.Add(new(thread.block, true));
 				return null;
 			}
 		},
@@ -701,8 +703,8 @@ public class Interpreter : IRunner
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				if (Strbool(thread.block.inputs[0].value))
 				{
-					thread.returnto.Add(new(thread.block));
 					thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
+					thread.returnto.Add(new(thread.block));
 					interpreter.Execute(ref thread);
 				}
 
@@ -731,12 +733,18 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.control_wait_until,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
+				string cond = thread.block.inputs[0].RawValue;
+				thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
+				thread.returnto.Add(new(thread.block, thread.sprite.blocks[cond]));
 				return null;
 			}
 		},
 		{
 			Block.Opcodes.control_repeat_until,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
+				string cond = thread.block.inputs[0].RawValue;
+				thread.block = thread.sprite.blocks[thread.block.inputs[1].RawValue];
+				thread.returnto.Add(new(thread.block, thread.sprite.blocks[cond]));
 				return null;
 			}
 		},
@@ -1073,11 +1081,11 @@ public class Interpreter : IRunner
 				string variable = thread.block.fields[0];
 				try
 				{
-					project.stage.variables.First(x => x.name == variable).value = thread.block.inputs[0];
+					project.stage.variables.First(x => x.name == variable).value = thread.block.inputs[0].value;
 				}
 				catch (InvalidOperationException)
 				{
-					thread.sprite.variables.First(x => x.name == variable).value = thread.block.inputs[0];
+					thread.sprite.variables.First(x => x.name == variable).value = thread.block.inputs[0].value;
 				}
 				
 				return null;
@@ -1089,11 +1097,13 @@ public class Interpreter : IRunner
 				string variable = thread.block.fields[0];
 				try
 				{
-					project.stage.variables.First(x => x.name == variable).value = thread.block.inputs[0];
+					var v = project.stage.variables.First(x => x.name == variable);
+					v.value = StrNumber(v.value.ToString() ?? "") + StrNumber(thread.block.inputs[0].value);
 				}
 				catch (InvalidOperationException)
 				{
-					thread.sprite.variables.First(x => x.name == variable).value = thread.block.inputs[0];
+					var v = thread.sprite.variables.First(x => x.name == variable);
+					v.value = StrNumber(v.value.ToString() ?? "") + StrNumber(thread.block.inputs[0].value);
 				}
 
 				return null;
@@ -1200,7 +1210,9 @@ public class Interpreter : IRunner
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				if (interpreter.procedures.ContainsKey(thread.block.mutation.proccode))
 				{
-					interpreter.Execute(thread.sprite, interpreter.procedures[thread.block.mutation.proccode]);
+					var t = new Thread(thread.sprite, interpreter.procedures[thread.block.mutation.proccode], interpreter, true);
+					interpreter.threads.Add(t);
+					t.Step();
 				}
 				return null;
 			}
@@ -1264,34 +1276,7 @@ public class Interpreter : IRunner
 
 	public static Number StrNumber(string str) => (Number)str;
 
-	public static bool StrNumber(string str, out Number value)
-	{
-		if (str == "Infinity") { value = double.MaxValue; return true; }
-		if (str == "-Infinity") { value = double.MinValue; return true; }
-
-		if (str == "true") { value = 1; return true; }
-		if (str == "false") { value = 0; return false; }
-
-		if (str.Contains('.'))
-		{
-			if (Number.TryParse(str, out var num))
-			{
-				value = num;
-				return true;
-			}
-		}
-		else
-		{
-			if (int.TryParse(str, out var num))
-			{
-				value = num;
-				return true;
-			}
-		}
-
-		value = new(0);
-		return false;
-	}
+	public static bool StrNumber(string str, out Number value) => Number.TryParse(str, out value);
 
 	public static bool CheckBoundingBoxOverlap(Sprite a, Sprite b)
 	{
@@ -1303,78 +1288,8 @@ public class Interpreter : IRunner
 			);
 	}
 
-	public bool CheckPixelOverlap(Sprite a, Sprite b)
+	public bool  CheckPixelOverlap(Sprite a, Sprite b)
 	{
-		// Matrix3x2 transformA = Matrix3x2.CreateScale(a.size / 100f) * Matrix3x2.CreateRotation((float)((90 - a.direction) * DegToRad)) * Matrix3x2.CreateTranslation(a.x, a.y);
-		// Matrix3x2 transformB = Matrix3x2.CreateScale(b.size / 100f) * Matrix3x2.CreateRotation((float)((90 - b.direction) * DegToRad)) * Matrix3x2.CreateTranslation(b.x, b.y);
-		// Vector2 rotCenterA = new Vector2(a.costume.rotationCenterX, a.costume.rotationCenterY);
-		// Vector2[] localCornersA = { new Vector2(-rotCenterA.X, rotCenterA.Y), new Vector2(a.costume.Width - rotCenterA.X, rotCenterA.Y), new Vector2(a.costume.Width - rotCenterA.X, -(a.costume.Height - rotCenterA.Y)), new Vector2(-rotCenterA.X, -(a.costume.Height - rotCenterA.Y)) };
-		// Vector2[] worldCornersA = new Vector2[localCornersA.Length];
-		// for (int i = 0; i < localCornersA.Length; i++)
-		// {
-		// 	worldCornersA[i] = Vector2.Transform(localCornersA[i], transformA);
-		// }
-		// Vector2 rotCenterB = new Vector2(b.costume.rotationCenterX, b.costume.rotationCenterY);
-		// Vector2[] localCornersB = { new Vector2(-rotCenterB.X, rotCenterB.Y), new Vector2(b.costume.Width - rotCenterB.X, rotCenterB.Y), new Vector2(b.costume.Width - rotCenterB.X, -(b.costume.Height - rotCenterB.Y)), new Vector2(-rotCenterB.X, -(b.costume.Height - rotCenterB.Y)) };
-		// Vector2[] worldCornersB = new Vector2[localCornersB.Length];
-		// for (int i = 0; i < localCornersB.Length; i++)
-		// {
-		// 	worldCornersB[i] = Vector2.Transform(localCornersB[i], transformB);
-		// }
-		// Vector2 aMin = new(worldCornersA.Min(v => v.X), worldCornersA.Max(v => v.Y));
-		// Vector2 aMax = new(worldCornersA.Max(v => v.X), worldCornersA.Min(v => v.Y));
-		// render.DrawRectangle((int)aMin.X, (int)aMin.Y, (int)(aMax.X - aMin.X), (int)(aMax.Y - aMin.Y), Color.Blue);
-
-		// Vector2 bMin = new(worldCornersB.Min(v => v.X), worldCornersB.Max(v => v.Y));
-		// Vector2 bMax = new(worldCornersB.Max(v => v.X), worldCornersB.Min(v => v.Y));
-		// render.DrawRectangle((int)bMin.X, (int)bMin.Y, (int)(bMax.X - bMin.X), (int)(bMax.Y - bMin.Y), Color.Red);
-		// float overlapStartX = Math.Max(worldCornersA.Min(v => v.X), worldCornersB.Min(v => v.X));
-		// float overlapEndX = Math.Min(worldCornersA.Max(v => v.X), worldCornersB.Max(v => v.X));
-		// float overlapStartY = Math.Max(worldCornersA.Min(v => v.Y), worldCornersB.Min(v => v.Y));
-		// float overlapEndY = Math.Min(worldCornersA.Max(v => v.Y), worldCornersB.Max(v => v.Y));
-		// if (overlapStartX >= overlapEndX || overlapStartY >= overlapEndY)
-		// {
-		// 	return false;
-		// }
-		// for (int y = (int)overlapStartY; y < (int)overlapEndY; y++)
-		// {
-		// 	for (int x = (int)overlapStartX; x < (int)overlapEndX; x++)
-		// 	{
-		// 		var pixelA = render.GetColorOnPixel(a, x, y);
-		// 		if (pixelA.HasValue && pixelA.Value.A > 0)
-		// 		{
-		// 			var pixelB = render.GetColorOnPixel(b, x, y);
-		// 			if (pixelB.HasValue && pixelB.Value.A > 0)
-		// 			{
-		// 				return true;
-		// 			}
-		// 		}
-		// 	}
-		// }
-		// return false;
-		
-		// Adjust origin to Left-Top
-		var abounding = new BoundingBox(
-			new(
-				project.width / 2f + a.boundingBox.Min.X,
-				project.height / 2f - a.boundingBox.Min.Y
-			),
-			new(
-				project.width / 2f + a.boundingBox.Max.X,
-				project.height / 2f - a.boundingBox.Max.Y
-			)
-		);
-		var bbounding = new BoundingBox(
-			new(
-				project.width / 2f + b.boundingBox.Min.X,
-				project.height / 2f - b.boundingBox.Min.Y
-			),
-			new(
-				project.width / 2f + b.boundingBox.Max.X,
-				project.height / 2f - b.boundingBox.Max.Y
-			)
-		);
-
 		// Get overlap of 2 bounding boxes
 		int startX = (int)Math.Max(a.boundingBox.Min.X, b.boundingBox.Min.X);
 		int startY = (int)Math.Min(a.boundingBox.Min.Y, b.boundingBox.Min.Y);
