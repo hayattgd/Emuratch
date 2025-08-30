@@ -979,27 +979,19 @@ public class Interpreter : IRunner
 		},
 		{
 			Block.Opcodes.operator_add,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return (StrNumber(thread.block.inputs[0].value) + StrNumber(thread.block.inputs[1].value)).ToString();
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => (StrNumber(thread.block.inputs[0].value) + StrNumber(thread.block.inputs[1].value)).ToString()
 		},
 		{
 			Block.Opcodes.operator_subtract,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return (StrNumber(thread.block.inputs[0].value) - StrNumber(thread.block.inputs[1].value)).ToString();
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => (StrNumber(thread.block.inputs[0].value) - StrNumber(thread.block.inputs[1].value)).ToString()
 		},
 		{
 			Block.Opcodes.operator_multiply,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return (StrNumber(thread.block.inputs[0].value) * StrNumber(thread.block.inputs[1].value)).ToString();
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => (StrNumber(thread.block.inputs[0].value) * StrNumber(thread.block.inputs[1].value)).ToString()
 		},
 		{
 			Block.Opcodes.operator_divide,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return (StrNumber(thread.block.inputs[0].value) / StrNumber(thread.block.inputs[1].value)).ToString();
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => (StrNumber(thread.block.inputs[0].value) / StrNumber(thread.block.inputs[1].value)).ToString()
 		},
 		{
 			Block.Opcodes.operator_random,
@@ -1010,57 +1002,39 @@ public class Interpreter : IRunner
 		},
 		{
 			Block.Opcodes.operator_gt,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return Boolstr(StrNumber(thread.block.inputs[0].value) > StrNumber(thread.block.inputs[1].value));
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => Boolstr(StrNumber(thread.block.inputs[0].value) > StrNumber(thread.block.inputs[1].value))
 		},
 		{
 			Block.Opcodes.operator_lt,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return Boolstr(StrNumber(thread.block.inputs[0].value) < StrNumber(thread.block.inputs[1].value));
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => Boolstr(StrNumber(thread.block.inputs[0].value) < StrNumber(thread.block.inputs[1].value))
 		},
 		{
 			Block.Opcodes.operator_equals,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return Boolstr(thread.block.inputs[0].value.ToLower() == thread.block.inputs[1].value.ToLower());
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => Boolstr(thread.block.inputs[0].value.ToLower() == thread.block.inputs[1].value.ToLower())
 		},
 		{
 			Block.Opcodes.operator_and,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return Boolstr(Strbool(thread.block.inputs[0].value) && Strbool(thread.block.inputs[1].value));
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => Boolstr(Strbool(thread.block.inputs[0].value) && Strbool(thread.block.inputs[1].value))
 		},
 		{
 			Block.Opcodes.operator_or,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return Boolstr(Strbool(thread.block.inputs[0].value) || Strbool(thread.block.inputs[1].value));
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => Boolstr(Strbool(thread.block.inputs[0].value) || Strbool(thread.block.inputs[1].value))
 		},
 		{
 			Block.Opcodes.operator_not,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return Boolstr(!Strbool(thread.block.inputs[0].value));
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => Boolstr(!Strbool(thread.block.inputs[0].value))
 		},
 		{
 			Block.Opcodes.operator_join,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return thread.block.inputs[0].value + thread.block.inputs[1].value;
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => thread.block.inputs[0].value + thread.block.inputs[1].value
 		},
 		{
 			Block.Opcodes.operator_letter_of,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return thread.block.inputs[0].value[int.Parse(thread.block.inputs[1].value)].ToString();
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => thread.block.inputs[0].value[int.Parse(thread.block.inputs[1].value)].ToString()
 		},
 		{
 			Block.Opcodes.operator_length,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return thread.block.inputs[0].value.Length.ToString();
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => thread.block.inputs[0].value.Length.ToString()
 		},
 		{
 			Block.Opcodes.operator_contains,
