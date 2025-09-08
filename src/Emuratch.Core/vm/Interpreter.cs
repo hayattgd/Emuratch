@@ -726,7 +726,6 @@ public class Interpreter : IRunner
 					thread.returnto.Add(new(thread.block));
 					interpreter.Execute(ref thread);
 				}
-
 				return null;
 			}
 		},

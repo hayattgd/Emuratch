@@ -111,7 +111,6 @@ public class Thread
 		{
 			Tick();
 		}
-		
 	}
 	public Number delay;
 	public List<Loop> returnto = [];
