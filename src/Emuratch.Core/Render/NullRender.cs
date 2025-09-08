@@ -13,6 +13,7 @@ public class NullRender : IRender
 
 	public void RenderAll() { }
 	public void RenderSprite(Sprite spr) { }
+	public void RenderMonitor(Monitor monitor) { }
 	public Color GetColorOnPixel(int x, int y) => new();
 	public Color? GetColorOnPixel(Sprite spr, int x, int y) => new();
 
@@ -31,5 +32,5 @@ public class NullRender : IRender
 	public void DrawPoint(int x, int y, Color color) { }
 	public void DrawPixel(int x, int y, Color color) { }
 
-	public void Unload() { }
+	public void Dispose() { }
 }

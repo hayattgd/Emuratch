@@ -6,12 +6,13 @@ using System.Numerics;
 
 namespace Emuratch.Core.Render;
 
-public interface IRender : IUnloadable
+public interface IRender : IDisposable
 {
 	const double DegToRad = Math.PI / 180;
 
 	public void RenderAll();
 	public void RenderSprite(Sprite spr);
+	public void RenderMonitor(Monitor monitor);
 	public Color GetColorOnPixel(int x, int y);
 	public Color? GetColorOnPixel(Sprite spr, int x, int y);
 

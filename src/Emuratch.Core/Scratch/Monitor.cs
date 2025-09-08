@@ -48,7 +48,7 @@ public class MonitorConverter : JsonConverter<Monitor>
 		return new()
 		{
 			id = obj["id"]?.ToString() ?? "",
-			name = obj["params"]?["VARIABLES"]?.ToString() ?? "my variable",
+			name = obj["params"]?["VARIABLE"]?.ToString() ?? "my variable",
 			sprname = obj["spriteName"]?.ToString() ?? string.Empty,
 			mode = Monitor.ToMode(obj["mode"]?.ToString() ?? "default"),
 			pos = new(obj["x"]?.ToObject<int>() ?? 2, obj["y"]?.ToObject<int>() ?? 2),

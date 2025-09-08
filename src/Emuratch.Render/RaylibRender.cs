@@ -144,6 +144,11 @@ public class RaylibRender : IRender
 			RenderSprite(sprite);
 		}
 
+		foreach (var monitor in project.monitors)
+		{
+			RenderMonitor(monitor);
+		}
+
 		if (!project.debug) return;
 
 		Raylib.DrawLine(0, Raylib.GetRenderHeight() / 2, Raylib.GetRenderWidth(), Raylib.GetRenderHeight() / 2, Color.Red);
@@ -215,6 +220,42 @@ public class RaylibRender : IRender
 			direction,
 			Color.White
 		);
+	}
+
+	private void RenderNormal(Monitor monitor)
+	{
+		var displaynameWidth = Raylib.MeasureText(monitor.DisplayName, 14);
+		var value = "";
+		if (monitor.sprname == "")
+		{
+			value = project.stage.variables[monitor.id].value.ToString();
+		}
+
+		var rect = new Rectangle((int)monitor.pos.X, (int)monitor.pos.Y, displaynameWidth + 40 + Raylib.MeasureText(value, 20), 30);
+		Raylib.DrawRectangleRounded(rect, 0.2f, 2, Color.RayWhite);
+		Raylib.DrawText(monitor.DisplayName, (int)monitor.pos.X + 5, (int)monitor.pos.Y + 4, 20, Color.Black);
+		var valueBgRect = new Rectangle((int)monitor.pos.X + displaynameWidth + 40, (int)monitor.pos.Y, 10 + Raylib.MeasureText(value, 20), 30);
+		Raylib.DrawRectangleRounded(valueBgRect, 0.2f, 2, Color.Orange);
+		Raylib.DrawText(value, (int)monitor.pos.X + displaynameWidth + 45, (int)monitor.pos.Y + 4, 20, Color.White);
+	}
+
+	public void RenderMonitor(Monitor monitor)
+	{
+		switch (monitor.mode)
+		{
+			case Monitor.Mode.normal:
+				RenderNormal(monitor);
+				break;
+
+			case Monitor.Mode.large:
+				break;
+
+			case Monitor.Mode.slider:
+				break;
+
+			case Monitor.Mode.list:
+				break;
+		}
 	}
 
 	public static Vector2 ScratchToRaylib(float x, float y) => new(Raylib.GetScreenWidth() / 2f + x, Raylib.GetScreenHeight() / 2f - y);
@@ -447,7 +488,7 @@ public class RaylibRender : IRender
 		Raylib.DrawPixel((int)pos.X, (int)pos.Y, raylibcolor);
 	}
 
-	public void Unload()
+	public void Dispose()
 	{
 		foreach (var img in images)
 		{

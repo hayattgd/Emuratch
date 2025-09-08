@@ -40,7 +40,7 @@ public class Sprite(Project project)
 	public string name = "";
 
 	[JsonConverter(typeof(VariableConverter))]
-	public Variable[] variables = Array.Empty<Variable>();
+	public Dictionary<string, Variable> variables = new();
 
 	[JsonConverter(typeof(BlockConverter))]
 	public Dictionary<string, Block> blocks = new();

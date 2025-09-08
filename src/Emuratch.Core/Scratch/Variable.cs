@@ -11,29 +11,30 @@ public class Variable
 	public object value = 0;
 }
 
-public class VariableConverter : JsonConverter<Variable[]>
+public class VariableConverter : JsonConverter<Dictionary<string, Variable>>
 {
-	public override void WriteJson(JsonWriter writer, Variable[]? value, JsonSerializer serializer)
+	public override void WriteJson(JsonWriter writer, Dictionary<string, Variable>? value, JsonSerializer serializer)
 	{
 		throw new NotImplementedException();
 	}
 
-	public override Variable[] ReadJson(JsonReader reader, Type objectType, Variable[]? existingValue, bool hasExistingValue, JsonSerializer serializer)
+	public override Dictionary<string, Variable> ReadJson(JsonReader reader, Type objectType, Dictionary<string, Variable>? existingValue, bool hasExistingValue, JsonSerializer serializer)
 	{
-		var obj = JObject.Load(reader).Values();
+		var obj = JObject.Load(reader);
 
-		List<Variable> variables = new();
+		Dictionary<string, Variable> variables = new();
 
 		foreach (var item in obj)
 		{
-			variables.Add(new()
+			if (item.Value == null) continue;
+			variables.Add(item.Key, new()
 			{
-				name = item[0]?.ToString() ?? "",
-				value = item[1] ?? ""
+				name = item.Value[0]?.ToString() ?? "",
+				value = item.Value[1] ?? ""
 			});
 		}
 
-		return variables.ToArray();
+		return variables;
 	}
 
 	public override bool CanWrite => false;

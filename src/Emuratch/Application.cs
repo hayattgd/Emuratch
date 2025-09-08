@@ -41,7 +41,7 @@ public class Application
 
 	public void UnloadProject()
 	{
-		render.Unload();
+		render.Dispose();
 		projectloaded = false;
 		projectpath = "";
 	}

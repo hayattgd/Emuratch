@@ -97,6 +97,7 @@ public class Interpreter : IRunner
 				Number x = thread.sprite.x + StrNumber(thread.block.inputs[0].value) * Math.Sin(thread.sprite.direction * DegToRad);
 				Number y = thread.sprite.y + StrNumber(thread.block.inputs[0].value) * Math.Cos(thread.sprite.direction * DegToRad);
 				thread.sprite.SetPosition(x, y);
+				System.Console.WriteLine(thread.block.inputs[0].value);
 				return null;
 			}
 		},
@@ -104,7 +105,6 @@ public class Interpreter : IRunner
 			Block.Opcodes.motion_turnright,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				thread.sprite.SetRotation(thread.sprite.direction + StrNumber(thread.block.inputs[0].value));
-				System.Console.WriteLine("right");
 				return null;
 			}
 		},
@@ -112,7 +112,6 @@ public class Interpreter : IRunner
 			Block.Opcodes.motion_turnleft,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				thread.sprite.SetRotation(thread.sprite.direction - StrNumber(thread.block.inputs[0].value));
-				System.Console.WriteLine("left");
 				return null;
 			}
 		},
@@ -294,7 +293,7 @@ public class Interpreter : IRunner
 					thread.sprite.ClampInsideStage(project.width, project.height);
 				}
 
-				thread.sprite.direction = 90 - Math.Atan2(dy, dx) * RadToDeg;
+				thread.sprite.SetRotation(90 - Math.Atan2(dy, dx) * RadToDeg);
 				return null;
 			}
 		},
@@ -1071,7 +1070,7 @@ public class Interpreter : IRunner
 			Block.Opcodes.data_variable,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
 				string variable = thread.block.fields[0];
-				return project.stage.variables.First(x => x.name == variable).value.ToString() ?? thread.sprite.variables.First(x => x.name == variable).value.ToString() ?? "";
+				return project.stage.variables.First(x => x.Value.name == variable).Value.value.ToString() ?? thread.sprite.variables.First(x => x.Value.name == variable).Value.value.ToString() ?? "";
 			}
 		},
 		{
@@ -1080,11 +1079,11 @@ public class Interpreter : IRunner
 				string variable = thread.block.fields[0];
 				try
 				{
-					project.stage.variables.First(x => x.name == variable).value = thread.block.inputs[0].value;
+					project.stage.variables.First(x => x.Value.name == variable).Value.value = thread.block.inputs[0].value;
 				}
 				catch (InvalidOperationException)
 				{
-					thread.sprite.variables.First(x => x.name == variable).value = thread.block.inputs[0].value;
+					thread.sprite.variables.First(x => x.Value.name == variable).Value.value = thread.block.inputs[0].value;
 				}
 				
 				return null;
@@ -1096,13 +1095,13 @@ public class Interpreter : IRunner
 				string variable = thread.block.fields[0];
 				try
 				{
-					var v = project.stage.variables.First(x => x.name == variable);
-					v.value = StrNumber(v.value.ToString() ?? "") + StrNumber(thread.block.inputs[0].value);
+					var v = project.stage.variables.First(x => x.Value.name == variable);
+					v.Value.value = StrNumber(v.Value.value.ToString() ?? "") + StrNumber(thread.block.inputs[0].value);
 				}
 				catch (InvalidOperationException)
 				{
-					var v = thread.sprite.variables.First(x => x.name == variable);
-					v.value = StrNumber(v.value.ToString() ?? "") + StrNumber(thread.block.inputs[0].value);
+					var v = thread.sprite.variables.First(x => x.Value.name == variable);
+					v.Value.value = StrNumber(v.Value.value.ToString() ?? "") + StrNumber(thread.block.inputs[0].value);
 				}
 
 				return null;
