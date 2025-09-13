@@ -1002,8 +1002,16 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.operator_random,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				double number = interpreter.rng.NextDouble() + StrNumber(thread.block.inputs[0].value) * (StrNumber(thread.block.inputs[1].value) - StrNumber(thread.block.inputs[0].value));
-				return number.ToString();
+				var min = Math.Min(StrNumber(thread.block.inputs[0].value), StrNumber(thread.block.inputs[1].value));
+				var max = Math.Max(StrNumber(thread.block.inputs[0].value), StrNumber(thread.block.inputs[1].value));
+				if (thread.block.inputs[0].value.Contains('.') || thread.block.inputs[1].value.Contains('.'))
+				{
+					return (interpreter.rng.NextDouble() * (max - min + 1) + min).ToString();
+				}
+				else
+				{
+					return interpreter.rng.Next(min, max).ToString();
+				}
 			}
 		},
 		{
