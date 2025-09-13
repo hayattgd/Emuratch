@@ -1241,7 +1241,6 @@ public class Interpreter : IRunner
 		{
 			Thread t = new(ev, this);
 			threads.Add(t);
-			Execute(ref t);
 		}
 
 		return threads;
