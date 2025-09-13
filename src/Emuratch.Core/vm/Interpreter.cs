@@ -1060,9 +1060,7 @@ public class Interpreter : IRunner
 		},
 		{
 			Block.Opcodes.operator_round,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return null;
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => Math.Round((double)(Number)thread.block.inputs[0].value, MidpointRounding.AwayFromZero).ToString()
 		},
 		{
 			Block.Opcodes.operator_mathop,
