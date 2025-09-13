@@ -1058,9 +1058,7 @@ public class Interpreter : IRunner
 		},
 		{
 			Block.Opcodes.operator_mod,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return null;
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => ((Number)thread.block.inputs[0].value % (Number)thread.block.inputs[1].value).ToString()
 		},
 		{
 			Block.Opcodes.operator_round,

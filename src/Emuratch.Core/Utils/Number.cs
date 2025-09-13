@@ -119,6 +119,7 @@ public struct Number
 	public static Number operator *(Number a, Number b) => new(a.value * b.value);
 	public static Number operator /(Number a, Number b) => new(a.value / b.value);
 	public static Number operator ^(Number a, Number b) => new(a.value ^ b.value);
+	public static Number operator %(Number a, Number b) => new(a.value % b.value);
 
 	public override string ToString()
 	{
