@@ -1052,9 +1052,7 @@ public class Interpreter : IRunner
 		},
 		{
 			Block.Opcodes.operator_contains,
-			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return null;
-			}
+			(ref Thread thread, Project project, Interpreter interpreter) => Boolstr(thread.block.inputs[0].value.Contains(thread.block.inputs[1].value))
 		},
 		{
 			Block.Opcodes.operator_mod,
