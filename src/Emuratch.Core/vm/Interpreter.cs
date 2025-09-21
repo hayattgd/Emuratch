@@ -97,7 +97,6 @@ public class Interpreter : IRunner
 				Number x = thread.sprite.x + StrNumber(thread.block.inputs[0].value) * Math.Sin(thread.sprite.direction * DegToRad);
 				Number y = thread.sprite.y + StrNumber(thread.block.inputs[0].value) * Math.Cos(thread.sprite.direction * DegToRad);
 				thread.sprite.SetPosition(x, y);
-				System.Console.WriteLine(thread.block.inputs[0].value);
 				return null;
 			}
 		},
