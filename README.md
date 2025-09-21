@@ -41,7 +41,7 @@ gh repo clone hayattgd/Emuratch #GitHub CLI
 Move into repository directory and run `dotnet build`.
 
 ```bash
-cd Emuratch
+cd src/Emuratch
 dotnet build
 ```
 
