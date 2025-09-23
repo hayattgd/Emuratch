@@ -6,16 +6,16 @@ public class GtkDialogService : IDialogService
 {
 	public void GtkQuit()
 	{
-		while (Gtk.Application.EventsPending())
+		while (Application.EventsPending())
 		{
-			Gtk.Application.RunIteration(); // Run it for while so gtk dialog will close
+			Application.RunIteration(); // Run it for while so gtk dialog will close
 		}
-		Gtk.Application.Quit();
+		Application.Quit();
 	}
 
 	public string ShowFileDialog(FileFilter[] filters)
 	{
-		Gtk.Application.Init();
+		Application.Init();
 		var dialog = new FileChooserDialog("File dialog", null, FileChooserAction.Open, "Cancel", ResponseType.Cancel, "Open", ResponseType.Accept);
 		dialog.SelectMultiple = false;
 		
@@ -45,7 +45,7 @@ public class GtkDialogService : IDialogService
 
 	public void ShowMessageDialog(string message)
 	{
-		Gtk.Application.Init();
+		Application.Init();
 		var dialog = new MessageDialog(null, DialogFlags.Modal, MessageType.Info, ButtonsType.Ok, message);
 		dialog.Run();
 		dialog.Destroy();
@@ -54,7 +54,7 @@ public class GtkDialogService : IDialogService
 
 	public bool ShowYesNoDialog(string message)
 	{
-		Gtk.Application.Init();
+		Application.Init();
 		var dialog = new MessageDialog(null, DialogFlags.Modal, MessageType.Info, ButtonsType.YesNo, message);
 
 		if (dialog.Run() == (int)ResponseType.Yes)
