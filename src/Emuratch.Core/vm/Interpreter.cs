@@ -1064,7 +1064,15 @@ public class Interpreter : IRunner
 		{
 			Block.Opcodes.operator_mathop,
 			(ref Thread thread, Project project, Interpreter interpreter) => {
-				return null;
+				switch (thread.block.fields[0])
+				{
+					case "abs":
+						return Math.Abs((double)(Number)thread.block.inputs[0].value).ToString();
+					case "floor":
+						return Math.Floor((double)(Number)thread.block.inputs[0].value).ToString();
+					default:
+						throw new NotImplementedException($"In operator_mathop, \"{thread.block.fields[0]}\" isn't implemented!");
+				}
 			}
 		},
 		{
