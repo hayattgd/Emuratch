@@ -1070,6 +1070,30 @@ public class Interpreter : IRunner
 						return Math.Abs((double)(Number)thread.block.inputs[0].value).ToString();
 					case "floor":
 						return Math.Floor((double)(Number)thread.block.inputs[0].value).ToString();
+					case "ceiling":
+						return Math.Ceiling((double)(Number)thread.block.inputs[0].value).ToString();
+					case "sqrt":
+						return Math.Sqrt((double)(Number)thread.block.inputs[0].value).ToString();
+					case "sin":
+						return Math.Sin((double)(Number)thread.block.inputs[0].value).ToString();
+					case "cos":
+						return Math.Cos((double)(Number)thread.block.inputs[0].value).ToString();
+					case "tan":
+						return Math.Tan((double)(Number)thread.block.inputs[0].value).ToString();
+					case "asin":
+						return Math.Asin((double)(Number)thread.block.inputs[0].value).ToString();
+					case "acos":
+						return Math.Acos((double)(Number)thread.block.inputs[0].value).ToString();
+					case "atan":
+						return Math.Atan((double)(Number)thread.block.inputs[0].value).ToString();
+					case "ln":
+						return Math.Log((double)(Number)thread.block.inputs[0].value).ToString();
+					case "log":
+						return Math.Log10((double)(Number)thread.block.inputs[0].value).ToString();
+					case "e ^":
+						return Math.Pow(double.E, (double)(Number)thread.block.inputs[0].value).ToString();
+					case "10 ^":
+						return Math.Pow(10, (double)(Number)thread.block.inputs[0].value).ToString();
 					default:
 						throw new NotImplementedException($"In operator_mathop, \"{thread.block.fields[0]}\" isn't implemented!");
 				}
