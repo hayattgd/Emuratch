@@ -81,7 +81,7 @@ Please reference [List](https://github.com/hayattgd/Emuratch/wiki/List-of-blocks
 
 ### Emulation
 
-- [ ] Interpreter
+- [ ] Interpreter <- currently working on
 - [ ] Cached Interpreter
 - [ ] JIT Compiler
 
