@@ -87,13 +87,7 @@ public class Application
 		if (projectloading)
 		{
 			projectloading = false;
-			var loaded = LoadProject();
-			if (loaded != null)
-			{
-				project = loaded;
-				runner = project.runner;
-				render = runner.render;
-			}
+			LoadProject();
 		}
 
 		if (Raylib.IsKeyPressed(KeyboardKey.F1))
@@ -178,7 +172,7 @@ public class Application
 		return 0;
 	}
 
-	public Project LoadProject()
+	public void LoadProject()
 	{
 		IDialogService dialog = DialogServiceFactory.CreateDialogService();
 		projectpath = dialog.ShowFileDialog(
@@ -188,18 +182,19 @@ public class Application
 		]);
 		if (!string.IsNullOrEmpty(projectpath))
 		{
-			return LoadProject(projectpath);
+			LoadProject(projectpath);
 		}
 		else
 		{
 			dialog.ShowMessageDialog("File selection canceled.");
 		}
 
-		return null;
+		return;
 	}
 
-	public Project LoadProject(string path)
+	public void LoadProject(string path)
 	{
+		if (!File.Exists(path)) { return; }
 		string suffix = ".Emuratch_Extract";
 
 		string ext = path.Split('.')[^1];
@@ -224,7 +219,7 @@ public class Application
 					}
 					else
 					{
-						return null;
+						return;
 					}
 				}
 
@@ -239,7 +234,7 @@ public class Application
 			catch (Exception ex)
 			{
 				DialogServiceFactory.CreateDialogService().ShowMessageDialog(ex.Message);
-				return null;
+				return;
 			}
 		}
 		else if (ext == "json")
@@ -257,12 +252,17 @@ public class Application
 			Raylib.SetWindowSize((int)LoadedProject.width, (int)LoadedProject.height);
 
 			projectloaded = projectpath != "";
-			return LoadedProject;
+			if (LoadedProject != null)
+			{
+				project = LoadedProject;
+				runner = project.runner;
+				render = runner.render;
+			}
 		}
 		catch (Exception)
 		{
 			projectloaded = false;
-			return null;
+			return;
 		}
 	}
 
