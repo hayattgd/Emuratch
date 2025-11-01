@@ -63,7 +63,7 @@ Please take a look at [CONTRIBUTING.md](CONTRIBUTING.md).
 - [ ] Events
 - [ ] Control
 - [ ] Sensing
-- [ ] Operators
+- [x] Operators (`operator_mathop` isn't 100% accurate)
 - [ ] Variables (including List)
 - [ ] My Blocks
 
