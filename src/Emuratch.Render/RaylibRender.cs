@@ -1,5 +1,6 @@
 ﻿using Emuratch.Core.Render;
 using Emuratch.Core.Scratch;
+using Emuratch.Core.Utils;
 using Raylib_cs;
 using Svg;
 using System;
@@ -147,6 +148,15 @@ public class RaylibRender : IRender
 		foreach (var monitor in project.monitors)
 		{
 			RenderMonitor(monitor);
+		}
+
+		foreach (var sprite in list)
+		{
+			if (sprite.dialog != null)
+			{
+				var pos = ScratchToRaylib(sprite.Position);
+				Raylib.DrawText(sprite.dialog.Value.text, (int)pos.X - sprite.costume.Width / 2, (int)pos.Y - sprite.costume.Height / 2 - 20, 20, Color.Black);
+			}
 		}
 
 		if (!project.debug) return;
@@ -360,13 +370,6 @@ public class RaylibRender : IRender
 			color = ((Color*)GetColors(spr, spr.costume))[y * img.Width + x];
 		}
 		return color;
-	}
-
-	public BoundingBox RaylibBoundingBox(Sprite spr)
-	{
-		Vector2 bmin = ScratchToRaylib(spr.boundingBox.Min);
-		Vector2 bmax = ScratchToRaylib(spr.boundingBox.Max);
-		return new(new(bmin, 0), new(bmax, 1));
 	}
 
 	public Vector2 RaylibPosition(Sprite spr) => ScratchToRaylib(spr.x, spr.y);

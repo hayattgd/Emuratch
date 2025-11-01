@@ -33,7 +33,7 @@ public class Sprite(Project project)
 	};
 
 	public Project project = project;
-	public Dialog dialog;
+	public Dialog? dialog;
 
 	public bool isStage = false;
 
